@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
-public class ItemizedOverlays extends ItemizedOverlay {
+public class GameCTFOverlays extends ItemizedOverlay {
 
 	
 	private Context mContext;
@@ -17,7 +17,7 @@ public class ItemizedOverlays extends ItemizedOverlay {
 	 * 
 	 * @param defaultMarker
 	 */
-	public ItemizedOverlays(Drawable defaultMarker) {
+	public GameCTFOverlays(Drawable defaultMarker) {
 		  super(boundCenterBottom(defaultMarker));
 	}
 	
@@ -26,7 +26,7 @@ public class ItemizedOverlays extends ItemizedOverlay {
 	 * @param defaultMarker
 	 * @param context
 	 */
-	public ItemizedOverlays(Drawable defaultMarker, Context context) {
+	public GameCTFOverlays(Drawable defaultMarker, Context context) {
 		  super(defaultMarker);
 		  mContext = context;
 	}

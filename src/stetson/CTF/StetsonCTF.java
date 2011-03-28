@@ -1,116 +1,193 @@
 package stetson.CTF;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ResponseCache;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-public class StetsonCTF extends MapActivity {
-
-
-	private LocationManager locationManager;
-	private LocationListener locationListener;
-	private GeoPoint playerPoint;
-	MapController mapController;
-	ItemizedOverlays itemizedoverlay;
-	OverlayItem overlayitem;
-	List<Overlay> mapOverlays;
-
-
+public class StetsonCTF extends Activity {
+	
+	private static final String TAG = "StetsonCTF";
+	
 	/**
-	 * Runs when the activity is started (by Android)
+	 * Called when the activity is first created.
 	 * @param saved instance state
 	 */
 	public void onCreate(Bundle savedInstanceState) {
-
+		
+		Log.i(TAG, "Starting activity...");
+		
+		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
 		
-		// Turns on built-in zoom controls
-		MapView mapView = (MapView) findViewById(R.id.mapView);
-		mapController = mapView.getController();
-		mapView.setBuiltInZoomControls(true);
+		// Move back to the game selection panel
+		setContentView(R.layout.intro);
 		
-		getLocation();
+		// Connect components
+		buildListeners();
+		buildGamesList();
 		
-		
-		// Setting up the overlays class
-		mapOverlays = mapView.getOverlays();
-		Drawable drawable = this.getResources().getDrawable(R.drawable.person_red);
-		itemizedoverlay = new ItemizedOverlays(drawable);
-
-		// Adding a marker to the map
-		if(playerPoint != null)
-		{
-		overlayitem = new OverlayItem(playerPoint, "Hola, Mundo!", "I'm in Mexico City!");
-		itemizedoverlay.addOverlay(overlayitem);
-		mapOverlays.add(itemizedoverlay);
-		}
-	}
-
-	/**
-	 * Returns false (required by MapActivity)
-	 * @return false
-	 */
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
-
-	protected boolean updateLocation()
-	{
-		mapController.setCenter(playerPoint);
-		overlayitem = new OverlayItem(playerPoint, "Hola, Mundo!", "I'm in Mexico City!");
-		itemizedoverlay.addOverlay(overlayitem);
-		return true;
+		Log.i(TAG, "Activity ready!");
 	}
 	
-	protected void getLocation()
-	{
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+	/**
+	 * Connects the view components to listeners
+	 */
+	private void buildListeners() {
+		
+		Log.i(TAG, "Prepare listeners.");
+		
+		// Create a new game
+		final Button newGameButton = (Button) findViewById(R.id.newgame_button);
+		newGameButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				Toast.makeText(view.getContext(), "Making a new game.", Toast.LENGTH_LONG).show();
+			}
+		});
+		
+		// Join a game
+		final Button joinGameButton = (Button) findViewById(R.id.joingame_button);
+		joinGameButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View view) {
+				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+				String game = "{NO_GAME}";
 
-		// Define a listener that responds to location updates
-		locationListener = new LocationListener() {
-			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location provider.
-				playerPoint = new GeoPoint(  (int)(1E6 *location.getLatitude()),  (int)(1E6 *location.getLongitude()));
-				updateLocation();
+				int selected = gamesGroup.getCheckedRadioButtonId();
+				Log.i(TAG, "Selected Game: " + selected);
+				if(selected >= 0)
+				{
+					RadioButton rb = (RadioButton) findViewById(selected);
+					game = (String) rb.getText();
+				} 
+				
+				Toast.makeText(view.getContext(), "Join Game: " + game, Toast.LENGTH_LONG).show();
+			}
+		});
+		
+	}
+	
+	/**
+	 * Retrieves and displays a new games list
+	 */
+	private void buildGamesList()
+	{
+		
+		Log.i(TAG, "Build games list. (Loading...)");
+		
+		// let the user know we aren't being lazy
+		RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+		
+		TextView loadText = new TextView(gamesGroup.getContext());
+		loadText.setText(R.string.loading_games);
+		gamesGroup.addView(loadText);
+
+		
+		// Build an send a request for game data
+		HttpGet req = new HttpGet("http://ctf.no.de/game/");
+		sendRequest(req, new ResponseListener() {
+
+			public void onResponseReceived(HttpResponse response) {
+				
+				// Pull reponse message
+				String data = responseToString(response);
+				
+				// Remove all of the current games on the list
+				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+				gamesGroup.removeAllViews();
+				
+				Log.i(TAG, "Build games list. (Done!)");
+			}
+			
+		});
+		/*
+		Log.i(TAG, "Build games list.");
+
+
+		
+		gamesGroup.removeAllViews();
+		// Start loading up games list
+		Log.i(TAG, "Making request...");
+		String resp = GetRequest("http://ctf.no.de/game/");
+		
+		try {
+			Log.i(TAG, "Response: " + resp);
+			JSONArray jObject = new JSONArray(resp);
+			jObject = new JSONArray(resp);
+			RadioButton rb;
+			int index = 0;
+			while(!jObject.optString(index,"[END]").equals("[END]")) {
+				Log.i(TAG, "Adding game to view (" + jObject.optString(index) + ")");
+				rb = new RadioButton(gamesGroup.getContext());
+				rb.setText(jObject.optString(index));
+				gamesGroup.addView(rb);
+				index ++;
 
 			}
-
-			public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-			public void onProviderEnabled(String provider) {}
-
-			public void onProviderDisabled(String provider) {}
-		};
-
-		// Register the listener with the Location Manager to receive location updates
-		//       locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,3, 0, locationListener);
-
-		playerPoint = new GeoPoint((int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude()),(int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude()));
-
-		while(locationManager.getProvider(LocationManager.GPS_PROVIDER).getAccuracy()!= android.location.Criteria.ACCURACY_FINE)
-		{
-			playerPoint = new GeoPoint((int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude()),(int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude()));
+		} catch (JSONException e) {
+			Toast.makeText(gamesGroup.getContext(), "Could not parse JSON Array.", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
 
 		}
 
-
-		mapController.setCenter(playerPoint);
-
-
-
+		// Remove old games
+		// gamesList.removeAllViews();
+		 * 
+		 */
+		
+	}
+	
+	/**
+	 * Makes an HTTP request and sends it to a response listener once completed.
+	 * @param request
+	 * @param responseListener
+	 */
+	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
+		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
+	}
+	
+	/**
+	 * Draws a string from an HttpResponse object.
+	 * @param rp
+	 * @return
+	 */
+	public static String responseToString(HttpResponse rp) {
+    	String str = "";
+    	try {
+    		str = EntityUtils.toString(rp.getEntity());
+    	} catch(IOException e) {
+    		Log.i(TAG, "HttpRequest Error!", e);
+    	}  
+    	return str;
 	}
 
 }

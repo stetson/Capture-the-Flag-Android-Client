@@ -10,6 +10,7 @@
 		<!--  GPS Location Access (Does NOT include WiFi location!) -->
    		<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
    		<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+   		
    		<!-- Full access to power controls while this app has focus. -->
    		<uses-permission android:name="android.permission.WAKE_LOCK" />
    		

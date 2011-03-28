@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+	<!--  Application Strings -->
     <string name="hello">Hello World, StetsonCTF!</string>
     <string name="app_name">StetsonCTF</string>
+    
+    <!--  Intro Layout Strings -->
+    <string name="create_game">Create Game</string>
+    <string name="join_game">Join</string>
+    <string name="loading_games">Loading Games...</string>
+    <string name="enter_name">Enter Your Name</string>
 </resources>

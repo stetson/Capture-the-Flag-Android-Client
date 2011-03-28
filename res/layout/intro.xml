@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+android:id="@+id/main_frame"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+xmlns:android="http://schemas.android.com/apk/res/android"
+>
+	<ScrollView
+	android:id="@+id/games_list"
+	android:layout_width="280px"
+	android:layout_height="350px"
+	android:layout_alignParentTop="true"
+	android:layout_centerHorizontal="true"
+	>
+		<LinearLayout
+		android:id="@+id/games_list_container"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:orientation="vertical"
+		>
+			<RadioGroup
+			android:id="@+id/games_list_group"
+			android:layout_width="fill_parent"
+			android:layout_height="fill_parent"
+			android:orientation="vertical"
+			></RadioGroup>
+		</LinearLayout>
+	</ScrollView>
+	
+	<EditText
+	android:id="@+id/name_text"
+	android:layout_width="280px"
+	android:layout_height="wrap_content"
+	android:text="@string/enter_name"
+	android:layout_below="@+id/games_list"
+	android:textSize="18sp"
+	android:layout_centerHorizontal="true"
+	></EditText>
+	
+	<Button
+	android:id="@+id/joingame_button"
+	android:layout_width="120px"
+	android:layout_height="wrap_content"
+	android:text="@string/join_game"
+	android:layout_below="@+id/name_text"
+	android:layout_alignLeft="@+id/games_list"
+	>
+	</Button>
+	<Button
+	android:id="@+id/newgame_button"
+	android:layout_width="120px"
+	android:layout_height="wrap_content"
+	android:text="@string/create_game"
+	android:layout_below="@+id/name_text"
+	android:layout_alignRight="@+id/games_list"
+	>
+	</Button>
+	
+</RelativeLayout>
