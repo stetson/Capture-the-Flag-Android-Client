@@ -7,9 +7,13 @@ import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -26,6 +30,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -36,6 +41,9 @@ public class StetsonCTF extends Activity {
 	private static final String TAG = "StetsonCTF";
 	private static final String NO_GAMES_RESPONSE = "[]";
 	private static final String SERVER_URL = "http://ctf.no.de";
+	
+	private static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
+	private static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
 	
 	/**
 	 * Called when the activity is first created.
@@ -77,7 +85,14 @@ public class StetsonCTF extends Activity {
 		final Button newGameButton = (Button) findViewById(R.id.newgame_button);
 		newGameButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
-				Toast.makeText(view.getContext(), "Making a new game.", Toast.LENGTH_LONG).show();
+				
+				// Get name
+				EditText et = (EditText) findViewById(R.id.name_text);
+				CurrentUser.setName(et.getText().toString());
+				
+				// Create the new game :)
+				joinGame(CurrentUser.getName(), "");
+				
 			}
 		});
 		
@@ -86,7 +101,7 @@ public class StetsonCTF extends Activity {
 		joinGameButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-				String game = "{NO_GAME}";
+				String game = "";
 
 				int selected = gamesGroup.getCheckedRadioButtonId();
 				
@@ -94,7 +109,14 @@ public class StetsonCTF extends Activity {
 				if(selected > -1) {
 					RadioButton rb = (RadioButton) findViewById(selected);
 					game = (String) rb.getText();
-					//joinGame(game);
+					CurrentUser.setGameId(game);
+					
+					// Get name
+					EditText et = (EditText) findViewById(R.id.name_text);
+					CurrentUser.setName(et.getText().toString());
+					
+					// Create the new game :)
+					joinGame(CurrentUser.getName(), CurrentUser.getGameId());
 					
 				// No game selected, notify user
 				} else {
@@ -114,8 +136,9 @@ public class StetsonCTF extends Activity {
 		
 		Log.i(TAG, "Build games list. (Loading...)");
 		
-		// let the user know we aren't being lazy
+		// let the user know we aren't being lazy, clear list and show them a load message
 		RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+		gamesGroup.removeAllViews();
 		
 		TextView loadText = new TextView(gamesGroup.getContext());
 		loadText.setText(R.string.loading_games);
@@ -132,9 +155,8 @@ public class StetsonCTF extends Activity {
 				String data = responseToString(response);
 				Log.i(TAG, "Response: " + data);
 
-				// Remove all of the current games on the list
+
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-				gamesGroup.removeAllViews();
 				
 				// Oh no, there are no games!
 				if (data.equals("") || data.equals(NO_GAMES_RESPONSE)) {
@@ -158,7 +180,7 @@ public class StetsonCTF extends Activity {
 	
 						}
 					} catch (JSONException e) {
-						Log.i(TAG, "There was an error parsing game data!", e);
+						Log.e(TAG, "There was an error parsing game data!", e);
 					}
 				}
 				
@@ -177,6 +199,21 @@ public class StetsonCTF extends Activity {
 	 */
 	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
 		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
+	}
+	
+	public static String sendFlatRequest(HttpRequestBase request) {
+		try {
+			HttpClient client = new DefaultHttpClient();
+			HttpResponse resp;
+			resp = client.execute(request);
+			return responseToString(resp);
+			 
+		} catch (ClientProtocolException e) {
+			Log.e(TAG, "Web Request Failed", e);
+		} catch (IOException e) {
+			Log.e(TAG, "Web Request Failed", e);
+		}
+		return "";
 	}
 	
 	/**
@@ -214,6 +251,7 @@ public class StetsonCTF extends Activity {
 		double longitude = location.getLongitude();
 		double latitude = location.getLatitude();
 		CurrentUser.setLocation(latitude, longitude);
+
 		
 		// Show the user a loading screen thingy
 		ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
@@ -221,20 +259,47 @@ public class StetsonCTF extends Activity {
 		// If a game name wasn't provided, lets make a game! Build the request and stuff :)
 		if(game.equals("")) {
 			
+			// Set the game name to the user's name
+			CurrentUser.setGameId(CurrentUser.getName());
 			
+			// Make the request, NOT asynchronous, we need an answer now
+			HttpPost hp = new HttpPost(SERVER_URL + "/game/");
+			CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
+			String data = sendFlatRequest(hp);
+			if(!data.equals(CREATE_SUCCESS)) {
+				dialog.hide();
+				Toast.makeText(this, R.string.failed_to_create, Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
 		}
 		
-        Intent i = new Intent(this, GameCTF.class);
-        startActivity(i);
-        
-        return false;
+		// Join the game!
+		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + CurrentUser.getGameId());
+		CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
+		String data = sendFlatRequest(hp);
+		
+		// This needs to be improved at some point for better error checking
+		if(data.equals(JOIN_FAILED)) {
+			dialog.hide();
+			Toast.makeText(this, R.string.failed_to_join, Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		
+		// We don't need loading stuff anymore + start the map activity
+		dialog.hide();
+	    Intent i = new Intent(this, GameCTF.class);
+	    startActivity(i);
+	    return true;
     }
+    
     
     /**
      * Sets the user's name and generates a new UID.
      * @param name
      */
     protected void updateUser(String name) {
+    	
     	// New name
     	CurrentUser.setName(name);
     	

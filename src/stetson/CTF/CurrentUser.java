@@ -18,10 +18,10 @@ import android.util.Log;
 
 public class CurrentUser {
 	
-	private static final String TAG = "CurrentUser";
-	private static final int CREATE_PARAMS = 0;
-	private static final int JOIN_PARAMS = 1;
-	private static final int UPDATE_PARAMS = 2;
+	public static final String TAG = "CurrentUser";
+	public static final int CREATE_PARAMS = 0;
+	public static final int JOIN_PARAMS = 1;
+	public static final int UPDATE_PARAMS = 2;
 	
 	// User Info
 	private static String name = "";
@@ -50,6 +50,13 @@ public class CurrentUser {
 		CurrentUser.uid = uid;
 	}
 	
+	public static void setGameId(String game) {
+		CurrentUser.gameId = game;
+	}
+	
+	public static String getGameId() {
+		return CurrentUser.gameId;
+	}
 	public static String getName() {
 		return name;
 	}
@@ -79,16 +86,20 @@ public class CurrentUser {
 
         List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
         
+        // Location (in all requests)
         params.add(new BasicNameValuePair("latitude", Double.toString(CurrentUser.latitude)));
         params.add(new BasicNameValuePair("longitude", Double.toString(CurrentUser.longitude)));
         
+        // Accuracy and UID for joining a game and requesting location updates
         if(type == JOIN_PARAMS || type == UPDATE_PARAMS) {
         	params.add(new BasicNameValuePair("accuracy",  Double.toString(CurrentUser.accuracy)));
         	params.add(new BasicNameValuePair("user_id", CurrentUser.uid));
         }
         
+        // Name (in all requests)
         params.add(new BasicNameValuePair("name", CurrentUser.name));
         
+        // Game ID for creating games and updating locations
         if(type == CREATE_PARAMS || type == UPDATE_PARAMS) {
         	params.add(new BasicNameValuePair("game_id", CurrentUser.gameId));
         }
