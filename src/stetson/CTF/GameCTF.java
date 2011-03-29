@@ -102,6 +102,9 @@ public class GameCTF extends MapActivity {
 	 */
 	private final Runnable gameProcess = new Runnable()
 	{
+		/**
+		 * Main gameProcess function.
+		 */
 	    public void run() 
 	    {
 	    	Log.i(TAG, "Game Process()");
@@ -120,37 +123,18 @@ public class GameCTF extends MapActivity {
 						String data = responseToString(response);
 						
 						// JSON IS FUN!
-						JSONObject jObject;
-						JSONObject jSubObj;
 						try {
+							JSONObject jObject, jSubObj;
 							jObject = new JSONObject(data);
 							
-							// Origin
+							// Process Players
 							jSubObj = (JSONObject) jObject.opt("players");
-
-							// Loop through all players
-							JSONObject player;
-							String playerKey;
+							processPlayers(jSubObj);
 							
-							Iterator plrIterator = jSubObj.keys();
-						    while(plrIterator .hasNext()) {
-						    	playerKey = (String) plrIterator .next();
-						    	player = jSubObj.getJSONObject(playerKey);
-						    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
-						    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
-	
-								Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
-								GeoPoint marker = new GeoPoint(lati, loni);
-								OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
-								itemizedoverlay.addOverlay(overlayitem);
-
-						    }
-						    
-						    // Add map overlays
-						    mapOverlays.add(itemizedoverlay);
 							
 						} catch (JSONException e) {
-							Log.e(TAG, "Error processing json data in gameProcess()", e);
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 						
 						Log.i(TAG, "Game Data: " + data);
@@ -161,6 +145,39 @@ public class GameCTF extends MapActivity {
 	    	
 	    	// Delay for set time and run again
 	    	gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    }
+	    
+	    /**
+	     * Handles other players.
+	     * @param jSubObj containing all players.
+	     */
+	    private void processPlayers(JSONObject jSubObj) {
+			try {
+	
+				// Loop through all players
+				JSONObject player;
+				String playerKey;
+				
+				Iterator plrIterator = jSubObj.keys();
+			    while(plrIterator .hasNext()) {
+			    	playerKey = (String) plrIterator .next();
+			    	player = jSubObj.getJSONObject(playerKey);
+			    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
+			    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
+
+					Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
+					GeoPoint marker = new GeoPoint(lati, loni);
+					OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
+					itemizedoverlay.addOverlay(overlayitem);
+
+			    }
+			    
+			    // Add map overlays
+			    mapOverlays.add(itemizedoverlay);
+				
+			} catch (JSONException e) {
+				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
+			}
 	    }
 	};
 
