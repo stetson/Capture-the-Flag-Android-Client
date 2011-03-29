@@ -39,6 +39,7 @@ public class GameCTF extends MapActivity {
 	
 	
 	// Data members
+	private MapView mapView;
 	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
 	
@@ -46,6 +47,7 @@ public class GameCTF extends MapActivity {
 	GameCTFOverlays itemizedoverlay;
 	OverlayItem overlayitem;
 	List<Overlay> mapOverlays;
+	boolean isRunning = false;
 	
 	/**
 	 * Called when the activity is first created.
@@ -55,7 +57,8 @@ public class GameCTF extends MapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		
 		Log.i(TAG, "Starting map activity...");
-		
+		 isRunning = true;
+		 
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
 		
@@ -69,7 +72,7 @@ public class GameCTF extends MapActivity {
 		setContentView(R.layout.game);
 		
  		// Turns on built-in zoom controls
-		MapView mapView = (MapView) findViewById(R.id.mapView);
+		mapView = (MapView) findViewById(R.id.mapView);
 		mapController = mapView.getController();
 		mapView.setBuiltInZoomControls(true);
 		
@@ -89,6 +92,12 @@ public class GameCTF extends MapActivity {
 	 * When the activity is ended, we need to clear the users game and location.
 	 */
 	public void onDestroy() {
+		
+		// No more game, stop running
+		isRunning = false;
+		
+		super.onDestroy();
+		
 		Log.i(TAG, "Stopping Map Activity");
 		CurrentUser.setGameId("");
 		CurrentUser.setLocation(-1, -1);
@@ -105,6 +114,12 @@ public class GameCTF extends MapActivity {
 		 */
 	    public void run() 
 	    {
+	    	
+	    	// Don't run if we don't have a game anymore
+	    	if(!isRunning) {
+	    		return;
+	    	}
+	    	
 	    	Log.i(TAG, "Game Process()");
 	    	
 	    	// If our accuracy doesn't suck, update
@@ -155,7 +170,6 @@ public class GameCTF extends MapActivity {
 				// Loop through all players
 				JSONObject player;
 				String playerKey;
-				
 				Iterator plrIterator = jSubObj.keys();
 			    while(plrIterator .hasNext()) {
 			    	playerKey = (String) plrIterator .next();
@@ -172,6 +186,9 @@ public class GameCTF extends MapActivity {
 			    
 			    // Add map overlays
 			    mapOverlays.add(itemizedoverlay);
+			    
+			    // Request a redraw from the view
+			    mapView.refreshDrawableState();
 				
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
