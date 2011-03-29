@@ -3,8 +3,26 @@
  * Used for storage of name, uid and location information of the current user.
  */
 package stetson.CTF;
-public class CurrentUser {
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicNameValuePair;
+
+import android.util.Log;
+
+public class CurrentUser {
+	
+	private static final String TAG = "CurrentUser";
+	private static final int CREATE_PARAMS = 0;
+	private static final int JOIN_PARAMS = 1;
+	private static final int UPDATE_PARAMS = 2;
+	
 	// User Info
 	private static String name = "";
 	private static String uid = "";
@@ -13,8 +31,7 @@ public class CurrentUser {
 	private static double accuracy = -1;
 	
 	// Game Info
-	private static String gameName = "";
-	private static String gameUID = "";
+	private static String gameId = "";
 	
 	private CurrentUser() {
 		
@@ -48,6 +65,43 @@ public class CurrentUser {
 	public static double getLatitude() {
 		return CurrentUser.latitude;
 	}
+	
+	/**
+	 * Generates HttpParams automatically for the current user.
+	 * Type:	CREATE_PARAMS 	= lat, long, name, gameId
+	 * 			JOIN_PARAMS		= lat, long, accuracy, uid, name
+	 * 			UPDATE_PARAMS 	= lat, long, accuracy, uid, name, game
+	 * @param hbr
+	 * @param type
+	 * @return
+	 */
+	public static HttpPost buildHttpParams(HttpPost hbr, int type) {
+
+        List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
+        
+        params.add(new BasicNameValuePair("latitude", Double.toString(CurrentUser.latitude)));
+        params.add(new BasicNameValuePair("longitude", Double.toString(CurrentUser.longitude)));
+        
+        if(type == JOIN_PARAMS || type == UPDATE_PARAMS) {
+        	params.add(new BasicNameValuePair("accuracy",  Double.toString(CurrentUser.accuracy)));
+        	params.add(new BasicNameValuePair("user_id", CurrentUser.uid));
+        }
+        
+        params.add(new BasicNameValuePair("name", CurrentUser.name));
+        
+        if(type == CREATE_PARAMS || type == UPDATE_PARAMS) {
+        	params.add(new BasicNameValuePair("game_id", CurrentUser.gameId));
+        }
+        
+        try {
+			hbr.setEntity(new UrlEncodedFormEntity(params));
+		} catch (UnsupportedEncodingException e) {
+			Log.e(TAG, "Error adding params to request!", e);
+		}
+		
+		return hbr;
+	}
+	
 
 	
 }

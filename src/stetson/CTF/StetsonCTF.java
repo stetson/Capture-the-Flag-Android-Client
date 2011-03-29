@@ -1,14 +1,21 @@
 package stetson.CTF;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -28,6 +35,7 @@ public class StetsonCTF extends Activity {
 	
 	private static final String TAG = "StetsonCTF";
 	private static final String NO_GAMES_RESPONSE = "[]";
+	private static final String SERVER_URL = "http://ctf.no.de";
 	
 	/**
 	 * Called when the activity is first created.
@@ -45,8 +53,7 @@ public class StetsonCTF extends Activity {
 		
 		// Connect components
 		buildListeners();
-		buildGamesList();
-		
+
 		Log.i(TAG, "Activity ready!");
 	}
 	
@@ -56,6 +63,7 @@ public class StetsonCTF extends Activity {
 	 */
 	public void onStart() {
 		super.onStart();
+		buildGamesList();
 	}
 	
 	/**
@@ -115,7 +123,7 @@ public class StetsonCTF extends Activity {
 
 		
 		// Build an send a request for game data
-		HttpGet req = new HttpGet("http://ctf.no.de/game/");
+		HttpGet req = new HttpGet(SERVER_URL + "/game/");
 		sendRequest(req, new ResponseListener() {
 
 			public void onResponseReceived(HttpResponse response) {
@@ -206,9 +214,13 @@ public class StetsonCTF extends Activity {
 		double longitude = location.getLongitude();
 		double latitude = location.getLatitude();
 		CurrentUser.setLocation(latitude, longitude);
+		
+		// Show the user a loading screen thingy
+		ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
     	
-		// If a game name wasn't provided, lets make a game!
+		// If a game name wasn't provided, lets make a game! Build the request and stuff :)
 		if(game.equals("")) {
+			
 			
 		}
 		
