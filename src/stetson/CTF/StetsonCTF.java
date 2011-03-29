@@ -17,6 +17,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,10 +36,11 @@ public class StetsonCTF extends Activity {
 	public static final String TAG = "StetsonCTF";
 	public static final String NO_GAMES_RESPONSE = "[]";
 	public static final String SERVER_URL = "http://ctf.no.de";
-	
 	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
 	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
-	
+	public static final int GPS_UPDATE_FREQUENCY = 3;
+	private LocationManager locationManager;
+	private LocationListener locationListener;
 	/**
 	 * Called when the activity is first created.
 	 * @param saved instance state
@@ -53,6 +55,8 @@ public class StetsonCTF extends Activity {
 		// Move back to the game selection panel
 		setContentView(R.layout.intro);
 		
+		// Start up the location manager
+		userLocation();
 		// Connect components
 		buildListeners();
 
@@ -304,4 +308,30 @@ public class StetsonCTF extends Activity {
 		uid = uid.toUpperCase();
 		CurrentUser.setUID(uid);
     }
+    
+    /**
+	 * Periodically updates the users location.
+	 */
+	protected void userLocation()
+	{
+
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationListener = new LocationListener() {
+			
+			public void onLocationChanged(Location location) {
+				
+				Log.i(TAG, "Update Location.");
+				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
+				CurrentUser.setAccuracy(location.getAccuracy());
+			}
+
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+			public void onProviderEnabled(String provider) {}
+
+			public void onProviderDisabled(String provider) {}
+		};
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_FREQUENCY, 0, locationListener);
+
+	}
 }
