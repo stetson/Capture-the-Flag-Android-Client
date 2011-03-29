@@ -39,6 +39,7 @@ public class GameCTF extends MapActivity {
 	public static final int GPS_UPDATE_FREQUENCY = 3;
 	
 	// Data members
+	private MapView mapView;
 	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
 	private LocationManager locationManager;
@@ -70,7 +71,7 @@ public class GameCTF extends MapActivity {
 		setContentView(R.layout.game);
 		
  		// Turns on built-in zoom controls
-		MapView mapView = (MapView) findViewById(R.id.mapView);
+		mapView = (MapView) findViewById(R.id.mapView);
 		mapController = mapView.getController();
 		mapView.setBuiltInZoomControls(true);
 		
@@ -157,7 +158,6 @@ public class GameCTF extends MapActivity {
 				// Loop through all players
 				JSONObject player;
 				String playerKey;
-				
 				Iterator plrIterator = jSubObj.keys();
 			    while(plrIterator .hasNext()) {
 			    	playerKey = (String) plrIterator .next();
@@ -174,6 +174,9 @@ public class GameCTF extends MapActivity {
 			    
 			    // Add map overlays
 			    mapOverlays.add(itemizedoverlay);
+			    
+			    // Request a redraw from the view
+			    mapView.refreshDrawableState();
 				
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
