@@ -36,6 +36,7 @@ public class GameCTF extends MapActivity {
 	
 	// Delay in gameProcess (in ms) [2.5 seconds]
 	public static final int GAME_UPDATE_DELAY = 2500;
+	public static final int GPS_UPDATE_FREQUENCY = 3;
 	
 	// Data members
 	private Handler gameHandler = new Handler();
@@ -218,7 +219,7 @@ public class GameCTF extends MapActivity {
 
 			public void onProviderDisabled(String provider) {}
 		};
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,3, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_FREQUENCY, 0, locationListener);
 
 	}
 }
