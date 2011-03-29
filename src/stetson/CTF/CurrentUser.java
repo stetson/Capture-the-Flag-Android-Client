@@ -20,6 +20,11 @@ public class CurrentUser {
 		
 	}
 	
+	public static void setLocation(double lati, double longi) {
+		CurrentUser.latitude = lati;
+		CurrentUser.longitude = longi;
+	}
+	
 	public static void setName(String name) {
 		CurrentUser.name = name;
 	}
@@ -35,4 +40,14 @@ public class CurrentUser {
 	public static String getUID() {
 		return uid;
 	}
+
+	public static double getLongitude() {
+		return CurrentUser.longitude;
+	}
+	
+	public static double getLatitude() {
+		return CurrentUser.latitude;
+	}
+
+	
 }

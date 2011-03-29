@@ -9,7 +9,10 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -178,22 +181,41 @@ public class StetsonCTF extends Activity {
     	try {
     		str = EntityUtils.toString(rp.getEntity());
     	} catch(IOException e) {
-    		Log.i(TAG, "HttpRequest Error!", e);
+    		Log.e(TAG, "HttpRequest Error!", e);
     	}  
     	return str;
 	}
 	
 
 	/**
-	 * Joins or creates a new game
+	 * Joins or creates a new game. If game is empty, then a new game will be created.
 	 * @param name
 	 * @param game
+	 * @return did the user join the game successfully
 	 */
-    protected void joinGame(String name, String game) {
-    	Log.i(TAG, "joinGame()");
+    protected boolean joinGame(String name, String game) {
+    	
+    	Log.i(TAG, "joinGame(" + name + ", " + game + ")");
+    	
+    	// Update the user
+    	updateUser(name);
+    	
+    	// We need to get current location data to make or join a game
+		LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
+		Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		double longitude = location.getLongitude();
+		double latitude = location.getLatitude();
+		CurrentUser.setLocation(latitude, longitude);
+    	
+		// If a game name wasn't provided, lets make a game!
+		if(game.equals("")) {
+			
+		}
+		
         Intent i = new Intent(this, GameCTF.class);
         startActivity(i);
         
+        return false;
     }
     
     /**
