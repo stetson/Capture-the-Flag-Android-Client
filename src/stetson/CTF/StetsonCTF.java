@@ -149,8 +149,10 @@ public class StetsonCTF extends Activity {
 				String data = responseToString(response);
 				Log.i(TAG, "Response: " + data);
 
-
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+				
+				// Remove the loading message
+				gamesGroup.removeAllViews();
 				
 				// Oh no, there are no games!
 				if (data.equals("") || data.equals(NO_GAMES_RESPONSE)) {
