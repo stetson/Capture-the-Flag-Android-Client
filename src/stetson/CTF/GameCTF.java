@@ -67,24 +67,6 @@ public class GameCTF extends MapActivity {
 	}
 
 	/**
-	 * Create a new user object given a name.
-	 * @param name
-	 */
-	public void CreateUser(String name)
-	{
-		
-		// Generate a new uid
-		String uid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-		while(uid.contains("x")) 
-		uid = uid.replaceFirst("x", Long.toHexString(Math.round(Math.random() * 16.0)));
-		uid = uid.toUpperCase();
-		
-		// Create our new user object
-		usr = new CurrentUser(name, uid);
-
-	}
-	
-	/**
 	 * Attempt to join the specified game using the given username.
 	 * This will generate a new UID for the user and stuff.
 	 * @param gameName

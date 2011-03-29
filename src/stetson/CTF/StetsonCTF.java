@@ -53,7 +53,6 @@ public class StetsonCTF extends Activity {
 	 */
 	public void onStart() {
 		super.onStart();
-		buildGamesList();
 	}
 	
 	/**
@@ -84,7 +83,7 @@ public class StetsonCTF extends Activity {
 				if(selected > -1) {
 					RadioButton rb = (RadioButton) findViewById(selected);
 					game = (String) rb.getText();
-					joinGame(game);
+					//joinGame(game);
 					
 				// No game selected, notify user
 				} else {
@@ -186,22 +185,30 @@ public class StetsonCTF extends Activity {
 	
 
 	/**
-	 * Attempt to join the specified game by name
+	 * Joins or creates a new game
 	 * @param name
+	 * @param game
 	 */
-    protected void joinGame(String name) {
+    protected void joinGame(String name, String game) {
     	Log.i(TAG, "joinGame()");
         Intent i = new Intent(this, GameCTF.class);
         startActivity(i);
+        
     }
     
-	/**
-	 * Attempt to create a game, given the specified name
-	 * @param name
-	 */
-    protected void createGame(String name) {
-    	Log.i(TAG, "createGame()");
-        Intent i = new Intent(this, GameCTF.class);
-        startActivity(i);
+    /**
+     * Sets the user's name and generates a new UID.
+     * @param name
+     */
+    protected void updateUser(String name) {
+    	// New name
+    	CurrentUser.setName(name);
+    	
+		// Generate a new uid
+		String uid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+		while(uid.contains("x")) 
+		uid = uid.replaceFirst("x", Long.toHexString(Math.round(Math.random() * 16.0)));
+		uid = uid.toUpperCase();
+		CurrentUser.setUID(uid);
     }
 }

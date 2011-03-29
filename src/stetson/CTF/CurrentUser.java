@@ -1,34 +1,38 @@
+/**
+ * CurrentUser.java
+ * Used for storage of name, uid and location information of the current user.
+ */
 package stetson.CTF;
-
 public class CurrentUser {
 
-	private String name;
-	private String uid;
-	private double latitude;
-	private double longitude;
-	private double accuracy;
+	// User Info
+	private static String name = "";
+	private static String uid = "";
+	private static double latitude = -1;
+	private static double longitude = -1;
+	private static double accuracy = -1;
 	
-	public CurrentUser(String name, String uid) {
-		this.name = name;
-		this.uid = uid;
-		this.latitude = -1;
-		this.longitude = -1;
-		this.accuracy = -1;
+	// Game Info
+	private static String gameName = "";
+	private static String gameUID = "";
+	
+	private CurrentUser() {
+		
 	}
 	
-	public void setName(String name) {
-		this.name = name;
+	public static void setName(String name) {
+		CurrentUser.name = name;
 	}
 	
-	public void setUID(String uid) {
-		this.uid = uid;
+	public static void setUID(String uid) {
+		CurrentUser.uid = uid;
 	}
 	
-	public String getName() {
-		return this.name;
+	public static String getName() {
+		return name;
 	}
 	
-	public String getUID() {
-		return this.uid;
+	public static String getUID() {
+		return uid;
 	}
 }
