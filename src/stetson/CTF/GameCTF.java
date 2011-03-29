@@ -50,6 +50,9 @@ public class GameCTF extends MapActivity {
 	OverlayItem overlayitem;
 	List<Overlay> mapOverlays;
 	boolean isRunning = false;
+	Drawable drawable;
+	Drawable drawable_red_flag;
+	Drawable drawable_blue_flag;
 	
 	/**
 	 * Called when the activity is first created.
@@ -79,7 +82,11 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlays class
-		Drawable drawable = this.getResources().getDrawable(R.drawable.person_red);
+		drawable = this.getResources().getDrawable(R.drawable.person_red);
+		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
+		drawable_red_flag.setBounds(0, 0, drawable_red_flag.getIntrinsicWidth(), drawable_red_flag.getIntrinsicHeight());
+		drawable_blue_flag = this.getResources().getDrawable(R.drawable.blue_flag);
+		drawable_blue_flag.setBounds(0, 0, drawable_blue_flag.getIntrinsicWidth(), drawable_blue_flag.getIntrinsicHeight());
 		mapOverlays = mapView.getOverlays();
         itemizedoverlay = new GameCTFOverlays(drawable);
 		
@@ -124,17 +131,10 @@ public class GameCTF extends MapActivity {
 	    	
 	    	Log.i(TAG, "Game Process()");
 	    	
+	    	
 	    	// If our accuracy doesn't suck, update
-	    	if(CurrentUser.getAccuracy() > -1) {
-	    		String game;
-				try {
-					game = URLEncoder.encode(CurrentUser.getGameId(), "UTF-8");
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					game = "error game id encoding error";
-					e1.printStackTrace();
-				}
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + game);
+	    	if(true) {
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + CurrentUser.getGameId());
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
 				sendRequest(req, new ResponseListener() {
 					public void onResponseReceived(HttpResponse response) {
@@ -153,6 +153,11 @@ public class GameCTF extends MapActivity {
 							// Process Players
 							jSubObj = (JSONObject) jObject.opt("players");
 							processPlayers(jSubObj);
+							
+							// Process Game data
+							
+							
+							processGame(jObject);
 							
 							
 						} catch (JSONException e) {
@@ -198,14 +203,54 @@ public class GameCTF extends MapActivity {
 			    mapOverlays.add(itemizedoverlay);
 			    
 			    // Request a redraw from the view
-			    mapView.refreshDrawableState();
+//			    mapView.refreshDrawableState();
 				
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
 			}
 	    }
 	
-	
+	    /*
+	     * Process Game Data
+	     * Currently processes red and blue flags and adds them to the map as markers
+	     *  
+	     * 
+	     */
+	    
+	    private void processGame(JSONObject jSubObj) {
+			try {
+				
+				JSONObject game = jSubObj;
+				JSONObject red_flag = game.getJSONObject("red_flag");
+				int lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
+		    	int lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
+
+				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				GeoPoint red_marker = new GeoPoint(lat, lon);
+				OverlayItem red_overlayitem = new OverlayItem(red_marker, "red_flag", "red_flag");
+				red_overlayitem.setMarker(drawable_red_flag);
+				itemizedoverlay.addOverlay(red_overlayitem);
+				
+				JSONObject blue_flag = game.getJSONObject("blue_flag");
+				lat = (int) (1E6 * Double.parseDouble(blue_flag.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
+
+				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				GeoPoint blue_marker = new GeoPoint(lat, lon);
+				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "blue_flag", "blue_flag");
+				blue_overlayitem.setMarker(drawable_blue_flag);
+				itemizedoverlay.addOverlay(blue_overlayitem);
+			    
+			    // Add map overlays
+			    mapOverlays.add(itemizedoverlay);
+			    
+			    // Request a redraw from the view
+//			    mapView.refreshDrawableState();
+				
+			} catch (JSONException e) {
+				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
+			}
+	    }
 	
 	
 	
