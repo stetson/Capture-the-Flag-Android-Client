@@ -3,7 +3,6 @@ package stetson.CTF;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,7 +33,6 @@ public class GameCTF extends MapActivity {
 	 */
 	public void onCreate(Bundle savedInstanceState) {
 		
-		// Yay LogCat!
 		Log.i(TAG, "Starting map activity...");
 		
 		// Restore a saved instance of the application
@@ -47,13 +45,11 @@ public class GameCTF extends MapActivity {
 		MapView mapView = (MapView) findViewById(R.id.mapView);
 		mapController = mapView.getController();
 		mapView.setBuiltInZoomControls(true);
-		getLocation();
+		// getLocation();
 		
 		// Setting up the overlays class
 		mapOverlays = mapView.getOverlays();
-		Drawable drawable = this.getResources().getDrawable(R.drawable.person_red);
-		itemizedoverlay = new GameCTFOverlays(drawable);
-		
+
 	}
 
 	/**

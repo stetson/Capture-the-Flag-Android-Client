@@ -9,6 +9,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -69,14 +70,18 @@ public class StetsonCTF extends Activity {
 				String game = "{NO_GAME}";
 
 				int selected = gamesGroup.getCheckedRadioButtonId();
-				Log.i(TAG, "Selected Game: " + selected);
-				if(selected >= 0)
-				{
+				
+				// Join the specified game
+				if(selected > -1) {
 					RadioButton rb = (RadioButton) findViewById(selected);
 					game = (String) rb.getText();
-				} 
-				
-				Toast.makeText(view.getContext(), "Join Game: " + game, Toast.LENGTH_LONG).show();
+					joinGame(game);
+					
+				// No game selected, notify user
+				} else {
+					Toast.makeText(view.getContext(), R.string.no_game_selected, Toast.LENGTH_SHORT).show();
+				}
+
 			}
 		});
 		
@@ -169,5 +174,29 @@ public class StetsonCTF extends Activity {
     	}  
     	return str;
 	}
+	
 
+	/**
+	 * Attempt to join the specified game by name
+	 * @param name
+	 */
+    protected void joinGame(String name) {
+    	try {
+    	Log.i(TAG, "joinGame()");
+        Intent i = new Intent(this, GameCTF.class);
+        startActivity(i);
+    	} catch (Exception e){
+    		Log.e(TAG, "joinGame() - something bad happened", e);
+    	}
+    }
+    
+	/**
+	 * Attempt to create a game, given the specified name
+	 * @param name
+	 */
+    protected void createGame(String name) {
+    	Log.i(TAG, "createGame()");
+        Intent i = new Intent(this, GameCTF.class);
+        startActivity(i);
+    }
 }

@@ -11,4 +11,5 @@
     <string name="loading_games">Loading Games...</string>
     <string name="no_games">There are no active games at the moment.</string>
     <string name="enter_name">Enter Your Name</string>
+    <string name="no_game_selected">You must pick a game first!</string>
 </resources>
