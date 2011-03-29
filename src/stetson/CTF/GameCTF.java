@@ -1,16 +1,10 @@
 package stetson.CTF;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import android.content.Context;
@@ -31,7 +25,6 @@ import com.google.android.maps.OverlayItem;
 public class GameCTF extends MapActivity {
 		
 	// Data members
-	private CurrentUser usr;
 	private static final String TAG = "GameCTF";
 	private LocationManager locationManager;
 	private LocationListener locationListener;
@@ -65,37 +58,6 @@ public class GameCTF extends MapActivity {
 		mapOverlays = mapView.getOverlays();
 
 	}
-
-	/**
-	 * Attempt to join the specified game using the given username.
-	 * This will generate a new UID for the user and stuff.
-	 * @param gameName
-	 * @param userName
-	 * @return
-	 */
-	public boolean joinGame(String gameName, String userName) {
-		
-        HttpPost hp = new HttpPost("http://ctf.no.de/game/Test%20Game");
-        List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
-        params.add(new BasicNameValuePair("latitude", "29.0356105"));
-        params.add(new BasicNameValuePair("longitude", "-81.3034442"));
-        params.add(new BasicNameValuePair("accuracy", "47"));
-        params.add(new BasicNameValuePair("user_id", "04176DF0-2D8C-4F49-8466-8C2C608ABFA7"));
-        params.add(new BasicNameValuePair("name", "fake-user2"));
-        try {
-			hp.setEntity(new UrlEncodedFormEntity(params));
-		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG, "Error adding params to post request!", e);
-		}
-		sendRequest(hp, new ResponseListener() {
-			public void onResponseReceived(HttpResponse response) {
-				Log.i(TAG, responseToString(response));
-			}
-		});
-		
-		return false;
-	}
-	
 	
 	/**
 	 * Returns false (required by MapActivity)

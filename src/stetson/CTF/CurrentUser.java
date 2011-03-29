@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.message.BasicNameValuePair;
 
 import android.util.Log;
