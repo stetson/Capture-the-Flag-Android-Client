@@ -36,7 +36,6 @@ public class AsynchronousSender extends Thread {
 		try {
 			final HttpResponse response;
 			synchronized (httpClient) {
-				
 				response = getClient().execute((HttpRequestBase) request);
 			}
 			wrapper.setResponse(response);
