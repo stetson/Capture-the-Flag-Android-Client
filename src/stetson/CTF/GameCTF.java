@@ -1,6 +1,8 @@
 package stetson.CTF;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 
@@ -124,7 +126,15 @@ public class GameCTF extends MapActivity {
 	    	
 	    	// If our accuracy doesn't suck, update
 	    	if(CurrentUser.getAccuracy() > -1) {
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + CurrentUser.getGameId());
+	    		String game;
+				try {
+					game = URLEncoder.encode(CurrentUser.getGameId(), "UTF-8");
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					game = "error game id encoding error";
+					e1.printStackTrace();
+				}
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + game);
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
 				sendRequest(req, new ResponseListener() {
 					public void onResponseReceived(HttpResponse response) {
@@ -194,6 +204,12 @@ public class GameCTF extends MapActivity {
 				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
 			}
 	    }
+	
+	
+	
+	
+	
+	
 	};
 
 
