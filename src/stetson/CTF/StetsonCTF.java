@@ -57,6 +57,7 @@ public class StetsonCTF extends Activity {
 		
 		// Start up the location manager
 		userLocation();
+		gpsLock();
 		// Connect components
 		buildListeners();
 
@@ -246,13 +247,10 @@ public class StetsonCTF extends Activity {
     	updateUser(name);
     	
     	// We need to get current location data to make or join a game
-		LocationManager lm = (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
-		Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-		double longitude = location.getLongitude();
-		double latitude = location.getLatitude();
+		double longitude = CurrentUser.getLongitude();
+		double latitude = CurrentUser.getLatitude();
 		CurrentUser.setLocation(latitude, longitude);
 
-		
 		// Show the user a loading screen thingy
 		ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
     	
@@ -334,6 +332,17 @@ public class StetsonCTF extends Activity {
 			public void onProviderDisabled(String provider) {}
 		};
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_FREQUENCY, 0, locationListener);
-
+		
+	}
+	protected void gpsLock()
+	{
+		while(locationManager.getProvider(LocationManager.GPS_PROVIDER).getAccuracy()!= android.location.Criteria.ACCURACY_FINE)	
+		{
+			
+			double lat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
+			double lon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
+			CurrentUser.setLocation(lat,lon);
+		}
+		
 	}
 }
