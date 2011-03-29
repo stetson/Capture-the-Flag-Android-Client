@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.OverlayItem;
 
-public class GameCTFOverlays extends ItemizedOverlay {
+public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 
 	
 	private Context mContext;
