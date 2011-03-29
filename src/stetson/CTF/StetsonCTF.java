@@ -57,7 +57,7 @@ public class StetsonCTF extends Activity {
 		
 		// Start up the location manager
 		userLocation();
-		gpsLock();
+		//gpsLock();
 		// Connect components
 		buildListeners();
 
