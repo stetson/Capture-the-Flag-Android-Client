@@ -1,6 +1,7 @@
 package stetson.CTF;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -8,8 +9,12 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,8 +22,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.RadioButton;
 
 import com.google.android.maps.GeoPoint;
+import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
@@ -35,7 +42,6 @@ public class GameCTF extends MapActivity {
 	private static final String TAG = "GameCTF";
 	private LocationManager locationManager;
 	private LocationListener locationListener;
-	private GeoPoint playerPoint;
 	MapController mapController;
 	GameCTFOverlays itemizedoverlay;
 	OverlayItem overlayitem;
@@ -68,7 +74,9 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlays class
+		Drawable drawable = this.getResources().getDrawable(R.drawable.person_red);
 		mapOverlays = mapView.getOverlays();
+        itemizedoverlay = new GameCTFOverlays(drawable);
 		
 		// Start up the location manager
 		userLocation();
@@ -104,8 +112,46 @@ public class GameCTF extends MapActivity {
 				sendRequest(req, new ResponseListener() {
 					public void onResponseReceived(HttpResponse response) {
 						
+						// Clear all map points
+						mapOverlays.clear();
+						
 						// Pull response message
 						String data = responseToString(response);
+						
+						// JSON IS FUN!
+						JSONObject jObject;
+						JSONObject jSubObj;
+						try {
+							jObject = new JSONObject(data);
+							
+							// Origin
+							jSubObj = (JSONObject) jObject.opt("players");
+
+							// Loop through all players
+							JSONObject player;
+							String playerKey;
+							
+							Iterator plrIterator = jSubObj.keys();
+						    while(plrIterator .hasNext()) {
+						    	playerKey = (String) plrIterator .next();
+						    	player = jSubObj.getJSONObject(playerKey);
+						    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
+						    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
+	
+								Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
+								GeoPoint marker = new GeoPoint(lati, loni);
+								OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
+								itemizedoverlay.addOverlay(overlayitem);
+
+						    }
+						    
+						    // Add map overlays
+						    mapOverlays.add(itemizedoverlay);
+							
+						} catch (JSONException e) {
+							Log.e(TAG, "Error processing json data in gameProcess()", e);
+						}
+						
 						Log.i(TAG, "Game Data: " + data);
 						
 					}
@@ -162,7 +208,7 @@ public class GameCTF extends MapActivity {
 			public void onLocationChanged(Location location) {
 				
 				Log.i(TAG, "Update Location.");
-				CurrentUser.setLocation(1E6 *location.getLatitude(), 1E6 *location.getLongitude());
+				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
 				CurrentUser.setAccuracy(location.getAccuracy());
 			}
 
