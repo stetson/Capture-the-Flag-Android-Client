@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.util.EntityUtils;
 
@@ -13,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.google.android.maps.GeoPoint;
@@ -23,8 +26,12 @@ import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
 public class GameCTF extends MapActivity {
-		
+	
+	// Delay in gameProcess (in ms) [2.5 seconds]
+	public static final int GAME_UPDATE_DELAY = 2500;
+	
 	// Data members
+	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
 	private LocationManager locationManager;
 	private LocationListener locationListener;
@@ -46,6 +53,12 @@ public class GameCTF extends MapActivity {
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
 		
+		// Make sure the user is actually in a game
+		if(CurrentUser.getGameId().equals("")) {
+			this.finish();
+			return;
+		}
+		
 		// Move back to the game selection panel
 		setContentView(R.layout.game);
 		
@@ -56,9 +69,55 @@ public class GameCTF extends MapActivity {
 		
 		// Setting up the overlays class
 		mapOverlays = mapView.getOverlays();
+		
+		// Start up the location manager
+		userLocation();
+		
+		// Start game processor
+		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
 
 	}
 	
+	/**
+	 * When the activity is ended, we need to clear the users game and location.
+	 */
+	public void onDestroy() {
+		Log.i(TAG, "Stopping Map Activity");
+		CurrentUser.setGameId("");
+		CurrentUser.setLocation(-1, -1);
+		CurrentUser.setAccuracy(-1);
+	}
+	
+	/**
+	 * Game processor. Runs every GAME_UPDATE_DELAY (ms).
+	 */
+	private final Runnable gameProcess = new Runnable()
+	{
+	    public void run() 
+	    {
+	    	Log.i(TAG, "Game Process()");
+	    	
+	    	// If our accuracy doesn't suck, update
+	    	if(CurrentUser.getAccuracy() > -1) {
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + CurrentUser.getGameId());
+				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
+				sendRequest(req, new ResponseListener() {
+					public void onResponseReceived(HttpResponse response) {
+						
+						// Pull response message
+						String data = responseToString(response);
+						Log.i(TAG, "Game Data: " + data);
+						
+					}
+				});
+	    	}
+	    	
+	    	// Delay for set time and run again
+	    	gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    }
+	};
+
+
 	/**
 	 * Returns false (required by MapActivity)
 	 * @return false
@@ -92,18 +151,19 @@ public class GameCTF extends MapActivity {
 	}
 	
 	/**
-	 * Currently un-used code. For example only.
+	 * Periodically updates the users location.
 	 */
-	protected void getLocation()
+	protected void userLocation()
 	{
+
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
-		// Define a listener that responds to location updates
 		locationListener = new LocationListener() {
+			
 			public void onLocationChanged(Location location) {
-				// Called when a new location is found by the network location provider.
-				playerPoint = new GeoPoint(  (int)(1E6 *location.getLatitude()),  (int)(1E6 *location.getLongitude()));
-
+				
+				Log.i(TAG, "Update Location.");
+				CurrentUser.setLocation(1E6 *location.getLatitude(), 1E6 *location.getLongitude());
+				CurrentUser.setAccuracy(location.getAccuracy());
 			}
 
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -112,23 +172,7 @@ public class GameCTF extends MapActivity {
 
 			public void onProviderDisabled(String provider) {}
 		};
-
-		// Register the listener with the Location Manager to receive location updates
-		//       locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,3, 0, locationListener);
-
-		playerPoint = new GeoPoint((int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude()),(int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude()));
-
-		while(locationManager.getProvider(LocationManager.GPS_PROVIDER).getAccuracy()!= android.location.Criteria.ACCURACY_FINE)
-		{
-			playerPoint = new GeoPoint((int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude()),(int)(1E6 *locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude()));
-
-		}
-
-
-		mapController.setCenter(playerPoint);
-
-
 
 	}
 }

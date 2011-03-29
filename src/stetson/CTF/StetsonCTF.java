@@ -32,12 +32,12 @@ import android.widget.Toast;
 
 public class StetsonCTF extends Activity {
 	
-	private static final String TAG = "StetsonCTF";
-	private static final String NO_GAMES_RESPONSE = "[]";
-	private static final String SERVER_URL = "http://ctf.no.de";
+	public static final String TAG = "StetsonCTF";
+	public static final String NO_GAMES_RESPONSE = "[]";
+	public static final String SERVER_URL = "http://ctf.no.de";
 	
-	private static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
-	private static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
+	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
+	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
 	
 	/**
 	 * Called when the activity is first created.

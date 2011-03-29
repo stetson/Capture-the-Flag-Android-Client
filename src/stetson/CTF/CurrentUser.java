@@ -53,6 +53,14 @@ public class CurrentUser {
 		CurrentUser.gameId = game;
 	}
 	
+	public static void setAccuracy(double accuracy) {
+		CurrentUser.accuracy = accuracy;
+	}
+	
+	public static double getAccuracy() {
+		return CurrentUser.accuracy;
+	}
+	
 	public static String getGameId() {
 		return CurrentUser.gameId;
 	}
