@@ -38,6 +38,7 @@ import android.widget.Toast;
 public class StetsonCTF extends Activity {
 	
 	private static final String TAG = "StetsonCTF";
+	private static final String NO_GAMES_RESPONSE = "[]";
 	
 	/**
 	 * Called when the activity is first created.
@@ -118,51 +119,45 @@ public class StetsonCTF extends Activity {
 
 			public void onResponseReceived(HttpResponse response) {
 				
-				// Pull reponse message
+				// Pull response message
 				String data = responseToString(response);
-				
+				Log.i(TAG, "Response: " + data);
+
 				// Remove all of the current games on the list
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
 				gamesGroup.removeAllViews();
+				
+				// Oh no, there are no games!
+				if (data.equals("") || data.equals(NO_GAMES_RESPONSE)) {
+					TextView loadText = new TextView(gamesGroup.getContext());
+					loadText.setText(R.string.no_games);
+					gamesGroup.addView(loadText);
+
+				// Parse the new data and add games to the list =D
+				} else {
+					JSONArray jObject;
+					try {
+						jObject = new JSONArray(data);
+						RadioButton rb;
+						int index = 0;
+						while(!jObject.optString(index).equals("")) {
+							Log.i(TAG, "Adding game to view (" + jObject.optString(index) + ")");
+							rb = new RadioButton(gamesGroup.getContext());
+							rb.setText(jObject.optString(index));
+							gamesGroup.addView(rb);
+							index ++;
+	
+						}
+					} catch (JSONException e) {
+						Log.i(TAG, "There was an error parsing game data!", e);
+					}
+				}
 				
 				Log.i(TAG, "Build games list. (Done!)");
 			}
 			
 		});
-		/*
-		Log.i(TAG, "Build games list.");
 
-
-		
-		gamesGroup.removeAllViews();
-		// Start loading up games list
-		Log.i(TAG, "Making request...");
-		String resp = GetRequest("http://ctf.no.de/game/");
-		
-		try {
-			Log.i(TAG, "Response: " + resp);
-			JSONArray jObject = new JSONArray(resp);
-			jObject = new JSONArray(resp);
-			RadioButton rb;
-			int index = 0;
-			while(!jObject.optString(index,"[END]").equals("[END]")) {
-				Log.i(TAG, "Adding game to view (" + jObject.optString(index) + ")");
-				rb = new RadioButton(gamesGroup.getContext());
-				rb.setText(jObject.optString(index));
-				gamesGroup.addView(rb);
-				index ++;
-
-			}
-		} catch (JSONException e) {
-			Toast.makeText(gamesGroup.getContext(), "Could not parse JSON Array.", Toast.LENGTH_LONG).show();
-			e.printStackTrace();
-
-		}
-
-		// Remove old games
-		// gamesList.removeAllViews();
-		 * 
-		 */
 		
 	}
 	
