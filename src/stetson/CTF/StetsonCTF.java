@@ -48,6 +48,15 @@ public class StetsonCTF extends Activity {
 	}
 	
 	/**
+	 * Rebuild games list when the application regains focus.
+	 * (After leave a game, answering a call, etc...)
+	 */
+	public void onStart() {
+		super.onStart();
+		buildGamesList();
+	}
+	
+	/**
 	 * Connects the view components to listeners
 	 */
 	private void buildListeners() {
@@ -181,13 +190,9 @@ public class StetsonCTF extends Activity {
 	 * @param name
 	 */
     protected void joinGame(String name) {
-    	try {
     	Log.i(TAG, "joinGame()");
         Intent i = new Intent(this, GameCTF.class);
         startActivity(i);
-    	} catch (Exception e){
-    		Log.e(TAG, "joinGame() - something bad happened", e);
-    	}
     }
     
 	/**
