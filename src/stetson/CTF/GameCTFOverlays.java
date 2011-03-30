@@ -11,7 +11,6 @@ import com.google.android.maps.OverlayItem;
 
 public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 
-	
 	private Context mContext;
 	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 	

@@ -13,6 +13,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.util.Log;
 
 public class CurrentUser {
@@ -32,50 +34,40 @@ public class CurrentUser {
 	// Game Info
 	private static String gameId = "";
 	
-	private CurrentUser() {
-		
-	}
-	
+	// Mutators
 	public static void setLocation(double lati, double longi) {
 		CurrentUser.latitude = lati;
 		CurrentUser.longitude = longi;
 	}
-	
 	public static void setName(String name) {
 		CurrentUser.name = name;
 	}
-	
 	public static void setUID(String uid) {
 		CurrentUser.uid = uid;
 	}
-	
 	public static void setGameId(String game) {
 		CurrentUser.gameId = game;
 	}
-	
 	public static void setAccuracy(double accuracy) {
 		CurrentUser.accuracy = accuracy;
 	}
 	
+	// Accessors
 	public static double getAccuracy() {
 		return CurrentUser.accuracy;
 	}
-	
 	public static String getGameId() {
 		return CurrentUser.gameId;
 	}
 	public static String getName() {
 		return name;
 	}
-	
 	public static String getUID() {
 		return uid;
 	}
-
 	public static double getLongitude() {
 		return CurrentUser.longitude;
 	}
-	
 	public static double getLatitude() {
 		return CurrentUser.latitude;
 	}

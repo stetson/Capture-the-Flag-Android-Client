@@ -33,14 +33,17 @@ import android.widget.Toast;
 
 public class StetsonCTF extends Activity {
 	
+	// All constants for Application
 	public static final String TAG = "StetsonCTF";
 	public static final String NO_GAMES_RESPONSE = "[]";
 	public static final String SERVER_URL = "http://ctf.no.de";
 	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
 	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
 	public static final int GPS_UPDATE_FREQUENCY = 3;
+	
 	private LocationManager locationManager;
 	private LocationListener locationListener;
+	
 	/**
 	 * Called when the activity is first created.
 	 * @param saved instance state
@@ -130,8 +133,7 @@ public class StetsonCTF extends Activity {
 	/**
 	 * Retrieves and displays a new games list
 	 */
-	private void buildGamesList()
-	{
+	private void buildGamesList() {
 		
 		Log.i(TAG, "Build games list. (Loading...)");
 		
@@ -146,12 +148,12 @@ public class StetsonCTF extends Activity {
 		
 		// Build an send a request for game data
 		HttpGet req = new HttpGet(SERVER_URL + "/game/");
-		sendRequest(req, new ResponseListener() {
+		Connections.sendRequest(req, new ResponseListener() {
 
 			public void onResponseReceived(HttpResponse response) {
 				
 				// Pull response message
-				String data = responseToString(response);
+				String data = Connections.responseToString(response);
 				Log.i(TAG, "Response: " + data);
 
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
@@ -192,46 +194,7 @@ public class StetsonCTF extends Activity {
 
 		
 	}
-	
-	/**
-	 * Makes an HTTP request and sends it to a response listener once completed.
-	 * @param request
-	 * @param responseListener
-	 */
-	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
-		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
-	}
-	
-	public static String sendFlatRequest(HttpRequestBase request) {
-		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpResponse resp;
-			resp = client.execute(request);
-			return responseToString(resp);
-			 
-		} catch (ClientProtocolException e) {
-			Log.e(TAG, "Web Request Failed", e);
-		} catch (IOException e) {
-			Log.e(TAG, "Web Request Failed", e);
-		}
-		return "";
-	}
-	
-	/**
-	 * Draws a string from an HttpResponse object.
-	 * @param rp
-	 * @return
-	 */
-	public static String responseToString(HttpResponse rp) {
-    	String str = "";
-    	try {
-    		str = EntityUtils.toString(rp.getEntity());
-    	} catch(IOException e) {
-    		Log.e(TAG, "HttpRequest Error!", e);
-    	}  
-    	return str;
-	}
-	
+
 
 	/**
 	 * Joins or creates a new game. If game is empty, then a new game will be created.
@@ -263,7 +226,7 @@ public class StetsonCTF extends Activity {
 			// Make the request, NOT asynchronous, we need an answer now
 			HttpPost hp = new HttpPost(SERVER_URL + "/game/");
 			CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
-			String data = sendFlatRequest(hp);
+			String data = Connections.sendFlatRequest(hp);
 			if(!data.equals(CREATE_SUCCESS)) {
 				dialog.hide();
 				Toast.makeText(this, R.string.failed_to_create, Toast.LENGTH_SHORT).show();
@@ -275,7 +238,7 @@ public class StetsonCTF extends Activity {
 		// Join the game!
 		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + CurrentUser.getGameId());
 		CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
-		String data = sendFlatRequest(hp);
+		String data = Connections.sendFlatRequest(hp);
 		
 		// This needs to be improved at some point for better error checking
 		if(data.equals(JOIN_FAILED)) {
@@ -312,37 +275,25 @@ public class StetsonCTF extends Activity {
     /**
 	 * Periodically updates the users location.
 	 */
-	protected void userLocation()
-	{
-
+	protected void userLocation() {
+		
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		
 		locationListener = new LocationListener() {
-			
-			public void onLocationChanged(Location location) {
 				
+			public void onLocationChanged(Location location) {
 				Log.i(TAG, "Update Location.");
 				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
 				CurrentUser.setAccuracy(location.getAccuracy());
 			}
-
+	
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
-
 			public void onProviderEnabled(String provider) {}
-
 			public void onProviderDisabled(String provider) {}
+				
 		};
+		
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_FREQUENCY, 0, locationListener);
-		
 	}
-	protected void gpsLock()
-	{
-		while(locationManager.getProvider(LocationManager.GPS_PROVIDER).getAccuracy()!= android.location.Criteria.ACCURACY_FINE)	
-		{
-			
-			double lat = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude();
-			double lon = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLongitude();
-			CurrentUser.setLocation(lat,lon);
-		}
 		
-	}
 }

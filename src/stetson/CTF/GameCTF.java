@@ -39,7 +39,6 @@ public class GameCTF extends MapActivity {
 	// Delay in gameProcess (in ms) [2.5 seconds]
 	public static final int GAME_UPDATE_DELAY = 2500;
 	
-	
 	// Data members
 	private MapView mapView;
 	private Handler gameHandler = new Handler();
@@ -90,8 +89,6 @@ public class GameCTF extends MapActivity {
 		mapOverlays = mapView.getOverlays();
         itemizedoverlay = new GameCTFOverlays(drawable);
 		
-		
-		
 		// Start game processor
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
 
@@ -136,14 +133,14 @@ public class GameCTF extends MapActivity {
 	    	if(true) {
 				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + CurrentUser.getGameId());
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
-				sendRequest(req, new ResponseListener() {
+				Connections.sendRequest(req, new ResponseListener() {
 					public void onResponseReceived(HttpResponse response) {
 						
 						// Clear all map points
 						mapOverlays.clear();
-						
+
 						// Pull response message
-						String data = responseToString(response);
+						String data = Connections.responseToString(response);
 						
 						// JSON IS FUN!
 						try {
@@ -155,10 +152,10 @@ public class GameCTF extends MapActivity {
 							processPlayers(jSubObj);
 							
 							// Process Game data
-							
-							
 							processGame(jObject);
 							
+						    // Add map overlays
+						    mapOverlays.add(itemizedoverlay);
 							
 						} catch (JSONException e) {
 							// TODO Auto-generated catch block
@@ -198,62 +195,51 @@ public class GameCTF extends MapActivity {
 					itemizedoverlay.addOverlay(overlayitem);
 
 			    }
-			    
-			    // Add map overlays
-			    mapOverlays.add(itemizedoverlay);
-			    
-			    // Request a redraw from the view
-//			    mapView.refreshDrawableState();
-				
+
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
 			}
+			
 	    }
-	
-	    /*
-	     * Process Game Data
-	     * Currently processes red and blue flags and adds them to the map as markers
-	     *  
-	     * 
+		    
+	    /**
+	     * Handles game data, such as flags and bounds.
+	     * @param jSubObj containing the entire game json object.
 	     */
-	    
 	    private void processGame(JSONObject jSubObj) {
 			try {
 				
 				JSONObject game = jSubObj;
+				
+				// Adding red flag
 				JSONObject red_flag = game.getJSONObject("red_flag");
 				int lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
 		    	int lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
 
-				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
 				GeoPoint red_marker = new GeoPoint(lat, lon);
 				OverlayItem red_overlayitem = new OverlayItem(red_marker, "red_flag", "red_flag");
 				red_overlayitem.setMarker(drawable_red_flag);
 				itemizedoverlay.addOverlay(red_overlayitem);
 				
+				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				
+				// Adding blue flag
 				JSONObject blue_flag = game.getJSONObject("blue_flag");
 				lat = (int) (1E6 * Double.parseDouble(blue_flag.getString("latitude")));
 		    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
 
-				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
 				GeoPoint blue_marker = new GeoPoint(lat, lon);
 				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "blue_flag", "blue_flag");
 				blue_overlayitem.setMarker(drawable_blue_flag);
 				itemizedoverlay.addOverlay(blue_overlayitem);
-			    
-			    // Add map overlays
-			    mapOverlays.add(itemizedoverlay);
-			    
-			    // Request a redraw from the view
-//			    mapView.refreshDrawableState();
 				
+				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+			    
 			} catch (JSONException e) {
-				Log.e(TAG, "Error in gameProcess().processPlayers()", e);
+				Log.e(TAG, "Error in gameProcess().processGame()", e);
 			}
 	    }
-	
-	
-	
+
 	
 	};
 
@@ -264,31 +250,6 @@ public class GameCTF extends MapActivity {
 	 */
 	protected boolean isRouteDisplayed() {
 		return false;
-	}
-	
-	/**
-	 * Makes an HTTP request and sends it to a response listener once completed.
-	 * @param request
-	 * @param responseListener
-	 */
-	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
-		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
-	}
-	
-	/**
-	 * Draws a string from an HttpResponse object.
-	 * @param rp
-	 * @return
-	 */
-	public static String responseToString(HttpResponse rp) {
-    	String str = "";
-    	try {
-    		str = EntityUtils.toString(rp.getEntity());
-    	} catch(IOException e) {
-    		Log.i(TAG, "HttpRequest Error!", e);
-    	}  
-    	return str;
-	}
-	
+	}	
 	
 }
