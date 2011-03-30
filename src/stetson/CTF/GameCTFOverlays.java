@@ -50,12 +50,12 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 		OverlayItem item = mOverlays.get(index);
 		Log.i("MAP", "Tapped " + item.getTitle());
 		/*
-	  OverlayItem item = mOverlays.get(index);
-	  AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-	  dialog.setTitle(item.getTitle());
-	  dialog.setMessage(item.getSnippet());
-	  dialog.show();
-	  */
+		  OverlayItem item = mOverlays.get(index);
+		  AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
+		  dialog.setTitle(item.getTitle());
+		  dialog.setMessage(item.getSnippet());
+		  dialog.show();
+		  */
 	  return true;
 	}
 	
@@ -73,6 +73,13 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 	 */
 	public int size() {
 		return mOverlays.size();
+	}
+	
+	/**
+	 * Clears the overlays array list.
+	 */
+	public void clear() {
+		mOverlays.clear();
 	}
 
 }

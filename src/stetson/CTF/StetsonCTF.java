@@ -236,65 +236,7 @@ public class StetsonCTF extends Activity {
 
 			}
 		});
-		
-		// let the user know we aren't being lazy, clear list and show them a load message
-		/*
-
-		
-		TextView loadText = new TextView(gamesGroup.getContext());
-		loadText.setText(R.string.loading_games);
-		gamesGroup.addView(loadText);
-
-		// Build an send a request for game data
-		HttpGet req = new HttpGet(SERVER_URL + "/game/");
-		Connections.sendRequest(req, new ResponseListener() {
-
-			public void onResponseReceived(HttpResponse response) {
 				
-				// Pull response message
-				String data = Connections.responseToString(response);
-				Log.i(TAG, "Response: " + data);
-
-				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-				
-				// Remove the loading message
-				gamesGroup.removeAllViews();
-				
-				// JSON Handling
-				JSONObject jObject;
-				jObject = new JSONObject(data);
-				
-				// If there are no errors, we have a list of games
-				if(jObject.getString("error").equals("")) {
-				
-				// 
-				} else {
-					
-				}
-				
-				// Oh no, there are no games!
-				if (data.equals("") || data.equals(NO_GAMES_RESPONSE)) {
-					TextView loadText = new TextView(gamesGroup.getContext());
-					loadText.setText(R.string.no_games);
-					gamesGroup.addView(loadText);
-
-				// Parse the new data and add games to the list =D
-				} else {
-										
-					try {
-						
-	
-					} catch (JSONException e) {
-						Log.e(TAG, "There was an error parsing game data!", e);
-					}
-				}
-				
-				Log.i(TAG, "Build games list. (Done!)");
-			}
-			
-		});
-	*/
-		
 	}
 
 	/**

@@ -138,7 +138,8 @@ public class GameCTF extends MapActivity {
 						
 						// Clear all map points
 						mapOverlays.clear();
-
+						itemizedoverlay.clear();
+						
 						// Pull response message
 						String data = Connections.responseToString(response);
 						
