@@ -52,9 +52,11 @@ public class GameCTF extends MapActivity {
 	boolean isRunning = false;
 	boolean isCentered = false;
 	
-	Drawable drawable;
-	Drawable drawable_red_flag;
-	Drawable drawable_blue_flag;
+	private Drawable drawable_self;
+	private Drawable drawable_red_flag;
+	private Drawable drawable_blue_flag;
+	private Drawable drawable_red_player;
+	private Drawable drawable_blue_player;
 	
 	/**
 	 * Called when the activity is first created.
@@ -84,14 +86,24 @@ public class GameCTF extends MapActivity {
 		mapController = mapView.getController();
 		mapView.setBuiltInZoomControls(true);
 		
-		// Setting up the overlays class
-		drawable = this.getResources().getDrawable(R.drawable.person_red);
+		// Setting up the overlay marker images
+		drawable_self = this.getResources().getDrawable(R.drawable.star);
+		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
+		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
 		drawable_red_flag.setBounds(0, 0, drawable_red_flag.getIntrinsicWidth(), drawable_red_flag.getIntrinsicHeight());
+		
 		drawable_blue_flag = this.getResources().getDrawable(R.drawable.blue_flag);
 		drawable_blue_flag.setBounds(0, 0, drawable_blue_flag.getIntrinsicWidth(), drawable_blue_flag.getIntrinsicHeight());
+		
+		drawable_red_player = this.getResources().getDrawable(R.drawable.person_red);
+		drawable_red_player .setBounds(0, 0, drawable_red_player.getIntrinsicWidth(), drawable_red_player.getIntrinsicHeight());
+		
+		drawable_blue_player = this.getResources().getDrawable(R.drawable.person_blue);
+		drawable_blue_player.setBounds(0, 0, drawable_blue_player.getIntrinsicWidth(), drawable_blue_player.getIntrinsicHeight());
+		
 		mapOverlays = mapView.getOverlays();
-        itemizedoverlay = new GameCTFOverlays(drawable);
+        itemizedoverlay = new GameCTFOverlays(drawable_self);
 		
 		// Start game processor
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
@@ -211,16 +223,34 @@ public class GameCTF extends MapActivity {
 				JSONObject player;
 				String playerKey;
 				Iterator plrIterator = jSubObj.keys();
-			    while(plrIterator .hasNext()) {
+			    while(plrIterator.hasNext()) {
+			    	
 			    	playerKey = (String) plrIterator .next();
 			    	player = jSubObj.getJSONObject(playerKey);
-			    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
-			    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
+			    	
+			    	// If a player isn't on a team, we don't care about it at all
+			    	if(player.has("team")) {
 
-					Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
-					GeoPoint marker = new GeoPoint(lati, loni);
-					OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
-					itemizedoverlay.addOverlay(overlayitem);
+				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
+				    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
+	
+						Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
+						GeoPoint marker = new GeoPoint(lati, loni);
+						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
+						
+						
+						String team = player.getString("team");
+						if(playerKey.equals(CurrentUser.getUID())) {
+							overlayitem.setMarker(drawable_self);
+						} else if(team.equals("red")) {
+							overlayitem.setMarker(drawable_red_player);
+						} else if(team.equals("blue")) {
+							overlayitem.setMarker(drawable_blue_player);
+						}
+	
+						itemizedoverlay.addOverlay(overlayitem);
+						
+			    	}
 
 			    }
 
