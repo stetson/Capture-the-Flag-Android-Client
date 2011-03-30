@@ -147,7 +147,8 @@ public class GameCTF extends MapActivity {
 	    	
 	    	// If our accuracy doesn't suck, update
 	    	if(true) {
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + CurrentUser.getGameId());
+	    		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
 				Connections.sendRequest(req, new ResponseListener() {
 					public void onResponseReceived(HttpResponse response) {

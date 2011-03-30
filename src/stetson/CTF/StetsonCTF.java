@@ -1,6 +1,7 @@
 package stetson.CTF;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -44,6 +45,8 @@ public class StetsonCTF extends Activity {
 	
 	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
 	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
+	// meters
+	public static final int GPS_UPDATE_DISTANCE = 0;
 	
 	public static final int LOADING_PAUSE = 1000;
 	
@@ -279,7 +282,9 @@ public class StetsonCTF extends Activity {
 		}
 		
 		// Join the game!
-		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + CurrentUser.getGameId());
+		
+		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
 		CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
 		String data = Connections.sendFlatRequest(hp);
 		
@@ -331,7 +336,7 @@ public class StetsonCTF extends Activity {
 			public void onLocationChanged(Location location) {
 				Log.i(TAG, "Update Location.");
 				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
-				CurrentUser.setAccuracy(location.getAccuracy());
+				CurrentUser.setAccuracy((double)location.getAccuracy());
 			}
 	
 			public void onStatusChanged(String provider, int status, Bundle extras) {}
@@ -344,7 +349,7 @@ public class StetsonCTF extends Activity {
 		locationManager.removeUpdates(locationListener);
 		
 		// Start requesting updates per given time
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, 0, locationListener);
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, GPS_UPDATE_DISTANCE, locationListener);
 		
 	}
 	
