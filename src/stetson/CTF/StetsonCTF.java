@@ -1,16 +1,8 @@
 package stetson.CTF;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -210,6 +202,14 @@ public class StetsonCTF extends Activity {
 										rb.setText(gameArray.optString(index));
 										gamesGroup.addView(rb);
 										index ++;
+									}
+									
+									// No games!
+									if(index == 0) {
+										// Post a message
+										TextView noGamesText = new TextView(gamesGroup.getContext());
+										noGamesText.setText(R.string.no_games);
+										gamesGroup.addView(noGamesText);
 									}
 
 								// JSON Object
