@@ -37,16 +37,19 @@ public class StetsonCTF extends Activity {
 	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
 	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
 	
-	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
+	// 3 seconds, 10 seconds, 1 minute
 	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
+	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
+	public static final int GPS_UPDATE_FREQUENCY_BACKGROUND = 60000;
+	
 	// meters
 	public static final int GPS_UPDATE_DISTANCE = 0;
 	
 	public static final int LOADING_PAUSE = 1000;
 	
 	private Handler gamesHandler;
-	private LocationManager locationManager;
-	private LocationListener locationListener;
+	private static LocationManager locationManager;
+	private static LocationListener locationListener;
 	
 	/**
 	 * Called when the activity is first created.
@@ -81,7 +84,16 @@ public class StetsonCTF extends Activity {
 		// Whenever this activity focus, slow down gps updates
 		userLocation(GPS_UPDATE_FREQUENCY_INTRO);
 	}
-		
+	
+	/**
+	 * Slow down GPS updates a lot when the application is in the background.
+	 */
+	public void onStop() {
+
+		super.onStop();
+		userLocation(GPS_UPDATE_FREQUENCY_BACKGROUND);
+	}
+	
 	/**
 	 * Connects the view components to listeners
 	 */
@@ -342,7 +354,13 @@ public class StetsonCTF extends Activity {
 		
 		// Setup our location manager
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-			
+		
+		// Remove all updates for the current listener (if one exists)
+		if(locationListener != null) {
+			locationManager.removeUpdates(locationListener);
+			locationListener = null;
+		}
+		
 		// Setup our location listener
 		locationListener = new LocationListener() {
 				
@@ -357,9 +375,7 @@ public class StetsonCTF extends Activity {
 			public void onProviderDisabled(String provider) {}
 				
 		};
-		
-		// Remove all updates for the current listener (if one exists)
-		locationManager.removeUpdates(locationListener);
+
 		
 		// Start requesting updates per given time
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, GPS_UPDATE_DISTANCE, locationListener);

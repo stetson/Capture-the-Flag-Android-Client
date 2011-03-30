@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
