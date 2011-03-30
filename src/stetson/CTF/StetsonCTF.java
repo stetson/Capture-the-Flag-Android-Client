@@ -17,6 +17,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -79,7 +81,7 @@ public class StetsonCTF extends Activity {
 		// Whenever this activity focus, slow down gps updates
 		userLocation(GPS_UPDATE_FREQUENCY_INTRO);
 	}
-	
+		
 	/**
 	 * Connects the view components to listeners
 	 */

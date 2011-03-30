@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/center_self"
+          android:title="@string/game_center_self" />
+    <item android:id="@+id/center_red"
+          android:title="@string/game_center_red" />
+    <item android:id="@+id/center_blue"
+          android:title="@string/game_center_blue" />
+    <item android:id="@+id/game_leave"
+          android:title="@string/game_leave" />
+</menu>

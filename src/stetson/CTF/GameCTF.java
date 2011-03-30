@@ -12,6 +12,9 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -25,6 +28,12 @@ public class GameCTF extends MapActivity {
 	// Delay in gameProcess (in ms) [2.5 seconds]
 	public static final int GAME_UPDATE_DELAY = 2500;
 	
+	public static final int CENTER_NONE = -1;
+	public static final int CENTER_ORIGIN = 0;
+	public static final int CENTER_SELF = 1;
+	public static final int CENTER_RED = 2;
+	public static final int CENTER_BLUE = -3;
+	
 	// Data members
 	private MapView mapView;
 	private Handler gameHandler = new Handler();
@@ -36,7 +45,7 @@ public class GameCTF extends MapActivity {
 	List<Overlay> mapOverlays;
 	
 	boolean isRunning = false;
-	boolean isCentered = false;
+	int isCentering = CENTER_NONE;
 	
 	private Drawable drawable_self;
 	private Drawable drawable_red_flag;
@@ -53,7 +62,7 @@ public class GameCTF extends MapActivity {
 		
 		Log.i(TAG, "Starting map activity...");
 		isRunning = true;
-		isCentered = false;
+		isCentering = CENTER_ORIGIN;
 		 
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
@@ -111,7 +120,45 @@ public class GameCTF extends MapActivity {
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
 	}
+
+	/**
+	 * Called when the menu is requested.
+	 */
+	public boolean onCreateOptionsMenu(Menu menu) {
+	   MenuInflater inflater = getMenuInflater();
+	   inflater.inflate(R.menu.game_menu, menu);
+	   return true;
+	}
 	
+	/**
+	 * Handle menu selections.
+	 */
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    
+		// which option?
+	    switch (item.getItemId()) {
+
+		    case R.id.center_self:
+		    	isCentering = CENTER_SELF;
+		    	return true;
+		    	
+		    case R.id.center_red:
+		    	isCentering = CENTER_RED;
+		    	return true;
+		    	
+		    case R.id.center_blue:
+		    	isCentering = CENTER_BLUE;
+		    	return true;
+		    	
+		    case R.id.game_leave:
+		    	this.finish();
+		    	return true;
+
+	    	// Can find what we're looking for? Call super
+		    default:
+		        return super.onOptionsItemSelected(item);
+	    }
+	}
 	/**
 	 * Game processor. Runs every GAME_UPDATE_DELAY (ms).
 	 */
@@ -151,8 +198,8 @@ public class GameCTF extends MapActivity {
 							JSONObject jObject, jSubObj;
 							jObject = new JSONObject(data);
 							
-							// Process origin
-							processOrigin(jObject);
+							// Process centering requests
+							processCentering(jObject);
 							
 							// Process Players
 							jSubObj = (JSONObject) jObject.opt("players");
@@ -183,20 +230,53 @@ public class GameCTF extends MapActivity {
 	     * If there is a request to center around the origin, do it.
 	     * @param jObject
 	     */
-	    private void processOrigin(JSONObject jObject) {
-	    	if(!isCentered) {
-	    		JSONObject orginObj;
+	    private void processCentering(JSONObject jObject) {
+	    	
+	    	// Do we even have a request to center?
+	    	if(isCentering != CENTER_NONE) {
+	    		
+	    		Log.i(TAG, "Centering = " + isCentering);
+	    		
+	    		
+	    		int lati = 0; 
+	    		int loni = 0;
+	    		JSONObject subObject;
+	    		
 				try {
-					isCentered = true;
-					orginObj = jObject.getJSONObject("origin");
-			    	int lati = (int) (1E6 * Double.parseDouble(orginObj.getString("latitude")));
-			    	int loni = (int) (1E6 * Double.parseDouble(orginObj.getString("longitude")));
+					
+					if (isCentering == CENTER_SELF) {
+				    	lati = (int) (1E6 * CurrentUser.getLatitude());
+				    	loni = (int) (1E6 * CurrentUser.getLongitude());
+					} else {
+						
+						if(isCentering == CENTER_ORIGIN) {
+							subObject = jObject.getJSONObject("origin");
+						} else if (isCentering == CENTER_RED) {
+							subObject = jObject.getJSONObject("red_flag");
+						} else if (isCentering == CENTER_BLUE) {
+							subObject = jObject.getJSONObject("blue_flag");
+						} else {
+							// nothing to center on
+							isCentering = CENTER_NONE;
+							return;
+						}
+						
+				    	lati = (int) (1E6 * Double.parseDouble(subObject.getString("latitude")));
+				    	loni = (int) (1E6 * Double.parseDouble(subObject.getString("longitude")));
+					}
+					
+					Log.i(TAG, "Centering @ LAT " + lati + ", LONG " + loni);
 			    	GeoPoint origin = new GeoPoint(lati, loni);
 			    	mapView.getController().animateTo(origin);
+			    	
+			    	
 				} catch (JSONException e) {
-					Log.e(TAG, "Error centering on origin.", e);
+					Log.e(TAG, "Error centering on target!", e);
 				}
+				
+				isCentering = CENTER_NONE;
 	    	}
+	    	
 	    }
 	    
 	    /**
