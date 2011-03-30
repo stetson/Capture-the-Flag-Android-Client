@@ -94,6 +94,11 @@ public class StetsonCTF extends Activity {
 		newGameButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				
+				// Do nothing if we have no loction (still loading)
+				if(!CurrentUser.hasLocation()) {
+					return;
+				}
+				
 				// Get name
 				EditText et = (EditText) findViewById(R.id.name_text);
 				CurrentUser.setName(et.getText().toString());
@@ -108,6 +113,12 @@ public class StetsonCTF extends Activity {
 		final Button joinGameButton = (Button) findViewById(R.id.joingame_button);
 		joinGameButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
+				
+				// Do nothing if we have no loction (still loading)
+				if(!CurrentUser.hasLocation()) {
+					return;
+				}
+				
 				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
 				String game = "";
 
