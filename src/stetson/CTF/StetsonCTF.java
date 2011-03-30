@@ -39,7 +39,9 @@ public class StetsonCTF extends Activity {
 	public static final String SERVER_URL = "http://ctf.no.de";
 	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
 	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
-	public static final int GPS_UPDATE_FREQUENCY = 3;
+	
+	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
+	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
 	
 	private LocationManager locationManager;
 	private LocationListener locationListener;
@@ -58,9 +60,6 @@ public class StetsonCTF extends Activity {
 		// Move back to the game selection panel
 		setContentView(R.layout.intro);
 		
-		// Start up the location manager
-		userLocation();
-		//gpsLock();
 		// Connect components
 		buildListeners();
 
@@ -72,8 +71,12 @@ public class StetsonCTF extends Activity {
 	 * (After leave a game, answering a call, etc...)
 	 */
 	public void onStart() {
+		
 		super.onStart();
 		buildGamesList();
+		
+		// Whenever this activity focus, slow down gps updates
+		userLocation(GPS_UPDATE_FREQUENCY_INTRO);
 	}
 	
 	/**
@@ -195,7 +198,6 @@ public class StetsonCTF extends Activity {
 		
 	}
 
-
 	/**
 	 * Joins or creates a new game. If game is empty, then a new game will be created.
 	 * @param name
@@ -247,13 +249,15 @@ public class StetsonCTF extends Activity {
 			return false;
 		}
 		
+		// Speed up gps location polling for game player
+		userLocation(GPS_UPDATE_FREQUENCY_GAME);
+		
 		// We don't need loading stuff anymore + start the map activity
 		dialog.hide();
 	    Intent i = new Intent(this, GameCTF.class);
 	    startActivity(i);
 	    return true;
     }
-    
     
     /**
      * Sets the user's name and generates a new UID.
@@ -275,10 +279,12 @@ public class StetsonCTF extends Activity {
     /**
 	 * Periodically updates the users location.
 	 */
-	protected void userLocation() {
+	protected void userLocation(int frequency) {
 		
+		// Setup our location manager
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		
+			
+		// Setup our location listener
 		locationListener = new LocationListener() {
 				
 			public void onLocationChanged(Location location) {
@@ -293,7 +299,12 @@ public class StetsonCTF extends Activity {
 				
 		};
 		
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_UPDATE_FREQUENCY, 0, locationListener);
-	}
+		// Remove all updates for the current listener (if one exists)
+		locationManager.removeUpdates(locationListener);
 		
+		// Start requesting updates per given time
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, 0, locationListener);
+		
+	}
+	
 }

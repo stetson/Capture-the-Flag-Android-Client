@@ -13,8 +13,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.util.Log;
 
 public class CurrentUser {
@@ -111,7 +109,5 @@ public class CurrentUser {
 		
 		return hbr;
 	}
-	
 
-	
 }
