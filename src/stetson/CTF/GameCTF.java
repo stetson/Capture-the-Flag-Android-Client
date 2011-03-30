@@ -8,7 +8,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -74,9 +76,11 @@ public class GameCTF extends MapActivity {
 			return;
 		}
 		
-		
 		// Move back to the game selection panel
 		setContentView(R.layout.game);
+		
+		// Make sure gps is running at the right speed
+		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);
 		
  		// Turns on built-in zoom controls
 		mapView = (MapView) findViewById(R.id.mapView);
@@ -212,7 +216,7 @@ public class GameCTF extends MapActivity {
 							processCentering(jObject);
 							
 							// Process Players
-							jSubObj = (JSONObject) jObject.opt("players");
+							jSubObj = jObject.getJSONObject("players");
 							processPlayers(jSubObj);
 							
 							// Process Game data
@@ -299,6 +303,7 @@ public class GameCTF extends MapActivity {
 				// Loop through all players
 				JSONObject player;
 				String playerKey;
+				
 				Iterator plrIterator = jSubObj.keys();
 			    while(plrIterator.hasNext()) {
 			    	

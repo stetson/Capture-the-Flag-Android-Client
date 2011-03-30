@@ -43,13 +43,14 @@ public class StetsonCTF extends Activity {
 	public static final int GPS_UPDATE_FREQUENCY_BACKGROUND = 60000;
 	
 	// meters
-	public static final int GPS_UPDATE_DISTANCE = 0;
+	public static final int GPS_UPDATE_DISTANCE_GAME = 0;
+	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
+	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
 	
 	public static final int LOADING_PAUSE = 1000;
 	
 	private Handler gamesHandler;
-	private static LocationManager locationManager;
-	private static LocationListener locationListener;
+	private boolean isGameStarting = false;
 	
 	/**
 	 * Called when the activity is first created.
@@ -80,9 +81,10 @@ public class StetsonCTF extends Activity {
 		
 		super.onStart();
 		buildGamesList();
+		isGameStarting = false;
 		
-		// Whenever this activity focus, slow down gps updates
-		userLocation(GPS_UPDATE_FREQUENCY_INTRO);
+		// Change GPS Freq
+		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_INTRO);
 	}
 	
 	/**
@@ -91,7 +93,11 @@ public class StetsonCTF extends Activity {
 	public void onStop() {
 
 		super.onStop();
-		userLocation(GPS_UPDATE_FREQUENCY_BACKGROUND);
+		
+		// Change GPS Freq
+		if(!isGameStarting) {
+			CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_BACKGROUND);
+		}
 	}
 	
 	/**
@@ -320,10 +326,8 @@ public class StetsonCTF extends Activity {
 			return false;
 		}
 		
-		// Speed up gps location polling for game player
-		userLocation(GPS_UPDATE_FREQUENCY_GAME);
-		
 		// We don't need loading stuff anymore + start the map activity
+		isGameStarting = true;
 		dialog.hide();
 	    Intent i = new Intent(this, GameCTF.class);
 	    startActivity(i);
@@ -346,40 +350,5 @@ public class StetsonCTF extends Activity {
 		uid = uid.toUpperCase();
 		CurrentUser.setUID(uid);
     }
-    
-    /**
-	 * Periodically updates the users location.
-	 */
-	protected void userLocation(int frequency) {
-		
-		// Setup our location manager
-		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-		
-		// Remove all updates for the current listener (if one exists)
-		if(locationListener != null) {
-			locationManager.removeUpdates(locationListener);
-			locationListener = null;
-		}
-		
-		// Setup our location listener
-		locationListener = new LocationListener() {
-				
-			public void onLocationChanged(Location location) {
-				Log.i(TAG, "Update Location.");
-				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
-				CurrentUser.setAccuracy((double)location.getAccuracy());
-			}
-	
-			public void onStatusChanged(String provider, int status, Bundle extras) {}
-			public void onProviderEnabled(String provider) {}
-			public void onProviderDisabled(String provider) {}
-				
-		};
-
-		
-		// Start requesting updates per given time
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, GPS_UPDATE_DISTANCE, locationListener);
-		
-	}
-	
+    	
 }

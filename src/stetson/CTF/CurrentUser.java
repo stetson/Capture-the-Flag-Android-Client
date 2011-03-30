@@ -13,6 +13,11 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
 import android.util.Log;
 
 public class CurrentUser {
@@ -31,6 +36,10 @@ public class CurrentUser {
 	
 	// Game Info
 	private static String gameId = "";
+	
+	// Location members
+	private static LocationManager locationManager;
+	private static LocationListener locationListener;
 	
 	// Mutators
 	public static void setLocation(double lati, double longi) {
@@ -128,5 +137,54 @@ public class CurrentUser {
 		params += "&longitude=" + CurrentUser.longitude;
 		params += "&accuracy=" + CurrentUser.accuracy;	
 		return params;
+	}
+	
+    /**
+	 * Periodically updates the users location.
+	 */
+	public static void userLocation(LocationManager lm, int frequency) {
+		
+		// Setup our location manager
+		locationManager = lm;
+		
+		// Remove all updates for the current listener (if one exists)
+		if(locationListener != null) {
+			locationManager.removeUpdates(locationListener);
+			locationListener = null;
+		}
+		
+		// Setup our location listener
+		locationListener = new LocationListener() {
+				
+			public void onLocationChanged(Location location) {
+				Log.i(TAG, "Update Location.");
+				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
+				CurrentUser.setAccuracy((double)location.getAccuracy());
+			}
+	
+			public void onStatusChanged(String provider, int status, Bundle extras) {}
+			public void onProviderEnabled(String provider) {}
+			public void onProviderDisabled(String provider) {}
+				
+		};
+		
+		// Minimum distance to move a gps update
+		int distThreshold = 0;
+		switch(frequency) {
+			case StetsonCTF.GPS_UPDATE_FREQUENCY_GAME:
+				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_GAME;
+				break;
+			case StetsonCTF.GPS_UPDATE_FREQUENCY_INTRO:
+				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_INTRO;
+				break;
+			case StetsonCTF.GPS_UPDATE_FREQUENCY_BACKGROUND:
+				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_BACKGROUND;
+				break;
+		}
+		
+		Log.i(TAG, "New GPS Parsing: FREQ=" + frequency + ", DIST=" + distThreshold);
+		// Start requesting updates per given time
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, distThreshold, locationListener);
+		
 	}
 }
