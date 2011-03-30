@@ -48,7 +48,10 @@ public class GameCTF extends MapActivity {
 	GameCTFOverlays itemizedoverlay;
 	OverlayItem overlayitem;
 	List<Overlay> mapOverlays;
+	
 	boolean isRunning = false;
+	boolean isCentered = false;
+	
 	Drawable drawable;
 	Drawable drawable_red_flag;
 	Drawable drawable_blue_flag;
@@ -61,7 +64,8 @@ public class GameCTF extends MapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		
 		Log.i(TAG, "Starting map activity...");
-		 isRunning = true;
+		isRunning = true;
+		isCentered = false;
 		 
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
@@ -148,6 +152,9 @@ public class GameCTF extends MapActivity {
 							JSONObject jObject, jSubObj;
 							jObject = new JSONObject(data);
 							
+							// Process origin
+							processOrigin(jObject);
+							
 							// Process Players
 							jSubObj = (JSONObject) jObject.opt("players");
 							processPlayers(jSubObj);
@@ -157,6 +164,7 @@ public class GameCTF extends MapActivity {
 							
 						    // Add map overlays
 						    mapOverlays.add(itemizedoverlay);
+						    mapView.invalidate();
 							
 						} catch (JSONException e) {
 							// TODO Auto-generated catch block
@@ -169,8 +177,27 @@ public class GameCTF extends MapActivity {
 				});
 	    	}
 	    	
-	    	// Delay for set time and run again
 	    	gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    }
+	    
+	    /**
+	     * If there is a request to center around the origin, do it.
+	     * @param jObject
+	     */
+	    private void processOrigin(JSONObject jObject) {
+	    	if(!isCentered) {
+	    		JSONObject orginObj;
+				try {
+					isCentered = true;
+					orginObj = jObject.getJSONObject("origin");
+			    	int lati = (int) (1E6 * Double.parseDouble(orginObj.getString("latitude")));
+			    	int loni = (int) (1E6 * Double.parseDouble(orginObj.getString("longitude")));
+			    	GeoPoint origin = new GeoPoint(lati, loni);
+			    	mapView.getController().animateTo(origin);
+				} catch (JSONException e) {
+					Log.e(TAG, "Error centering on origin.", e);
+				}
+	    	}
 	    }
 	    
 	    /**
