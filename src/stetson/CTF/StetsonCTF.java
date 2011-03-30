@@ -12,6 +12,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -43,6 +45,9 @@ public class StetsonCTF extends Activity {
 	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
 	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
 	
+	public static final int LOADING_PAUSE = 1000;
+	
+	private Handler gamesHandler;
 	private LocationManager locationManager;
 	private LocationListener locationListener;
 	
@@ -62,6 +67,7 @@ public class StetsonCTF extends Activity {
 		
 		// Connect components
 		buildListeners();
+		gamesHandler = new Handler();
 
 		Log.i(TAG, "Activity ready!");
 	}
@@ -140,15 +146,105 @@ public class StetsonCTF extends Activity {
 		
 		Log.i(TAG, "Build games list. (Loading...)");
 		
+		// Start the handle (so we don't weigh down the thread)
+		gamesHandler.post(new Runnable() {
+			public void run() {
+				
+				// Clear all games and messages
+				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+				gamesGroup.removeAllViews();
+				
+				TextView loadText;
+				
+				// Acquiring location
+				if(!CurrentUser.hasLocation()) {
+					
+					// Post a message
+					loadText = new TextView(gamesGroup.getContext());
+					loadText.setText(R.string.loading_location);
+					gamesGroup.addView(loadText);
+					
+					// Check again in a little bit
+					gamesHandler.postDelayed(this, LOADING_PAUSE);
+					
+				// Acquiring games
+				} else {
+					
+					// Post a message
+					loadText = new TextView(gamesGroup.getContext());
+					loadText.setText(R.string.loading_games);
+					gamesGroup.addView(loadText);
+					
+					// Build an send a request for game data
+					HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
+					Connections.sendRequest(req, new ResponseListener() {
+
+						public void onResponseReceived(HttpResponse response) {
+							
+							RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+							gamesGroup.removeAllViews();
+							
+							// Pull response message
+							String data = Connections.responseToString(response);
+							Log.i(TAG, "Response: " + data);
+							
+							// Sloppy server-side code requires use to check if the text is an object or array
+							try {
+
+								// JSON Array
+								if(data.charAt(0) == '[') {
+									
+									JSONArray gameArray = new JSONArray(data);
+									
+									// Add games to list
+									RadioButton rb;
+									int index = 0;
+									while(!gameArray.optString(index).equals("")) {
+										
+										Log.i(TAG, "Adding game to view (" + gameArray.optString(index) + ")");
+										
+										rb = new RadioButton(gamesGroup.getContext());
+										rb.setText(gameArray.optString(index));
+										gamesGroup.addView(rb);
+										index ++;
+									}
+
+								// JSON Object
+								} else {
+									
+									JSONObject jObject = new JSONObject(data);
+									
+									// This should never happen, but if it does handle it
+									if(jObject.has("error")) {
+										// STUB
+										Log.e(TAG, "Server Error: " + jObject.getString("error"));
+									} else {
+										// STUB
+										Log.e(TAG, "Unexpected Server Response: " + data);
+									}
+								}
+							} catch (JSONException e) {
+								Log.e(TAG, "Error parsing JSON.", e);
+							}
+							
+						}
+						
+					});
+
+				}
+				
+
+			}
+		});
+		
 		// let the user know we aren't being lazy, clear list and show them a load message
-		RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-		gamesGroup.removeAllViews();
+		/*
+
 		
 		TextView loadText = new TextView(gamesGroup.getContext());
 		loadText.setText(R.string.loading_games);
 		gamesGroup.addView(loadText);
 
-		
 		// Build an send a request for game data
 		HttpGet req = new HttpGet(SERVER_URL + "/game/");
 		Connections.sendRequest(req, new ResponseListener() {
@@ -164,6 +260,18 @@ public class StetsonCTF extends Activity {
 				// Remove the loading message
 				gamesGroup.removeAllViews();
 				
+				// JSON Handling
+				JSONObject jObject;
+				jObject = new JSONObject(data);
+				
+				// If there are no errors, we have a list of games
+				if(jObject.getString("error").equals("")) {
+				
+				// 
+				} else {
+					
+				}
+				
 				// Oh no, there are no games!
 				if (data.equals("") || data.equals(NO_GAMES_RESPONSE)) {
 					TextView loadText = new TextView(gamesGroup.getContext());
@@ -172,19 +280,10 @@ public class StetsonCTF extends Activity {
 
 				// Parse the new data and add games to the list =D
 				} else {
-					JSONArray jObject;
+										
 					try {
-						jObject = new JSONArray(data);
-						RadioButton rb;
-						int index = 0;
-						while(!jObject.optString(index).equals("")) {
-							Log.i(TAG, "Adding game to view (" + jObject.optString(index) + ")");
-							rb = new RadioButton(gamesGroup.getContext());
-							rb.setText(jObject.optString(index));
-							gamesGroup.addView(rb);
-							index ++;
+						
 	
-						}
 					} catch (JSONException e) {
 						Log.e(TAG, "There was an error parsing game data!", e);
 					}
@@ -194,7 +293,7 @@ public class StetsonCTF extends Activity {
 			}
 			
 		});
-
+	*/
 		
 	}
 

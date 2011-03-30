@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -70,6 +71,13 @@ public class CurrentUser {
 		return CurrentUser.latitude;
 	}
 	
+	public static boolean hasLocation() {
+		if(CurrentUser.accuracy == -1 || CurrentUser.latitude == -1 || CurrentUser.longitude == -1) {
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Generates HttpParams automatically for the current user.
 	 * Type:	CREATE_PARAMS 	= lat, long, name, gameId
@@ -110,4 +118,16 @@ public class CurrentUser {
 		return hbr;
 	}
 
+	/**
+	 * Generates HttpParams automatically for quering the server for a list of games.
+	 * @param hbr
+	 * @return
+	 */
+	public static String buildQueryParams() {
+		String params = "";
+		params += "latitude=" + CurrentUser.latitude;
+		params += "&longitude=" + CurrentUser.longitude;
+		params += "&accuracy=" + CurrentUser.accuracy;	
+		return params;
+	}
 }
