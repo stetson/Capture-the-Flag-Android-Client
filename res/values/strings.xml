@@ -21,5 +21,9 @@
     <string name="game_center_red">Red Flag</string>
     <string name="game_center_blue">Blue Flag</string>
     <string name="game_leave">Leave Game</string>
-
+    <string name="game_info_red">Red: </string>
+    <string name="game_info_blue">Blue: </string>
+    <string name="game_info_accuracy">Accuracy: </string>
+	<string name="game_info_loading">Loading...</string>
+	
 </resources>

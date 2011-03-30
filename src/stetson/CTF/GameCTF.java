@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -63,7 +65,7 @@ public class GameCTF extends MapActivity {
 		Log.i(TAG, "Starting map activity...");
 		isRunning = true;
 		isCentering = CENTER_ORIGIN;
-		 
+		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
 		
@@ -72,6 +74,7 @@ public class GameCTF extends MapActivity {
 			this.finish();
 			return;
 		}
+		
 		
 		// Move back to the game selection panel
 		setContentView(R.layout.game);
@@ -102,7 +105,15 @@ public class GameCTF extends MapActivity {
 		
 		// Start game processor
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
-
+		
+		// Clear game info
+		TextView text;
+		text = (TextView) findViewById(R.id.gameInfo_red);
+		text.setText(getString(R.string.game_info_loading));
+		text = (TextView) findViewById(R.id.gameInfo_blue);
+		text.setText("");
+		text = (TextView) findViewById(R.id.gameInfo_connection);
+		text.setText("");
 	}
 	
 	/**
@@ -336,6 +347,14 @@ public class GameCTF extends MapActivity {
 				
 				JSONObject game = jSubObj;
 				
+				// Display game info bar details
+				TextView text;
+				text = (TextView) findViewById(R.id.gameInfo_red);
+				text.setText(getString(R.string.game_info_red) + game.getString("red_score"));
+				text = (TextView) findViewById(R.id.gameInfo_blue);
+				text.setText(getString(R.string.game_info_blue) + game.getString("blue_score"));
+				text = (TextView) findViewById(R.id.gameInfo_connection);
+				text.setText(getString(R.string.game_info_accuracy) + CurrentUser.getAccuracy());
 				// Adding red flag
 				JSONObject red_flag = game.getJSONObject("red_flag");
 				int lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
@@ -365,7 +384,6 @@ public class GameCTF extends MapActivity {
 			}
 	    }
 
-	
 	};
 
 

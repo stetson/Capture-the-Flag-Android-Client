@@ -3,14 +3,45 @@
     android:layout_width="fill_parent" 
     android:layout_height="fill_parent">
  
+ 	<LinearLayout
+		android:id="@+id/gameInfo"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_alignParentTop="true"
+		android:orientation="horizontal"
+		android:weightSum="1.0"
+		android:padding="3px"
+ 		>
+ 		<TextView
+			android:id="@+id/gameInfo_red"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight=".25"
+ 		/>
+ 		<TextView
+			android:id="@+id/gameInfo_blue"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight=".25"
+ 		/>
+ 		<TextView
+			android:id="@+id/gameInfo_connection"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight=".50"
+ 		/>
+ 	</LinearLayout>
+ 	
     <com.google.android.maps.MapView 
-        android:id="@+id/mapView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:enabled="true"
-        android:clickable="true"
-        android:apiKey="0_55jNcDoyLz4SV0wenbdDiE5Hj-XGGFIaVsSLw"
+		android:id="@+id/mapView"
+		android:layout_width="wrap_content"
+		android:layout_height="fill_parent"
+		android:layout_gravity="bottom"
+		android:layout_below="@+id/gameInfo"
+		android:enabled="true"
+		android:clickable="true"
+		android:layout_weight="1"
+		android:apiKey="0_55jNcDoyLz4SV0wenbdDiE5Hj-XGGFIaVsSLw"
         />
        
- 
 </RelativeLayout>
