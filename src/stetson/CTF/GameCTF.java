@@ -55,6 +55,7 @@ public class GameCTF extends MapActivity {
 	private Drawable drawable_blue_flag;
 	private Drawable drawable_red_player;
 	private Drawable drawable_blue_player;
+	Boundaries bounds;
 	
 	/**
 	 * Called when the activity is first created.
@@ -117,6 +118,7 @@ public class GameCTF extends MapActivity {
 		text.setText("");
 		text = (TextView) findViewById(R.id.gameInfo_connection);
 		text.setText("");
+		bounds = new Boundaries();
 	}
 	
 	/**
@@ -223,6 +225,7 @@ public class GameCTF extends MapActivity {
 							processGame(jObject);
 							
 						    // Add map overlays
+							mapOverlays.add(bounds);
 						    mapOverlays.add(itemizedoverlay);
 						    mapView.invalidate();
 							
@@ -382,6 +385,35 @@ public class GameCTF extends MapActivity {
 				itemizedoverlay.addOverlay(blue_overlayitem);
 				
 				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				
+				
+				// Adding boundaries
+				
+				// Get Red boundaries
+				JSONObject redBounds = game.getJSONObject("red_bounds");
+				JSONObject redTopLeft = redBounds.getJSONObject("top_left");
+				lat = (int) (1E6 * Double.parseDouble(redTopLeft.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(redTopLeft.getString("longitude")));
+		    	GeoPoint redTopLeftBoundary = new GeoPoint(lat, lon);
+		    	JSONObject redBottomRight = redBounds.getJSONObject("bottom_right");
+				lat = (int) (1E6 * Double.parseDouble(redBottomRight.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(redBottomRight.getString("longitude")));
+		    	GeoPoint redBottomRightBoundary = new GeoPoint(lat, lon);
+		    	bounds.setRedBounds(redTopLeftBoundary, redBottomRightBoundary);
+		    	
+		    	// Get blue  boundaries
+		    	JSONObject blueBounds = game.getJSONObject("blue_bounds");
+				JSONObject blueTopLeft = blueBounds.getJSONObject("top_left");
+				lat = (int) (1E6 * Double.parseDouble(blueTopLeft.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(blueTopLeft.getString("longitude")));
+		    	GeoPoint blueTopLeftBoundary = new GeoPoint(lat, lon);
+		    	JSONObject blueBottomRight = blueBounds.getJSONObject("bottom_right");
+				lat = (int) (1E6 * Double.parseDouble(blueBottomRight.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(blueBottomRight.getString("longitude")));
+		    	GeoPoint blueBottomRightBoundary = new GeoPoint(lat, lon);
+		    	bounds.setBlueBounds(blueTopLeftBoundary, blueBottomRightBoundary);
+		    	
+				
 			    
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processGame()", e);
