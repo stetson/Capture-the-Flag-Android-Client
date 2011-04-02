@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -330,18 +331,62 @@ public class GameCTF extends MapActivity {
 						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
 						
 						
+						
+						boolean hasFlag = player.getBoolean("has_flag");
+						boolean isObserverMode = player.getBoolean("observer_mode");
+						
+						// may be used later
+						
+//						boolean redFlagCaptured = jSubObj.getBoolean("red_flag_captured");
+//						boolean blueFlagCaptured = jSubObj.getBoolean("blue_flag_captured");
+						
+						
 						String team = player.getString("team");
 						if(playerKey.equals(CurrentUser.getUID())) {
-							overlayitem.setMarker(drawable_self);
+							
+							if(team.equals("red"))
+							{
+								overlayitem.setMarker(drawable_red_player);
+								Log.i(TAG,"Current User is on Red team");
+							}
+							if(team.equals("blue"))
+							{
+								overlayitem.setMarker(drawable_blue_player);
+								Log.i(TAG,"Current User is on Blue team");
+							}
+							
+							// if Current User is on red team and has the blue flag, change their marker.
+							if(team.equals("red") && hasFlag)
+							{	
+								overlayitem.setMarker(drawable_blue_flag);								
+							}
+							// if Current User is on blue team and has the red flag, change their marker.
+							if(team.equals("blue") && hasFlag)
+							{
+								overlayitem.setMarker(drawable_red_flag);
+							}
+							if(isObserverMode)
+							{
+								Toast.makeText(getBaseContext(), "Observer Mode", 5).show();
+								Log.i(TAG,"Current User is in observer mode");
+							}
+							if(!isObserverMode)
+							{
+								Toast.makeText(getBaseContext(), "Observer Mode = false", 5).show();
+
+							}
+							
 						} else if(team.equals("red")) {
 							overlayitem.setMarker(drawable_red_player);
 						} else if(team.equals("blue")) {
 							overlayitem.setMarker(drawable_blue_player);
 						}
+						
+						
+						
 	
 						itemizedoverlay.addOverlay(overlayitem);
-						
-			    	}
+						}
 
 			    }
 

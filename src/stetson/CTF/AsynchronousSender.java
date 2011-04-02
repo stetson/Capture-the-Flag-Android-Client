@@ -19,7 +19,7 @@ import android.os.Handler;
  
 public class AsynchronousSender extends Thread {
  
-	private static  DefaultHttpClient httpClient;
+	private static  DefaultHttpClient httpClient = new DefaultHttpClient();;
  
 	private HttpRequest request;
 	private Handler handler;
@@ -34,8 +34,7 @@ public class AsynchronousSender extends Thread {
  
 	public void run() {
 		try {
-			final HttpResponse response;
-			httpClient = new DefaultHttpClient();
+			final HttpResponse response; 
 			synchronized (httpClient) {
 				response = getClient().execute((HttpRequestBase) request);
 			}
