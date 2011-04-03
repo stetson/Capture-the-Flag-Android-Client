@@ -92,7 +92,7 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlay marker images
-		drawable_self = this.getResources().getDrawable(R.drawable.star);
+		drawable_self = this.getResources().getDrawable(R.drawable.person_red_owner);
 		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
 		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
