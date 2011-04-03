@@ -331,8 +331,18 @@ public class GameCTF extends MapActivity {
 			    	playerKey = (String) plrIterator .next();
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
-			    	// If a player isn't on a team or is in observer mode, ignore them
-			    	if(player.has("team") && !player.has("observer_mode")) {
+			    	/*
+			    	 * We should be using the following line below:
+			    	 * if(player.has("team") && !player.has("observer_mode")) {
+			    	 * 
+			    	 * But due to unhandled logic on the server, observer_mode should be
+			    	 * ignored for the time being. I've made a request for the server
+			    	 * to send a boolean to let us know that the game is active or in progress.
+			    	 * Currently, the server is attempt to rapidly assign teams and its causing
+			    	 * a bunch of problems with observer mode and teams.
+			    	 * 
+			    	 */
+			    	if(player.has("team")) {
 
 				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
 				    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
