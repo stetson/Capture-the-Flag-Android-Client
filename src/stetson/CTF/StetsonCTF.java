@@ -217,10 +217,11 @@ public class StetsonCTF extends Activity {
 							// Sloppy server-side code requires use to check if the text is an object or array
 							try {
 
-								// JSON Array
-								if(data.charAt(0) == '[') {
+								if(data.charAt(0) == '{'){
+								    JSONObject games = new JSONObject(data);
+								    
 									
-									JSONArray gameArray = new JSONArray(data);
+									JSONArray gameArray = games.getJSONArray("games");
 									
 									// Add games to list
 									RadioButton rb;

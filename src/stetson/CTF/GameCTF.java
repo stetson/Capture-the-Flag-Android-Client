@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -36,6 +37,8 @@ public class GameCTF extends MapActivity {
 	public static final int CENTER_SELF = 1;
 	public static final int CENTER_RED = 2;
 	public static final int CENTER_BLUE = -3;
+	// accuracy in meters
+	public static final int MIN_ACCURACY = 40;
 	
 	// Data members
 	private MapView mapView;
@@ -55,6 +58,7 @@ public class GameCTF extends MapActivity {
 	private Drawable drawable_blue_flag;
 	private Drawable drawable_red_player;
 	private Drawable drawable_blue_player;
+	Boundaries bounds;
 	
 	/**
 	 * Called when the activity is first created.
@@ -92,10 +96,14 @@ public class GameCTF extends MapActivity {
 		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
 		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
-		drawable_red_flag.setBounds(0, 0, drawable_red_flag.getIntrinsicWidth(), drawable_red_flag.getIntrinsicHeight());
+		int redW = drawable_red_flag.getIntrinsicWidth();
+		int redH = drawable_red_flag.getIntrinsicHeight();
+		drawable_red_flag.setBounds(-redW / 2, -redH, redH / 2, 0);
 		
 		drawable_blue_flag = this.getResources().getDrawable(R.drawable.blue_flag);
-		drawable_blue_flag.setBounds(0, 0, drawable_blue_flag.getIntrinsicWidth(), drawable_blue_flag.getIntrinsicHeight());
+		int blueW = drawable_blue_flag.getIntrinsicWidth();
+		int blueH = drawable_blue_flag.getIntrinsicHeight();
+		drawable_blue_flag.setBounds(-blueW / 2, -blueH, blueH / 2, 0);
 		
 		drawable_red_player = this.getResources().getDrawable(R.drawable.person_red);
 		drawable_red_player .setBounds(0, 0, drawable_red_player.getIntrinsicWidth(), drawable_red_player.getIntrinsicHeight());
@@ -117,6 +125,7 @@ public class GameCTF extends MapActivity {
 		text.setText("");
 		text = (TextView) findViewById(R.id.gameInfo_connection);
 		text.setText("");
+		bounds = new Boundaries();
 	}
 	
 	/**
@@ -193,7 +202,7 @@ public class GameCTF extends MapActivity {
 	    	
 	    	
 	    	// If our accuracy doesn't suck, update
-	    	if(true) {
+	    	if(CurrentUser.getAccuracy() < MIN_ACCURACY) {
 	    		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
@@ -223,6 +232,7 @@ public class GameCTF extends MapActivity {
 							processGame(jObject);
 							
 						    // Add map overlays
+							mapOverlays.add(bounds);
 						    mapOverlays.add(itemizedoverlay);
 						    mapView.invalidate();
 							
@@ -321,18 +331,62 @@ public class GameCTF extends MapActivity {
 						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
 						
 						
+						
+						boolean hasFlag = player.getBoolean("has_flag");
+						boolean isObserverMode = player.getBoolean("observer_mode");
+						
+						// may be used later
+						
+//						boolean redFlagCaptured = jSubObj.getBoolean("red_flag_captured");
+//						boolean blueFlagCaptured = jSubObj.getBoolean("blue_flag_captured");
+						
+						
 						String team = player.getString("team");
 						if(playerKey.equals(CurrentUser.getUID())) {
-							overlayitem.setMarker(drawable_self);
+							
+							if(team.equals("red"))
+							{
+								overlayitem.setMarker(drawable_red_player);
+								Log.i(TAG,"Current User is on Red team");
+							}
+							if(team.equals("blue"))
+							{
+								overlayitem.setMarker(drawable_blue_player);
+								Log.i(TAG,"Current User is on Blue team");
+							}
+							
+							// if Current User is on red team and has the blue flag, change their marker.
+							if(team.equals("red") && hasFlag)
+							{	
+								overlayitem.setMarker(drawable_blue_flag);								
+							}
+							// if Current User is on blue team and has the red flag, change their marker.
+							if(team.equals("blue") && hasFlag)
+							{
+								overlayitem.setMarker(drawable_red_flag);
+							}
+							if(isObserverMode)
+							{
+								Toast.makeText(getBaseContext(), "Observer Mode", 5).show();
+								Log.i(TAG,"Current User is in observer mode");
+							}
+							if(!isObserverMode)
+							{
+								Toast.makeText(getBaseContext(), "Observer Mode = false", 5).show();
+
+							}
+							
 						} else if(team.equals("red")) {
 							overlayitem.setMarker(drawable_red_player);
 						} else if(team.equals("blue")) {
 							overlayitem.setMarker(drawable_blue_player);
 						}
+						
+						
+						
 	
 						itemizedoverlay.addOverlay(overlayitem);
-						
-			    	}
+						}
 
 			    }
 
@@ -359,6 +413,7 @@ public class GameCTF extends MapActivity {
 				text.setText(getString(R.string.game_info_blue) + game.getString("blue_score"));
 				text = (TextView) findViewById(R.id.gameInfo_connection);
 				text.setText(getString(R.string.game_info_accuracy) + CurrentUser.getAccuracy());
+				
 				// Adding red flag
 				JSONObject red_flag = game.getJSONObject("red_flag");
 				int lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
@@ -382,6 +437,35 @@ public class GameCTF extends MapActivity {
 				itemizedoverlay.addOverlay(blue_overlayitem);
 				
 				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				
+				
+				// Adding boundaries
+				
+				// Get Red boundaries
+				JSONObject redBounds = game.getJSONObject("red_bounds");
+				JSONObject redTopLeft = redBounds.getJSONObject("top_left");
+				lat = (int) (1E6 * Double.parseDouble(redTopLeft.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(redTopLeft.getString("longitude")));
+		    	GeoPoint redTopLeftBoundary = new GeoPoint(lat, lon);
+		    	JSONObject redBottomRight = redBounds.getJSONObject("bottom_right");
+				lat = (int) (1E6 * Double.parseDouble(redBottomRight.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(redBottomRight.getString("longitude")));
+		    	GeoPoint redBottomRightBoundary = new GeoPoint(lat, lon);
+		    	bounds.setRedBounds(redTopLeftBoundary, redBottomRightBoundary);
+		    	
+		    	// Get blue  boundaries
+		    	JSONObject blueBounds = game.getJSONObject("blue_bounds");
+				JSONObject blueTopLeft = blueBounds.getJSONObject("top_left");
+				lat = (int) (1E6 * Double.parseDouble(blueTopLeft.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(blueTopLeft.getString("longitude")));
+		    	GeoPoint blueTopLeftBoundary = new GeoPoint(lat, lon);
+		    	JSONObject blueBottomRight = blueBounds.getJSONObject("bottom_right");
+				lat = (int) (1E6 * Double.parseDouble(blueBottomRight.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(blueBottomRight.getString("longitude")));
+		    	GeoPoint blueBottomRightBoundary = new GeoPoint(lat, lon);
+		    	bounds.setBlueBounds(blueTopLeftBoundary, blueBottomRightBoundary);
+		    	
+				
 			    
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processGame()", e);
