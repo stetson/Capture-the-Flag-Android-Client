@@ -45,6 +45,9 @@ public class GameCTF extends MapActivity {
 	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
 	
+	//Screen Dim Wake lock
+	//public static final int SCREEN_DIM_WAKE_LOCK = 6;
+	
 	MapController mapController;
 	GameCTFOverlays itemizedoverlay;
 	OverlayItem overlayitem;
