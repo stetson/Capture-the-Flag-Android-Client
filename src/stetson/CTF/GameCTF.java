@@ -92,7 +92,7 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlay marker images
-		drawable_self = this.getResources().getDrawable(R.drawable.person_red_owner);
+		drawable_self = this.getResources().getDrawable(R.drawable.star);
 		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
 		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
@@ -320,8 +320,8 @@ public class GameCTF extends MapActivity {
 			    	playerKey = (String) plrIterator .next();
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
-			    	// If a player isn't on a team, we don't care about it at all
-			    	if(player.has("team")) {
+			    	// If a player isn't on a team or is in observer mode, ignore them
+			    	if(player.has("team") || (player.has("observer_mode") && player.getBoolean("observer_mode"))) {
 
 				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
 				    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
@@ -330,63 +330,29 @@ public class GameCTF extends MapActivity {
 						GeoPoint marker = new GeoPoint(lati, loni);
 						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
 						
-						
-						
 						boolean hasFlag = player.getBoolean("has_flag");
-						boolean isObserverMode = player.getBoolean("observer_mode");
-						
-						// may be used later
-						
-//						boolean redFlagCaptured = jSubObj.getBoolean("red_flag_captured");
-//						boolean blueFlagCaptured = jSubObj.getBoolean("blue_flag_captured");
-						
-						
+						boolean isCurrentPlayer = playerKey.equals(CurrentUser.getUID());
 						String team = player.getString("team");
-						if(playerKey.equals(CurrentUser.getUID())) {
+						
+						// Red team member has blue flag
+						if(team.equals("red") && hasFlag) {
+							overlayitem.setMarker(drawable_blue_flag);	
 							
-							if(team.equals("red"))
-							{
-								overlayitem.setMarker(drawable_red_player);
-								Log.i(TAG,"Current User is on Red team");
-							}
-							if(team.equals("blue"))
-							{
-								overlayitem.setMarker(drawable_blue_player);
-								Log.i(TAG,"Current User is on Blue team");
-							}
+						// Blue team member has red flag
+						} else if(team.equals("blue") && hasFlag) {
+							overlayitem.setMarker(drawable_red_flag);	
 							
-							// if Current User is on red team and has the blue flag, change their marker.
-							if(team.equals("red") && hasFlag)
-							{	
-								overlayitem.setMarker(drawable_blue_flag);								
-							}
-							// if Current User is on blue team and has the red flag, change their marker.
-							if(team.equals("blue") && hasFlag)
-							{
-								overlayitem.setMarker(drawable_red_flag);
-							}
-							if(isObserverMode)
-							{
-								Toast.makeText(getBaseContext(), "Observer Mode", 5).show();
-								Log.i(TAG,"Current User is in observer mode");
-							}
-							if(!isObserverMode)
-							{
-								Toast.makeText(getBaseContext(), "Observer Mode = false", 5).show();
-
-							}
-							
+						// Just a red player
 						} else if(team.equals("red")) {
 							overlayitem.setMarker(drawable_red_player);
+							
+						// Just a blue player
 						} else if(team.equals("blue")) {
 							overlayitem.setMarker(drawable_blue_player);
 						}
 						
-						
-						
-	
 						itemizedoverlay.addOverlay(overlayitem);
-						}
+					}
 
 			    }
 

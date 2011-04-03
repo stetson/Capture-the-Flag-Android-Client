@@ -216,9 +216,44 @@ public class StetsonCTF extends Activity {
 							
 							// Sloppy server-side code requires use to check if the text is an object or array
 							try {
+								
+								JSONObject games = new JSONObject(data);
+								// Post a message
+								TextView textResponse = new TextView(gamesGroup.getContext());
 
+								// There was a server response with an error message
+								if(games.has("error")) {
+									textResponse.setText("Error: " + games.getString("error"));
+									
+								// A list of games was returned
+								} else if (games.has("games")) {
+									
+									RadioButton rb;
+									JSONArray list = games.getJSONArray("games");
+									for(int n = 0; n < list.length(); n++) {
+										Log.i(TAG, "Adding game to view (" + list.optString(n) + ")");
+										rb = new RadioButton(gamesGroup.getContext());
+										rb.setText(list.optString(n));
+										gamesGroup.addView(rb);
+									}
+									
+									if(list.length() == 0) {
+										textResponse.setText(R.string.no_games);
+									}
+									
+								
+								// An unexpected response from the server (probably blank)
+								} else {
+									Log.e(TAG, "Unexpected server response: " + data);
+								}
+								
+								if(!textResponse.getText().equals("")) {
+									gamesGroup.addView(textResponse);
+								}
+								
+								/*
 								if(data.charAt(0) == '{'){
-								    JSONObject games = new JSONObject(data);
+								    
 								    
 									
 									JSONArray gameArray = games.getJSONArray("games");
@@ -238,10 +273,7 @@ public class StetsonCTF extends Activity {
 									
 									// No games!
 									if(index == 0) {
-										// Post a message
-										TextView noGamesText = new TextView(gamesGroup.getContext());
-										noGamesText.setText(R.string.no_games);
-										gamesGroup.addView(noGamesText);
+
 									}
 
 								// JSON Object
@@ -252,12 +284,13 @@ public class StetsonCTF extends Activity {
 									// This should never happen, but if it does handle it
 									if(jObject.has("error")) {
 										// STUB
-										Log.e(TAG, "Server Error: " + jObject.getString("error"));
+										
 									} else {
 										// STUB
 										Log.e(TAG, "Unexpected Server Response: " + data);
 									}
 								}
+								*/
 							} catch (JSONException e) {
 								Log.e(TAG, "Error parsing JSON.", e);
 							}
