@@ -53,7 +53,9 @@ public class GameCTF extends MapActivity {
 	boolean isRunning = false;
 	int isCentering = CENTER_NONE;
 	
-	private Drawable drawable_self;
+	private Drawable drawable_unknown;
+	private Drawable drawable_red_owner;
+	private Drawable drawable_blue_owner;
 	private Drawable drawable_red_flag;
 	private Drawable drawable_blue_flag;
 	private Drawable drawable_red_player;
@@ -92,8 +94,14 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlay marker images
-		drawable_self = this.getResources().getDrawable(R.drawable.star);
-		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
+		drawable_unknown = this.getResources().getDrawable(R.drawable.star);
+		drawable_unknown.setBounds(0, 0, drawable_unknown.getIntrinsicWidth(), drawable_unknown.getIntrinsicHeight());
+		
+		drawable_red_owner = this.getResources().getDrawable(R.drawable.person_red_owner);
+		drawable_red_owner.setBounds(0, 0, drawable_red_owner.getIntrinsicWidth(), drawable_red_owner.getIntrinsicHeight());
+		
+		drawable_blue_owner = this.getResources().getDrawable(R.drawable.person_blue_owner);
+		drawable_blue_owner.setBounds(0, 0, drawable_blue_owner.getIntrinsicWidth(), drawable_blue_owner.getIntrinsicHeight());
 		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
 		int redW = drawable_red_flag.getIntrinsicWidth();
@@ -112,7 +120,7 @@ public class GameCTF extends MapActivity {
 		drawable_blue_player.setBounds(0, 0, drawable_blue_player.getIntrinsicWidth(), drawable_blue_player.getIntrinsicHeight());
 		
 		mapOverlays = mapView.getOverlays();
-        itemizedoverlay = new GameCTFOverlays(drawable_self);
+        itemizedoverlay = new GameCTFOverlays(drawable_unknown);
 		
 		// Start game processor
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
@@ -321,7 +329,7 @@ public class GameCTF extends MapActivity {
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
 			    	// If a player isn't on a team or is in observer mode, ignore them
-			    	if(player.has("team") || (player.has("observer_mode") && player.getBoolean("observer_mode"))) {
+			    	if(player.has("team") && !player.has("observer_mode")) {
 
 				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
 				    	int loni = (int) (1E6 * Double.parseDouble(player.getString("longitude")));
@@ -344,11 +352,22 @@ public class GameCTF extends MapActivity {
 							
 						// Just a red player
 						} else if(team.equals("red")) {
-							overlayitem.setMarker(drawable_red_player);
+							
+							if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable_red_owner);
+							} else {
+								overlayitem.setMarker(drawable_red_player);
+							}
 							
 						// Just a blue player
 						} else if(team.equals("blue")) {
-							overlayitem.setMarker(drawable_blue_player);
+							
+							if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable_blue_owner);
+							} else {
+								overlayitem.setMarker(drawable_blue_player);
+							}
+							
 						}
 						
 						itemizedoverlay.addOverlay(overlayitem);
