@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,7 +65,8 @@ public class GameCTF extends MapActivity {
 	Boundaries bounds;
 	
 	//Dim Wake Lock
-//	private PowerManager ctfWakeLock = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+	private static PowerManager ctfWakeLock;
+	private WakeLock wakeLock;
 	
 	
 	/**
@@ -141,8 +143,9 @@ public class GameCTF extends MapActivity {
 		bounds = new Boundaries();
 		
 		//Dim Wake Lock
-//		ctfWakeLock.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
-//	            | PowerManager.ON_AFTER_RELEASE, TAG);
+		ctfWakeLock = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wakeLock = ctfWakeLock.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+	            | PowerManager.ON_AFTER_RELEASE, TAG);
 	}
 	
 	/**
@@ -163,14 +166,14 @@ public class GameCTF extends MapActivity {
 	
 	public void onResume() {
 	    super.onResume();
-	// aquire wake lock
-//	    ctfWakeLock.aquire();
+	// acquire wake lock
+	    wakeLock.acquire();
 	}
 
 	public void onPause(){
 	   super.onPause();
-	// destory wake lock
-//	   ctfWakeLock.release();
+	// destroy wake lock
+	   wakeLock.release();
 	}
 	
 	/**
