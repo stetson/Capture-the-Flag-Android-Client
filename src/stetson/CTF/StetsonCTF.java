@@ -11,14 +11,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -32,10 +28,8 @@ public class StetsonCTF extends Activity {
 	
 	// All constants for Application
 	public static final String TAG = "StetsonCTF";
-	public static final String NO_GAMES_RESPONSE = "[]";
 	public static final String SERVER_URL = "http://ctf.no.de";
 	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
-	public static final String JOIN_FAILED = "{\"error\":\"Could not join game\"}";
 	
 	// 3 seconds, 10 seconds, 1 minute
 	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
@@ -214,50 +208,44 @@ public class StetsonCTF extends Activity {
 							String data = Connections.responseToString(response);
 							Log.i(TAG, "Response: " + data);
 							
-							// Sloppy server-side code requires use to check if the text is an object or array
 							try {
+								
+								JSONObject games = new JSONObject(data);
+								// Post a message
+								TextView textResponse = new TextView(gamesGroup.getContext());
 
-								if(data.charAt(0) == '{'){
-								    JSONObject games = new JSONObject(data);
-								    
+								// There was a server response with an error message
+								if(games.has("error")) {
 									
-									JSONArray gameArray = games.getJSONArray("games");
+									textResponse.setText("Error: " + games.getString("error"));
 									
-									// Add games to list
+								// A list of games was returned
+								} else if (games.has("games")) {
+									
 									RadioButton rb;
-									int index = 0;
-									while(!gameArray.optString(index).equals("")) {
-										
-										Log.i(TAG, "Adding game to view (" + gameArray.optString(index) + ")");
-										
+									JSONArray list = games.getJSONArray("games");
+									for(int n = 0; n < list.length(); n++) {
+										Log.i(TAG, "Adding game to view (" + list.optString(n) + ")");
 										rb = new RadioButton(gamesGroup.getContext());
-										rb.setText(gameArray.optString(index));
+										rb.setText(list.optString(n));
 										gamesGroup.addView(rb);
-										index ++;
 									}
 									
-									// No games!
-									if(index == 0) {
-										// Post a message
-										TextView noGamesText = new TextView(gamesGroup.getContext());
-										noGamesText.setText(R.string.no_games);
-										gamesGroup.addView(noGamesText);
+									if(list.length() == 0) {
+										textResponse.setText(R.string.no_games);
 									}
-
-								// JSON Object
+									
+								
+								// An unexpected response from the server (probably blank)
 								} else {
-									
-									JSONObject jObject = new JSONObject(data);
-									
-									// This should never happen, but if it does handle it
-									if(jObject.has("error")) {
-										// STUB
-										Log.e(TAG, "Server Error: " + jObject.getString("error"));
-									} else {
-										// STUB
-										Log.e(TAG, "Unexpected Server Response: " + data);
-									}
+									Log.e(TAG, "Unexpected server response: " + data);
 								}
+								
+								// If we have a text response, diplay it 
+								if(!textResponse.getText().equals("")) {
+									gamesGroup.addView(textResponse);
+								}
+
 							} catch (JSONException e) {
 								Log.e(TAG, "Error parsing JSON.", e);
 							}
@@ -314,20 +302,24 @@ public class StetsonCTF extends Activity {
 		}
 		
 		// Join the game!
-		
 		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
 		CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
 		String data = Connections.sendFlatRequest(hp);
 		
-		// This needs to be improved at some point for better error checking
-		if(data.equals(JOIN_FAILED)) {
-			dialog.hide();
-			Toast.makeText(this, R.string.failed_to_join, Toast.LENGTH_SHORT).show();
+		try {
+			JSONObject jsonGame = new JSONObject(data);
+			if(jsonGame.has("error")) {
+				dialog.hide();
+				Toast.makeText(this, "Error: " + jsonGame.getString("error"), Toast.LENGTH_SHORT).show();
+				return false;
+			}
+		} catch (JSONException e) {
+			Log.e(TAG, "JSON Parsing Error.", e);
 			return false;
 		}
-		
-		// We don't need loading stuff anymore + start the map activity
+
+		// Nothing else to load, start the game :)
 		isGameStarting = true;
 		dialog.hide();
 	    Intent i = new Intent(this, GameCTF.class);

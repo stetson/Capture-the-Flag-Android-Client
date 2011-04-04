@@ -54,7 +54,9 @@ public class GameCTF extends MapActivity {
 	boolean isRunning = false;
 	int isCentering = CENTER_NONE;
 	
-	private Drawable drawable_self;
+	private Drawable drawable_unknown;
+	private Drawable drawable_red_owner;
+	private Drawable drawable_blue_owner;
 	private Drawable drawable_red_flag;
 	private Drawable drawable_blue_flag;
 	private Drawable drawable_red_player;
@@ -97,8 +99,14 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlay marker images
-		drawable_self = this.getResources().getDrawable(R.drawable.person_red_owner);
-		drawable_self.setBounds(0, 0, drawable_self.getIntrinsicWidth(), drawable_self.getIntrinsicHeight());
+		drawable_unknown = this.getResources().getDrawable(R.drawable.star);
+		drawable_unknown.setBounds(0, 0, drawable_unknown.getIntrinsicWidth(), drawable_unknown.getIntrinsicHeight());
+		
+		drawable_red_owner = this.getResources().getDrawable(R.drawable.person_red_owner);
+		drawable_red_owner.setBounds(0, 0, drawable_red_owner.getIntrinsicWidth(), drawable_red_owner.getIntrinsicHeight());
+		
+		drawable_blue_owner = this.getResources().getDrawable(R.drawable.person_blue_owner);
+		drawable_blue_owner.setBounds(0, 0, drawable_blue_owner.getIntrinsicWidth(), drawable_blue_owner.getIntrinsicHeight());
 		
 		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
 		int redW = drawable_red_flag.getIntrinsicWidth();
@@ -117,7 +125,7 @@ public class GameCTF extends MapActivity {
 		drawable_blue_player.setBounds(0, 0, drawable_blue_player.getIntrinsicWidth(), drawable_blue_player.getIntrinsicHeight());
 		
 		mapOverlays = mapView.getOverlays();
-        itemizedoverlay = new GameCTFOverlays(drawable_self);
+        itemizedoverlay = new GameCTFOverlays(drawable_unknown);
 		
 		// Start game processor
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
@@ -341,7 +349,17 @@ public class GameCTF extends MapActivity {
 			    	playerKey = (String) plrIterator .next();
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
-			    	// If a player isn't on a team, we don't care about it at all
+			    	/*
+			    	 * We should be using the following line below:
+			    	 * if(player.has("team") && !player.has("observer_mode")) {
+			    	 * 
+			    	 * But due to unhandled logic on the server, observer_mode should be
+			    	 * ignored for the time being. I've made a request for the server
+			    	 * to send a boolean to let us know that the game is active or in progress.
+			    	 * Currently, the server is attempt to rapidly assign teams and its causing
+			    	 * a bunch of problems with observer mode and teams.
+			    	 * 
+			    	 */
 			    	if(player.has("team")) {
 
 				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
@@ -351,63 +369,40 @@ public class GameCTF extends MapActivity {
 						GeoPoint marker = new GeoPoint(lati, loni);
 						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
 						
-						
-						
 						boolean hasFlag = player.getBoolean("has_flag");
-						boolean isObserverMode = player.getBoolean("observer_mode");
-						
-						// may be used later
-						
-//						boolean redFlagCaptured = jSubObj.getBoolean("red_flag_captured");
-//						boolean blueFlagCaptured = jSubObj.getBoolean("blue_flag_captured");
-						
-						
+						boolean isCurrentPlayer = playerKey.equals(CurrentUser.getUID());
 						String team = player.getString("team");
-						if(playerKey.equals(CurrentUser.getUID())) {
+						
+						// Red team member has blue flag
+						if(team.equals("red") && hasFlag) {
+							overlayitem.setMarker(drawable_blue_flag);	
 							
-							if(team.equals("red"))
-							{
-								overlayitem.setMarker(drawable_red_player);
-								Log.i(TAG,"Current User is on Red team");
-							}
-							if(team.equals("blue"))
-							{
-								overlayitem.setMarker(drawable_blue_player);
-								Log.i(TAG,"Current User is on Blue team");
-							}
+						// Blue team member has red flag
+						} else if(team.equals("blue") && hasFlag) {
+							overlayitem.setMarker(drawable_red_flag);	
 							
-							// if Current User is on red team and has the blue flag, change their marker.
-							if(team.equals("red") && hasFlag)
-							{	
-								overlayitem.setMarker(drawable_blue_flag);								
-							}
-							// if Current User is on blue team and has the red flag, change their marker.
-							if(team.equals("blue") && hasFlag)
-							{
-								overlayitem.setMarker(drawable_red_flag);
-							}
-							if(isObserverMode)
-							{
-								Toast.makeText(getBaseContext(), "Observer Mode", 5).show();
-								Log.i(TAG,"Current User is in observer mode");
-							}
-							if(!isObserverMode)
-							{
-								Toast.makeText(getBaseContext(), "Observer Mode = false", 5).show();
-
-							}
-							
+						// Just a red player
 						} else if(team.equals("red")) {
-							overlayitem.setMarker(drawable_red_player);
+							
+							if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable_red_owner);
+							} else {
+								overlayitem.setMarker(drawable_red_player);
+							}
+							
+						// Just a blue player
 						} else if(team.equals("blue")) {
-							overlayitem.setMarker(drawable_blue_player);
+							
+							if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable_blue_owner);
+							} else {
+								overlayitem.setMarker(drawable_blue_player);
+							}
+							
 						}
 						
-						
-						
-	
 						itemizedoverlay.addOverlay(overlayitem);
-						}
+					}
 
 			    }
 
