@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.PowerManager;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
@@ -45,9 +46,6 @@ public class GameCTF extends MapActivity {
 	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
 	
-	//Screen Dim Wake lock
-	//public static final int SCREEN_DIM_WAKE_LOCK = 6;
-	
 	MapController mapController;
 	GameCTFOverlays itemizedoverlay;
 	OverlayItem overlayitem;
@@ -62,6 +60,10 @@ public class GameCTF extends MapActivity {
 	private Drawable drawable_red_player;
 	private Drawable drawable_blue_player;
 	Boundaries bounds;
+	
+	//Dim Wake Lock
+//	private PowerManager ctfWakeLock = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+	
 	
 	/**
 	 * Called when the activity is first created.
@@ -129,6 +131,10 @@ public class GameCTF extends MapActivity {
 		text = (TextView) findViewById(R.id.gameInfo_connection);
 		text.setText("");
 		bounds = new Boundaries();
+		
+		//Dim Wake Lock
+//		ctfWakeLock.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
+//	            | PowerManager.ON_AFTER_RELEASE, TAG);
 	}
 	
 	/**
@@ -146,7 +152,19 @@ public class GameCTF extends MapActivity {
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
 	}
+	
+	public void onResume() {
+	    super.onResume();
+	// aquire wake lock
+//	    ctfWakeLock.aquire();
+	}
 
+	public void onPause(){
+	   super.onPause();
+	// destory wake lock
+//	   ctfWakeLock.release();
+	}
+	
 	/**
 	 * Called when the menu is requested.
 	 */
