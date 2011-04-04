@@ -1,5 +1,6 @@
 package stetson.CTF;
 
+import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,6 +54,7 @@ public class GameCTF extends MapActivity {
 	List<Overlay> mapOverlays;
 	
 	boolean isRunning = false;
+	
 	int isCentering = CENTER_NONE;
 	
 	private Drawable drawable_unknown;
@@ -65,8 +67,7 @@ public class GameCTF extends MapActivity {
 	Boundaries bounds;
 	
 	//Dim Wake Lock
-	private static PowerManager ctfWakeLock;
-	private WakeLock wakeLock;
+	private PowerManager.WakeLock ctfWakeLock;
 	
 	
 	/**
@@ -142,10 +143,10 @@ public class GameCTF extends MapActivity {
 		text.setText("");
 		bounds = new Boundaries();
 		
-		//Dim Wake Lock
-		ctfWakeLock = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wakeLock = ctfWakeLock.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK
-	            | PowerManager.ON_AFTER_RELEASE, TAG);
+		// Setup the wake lock
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		ctfWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
+
 	}
 	
 	/**
@@ -166,14 +167,12 @@ public class GameCTF extends MapActivity {
 	
 	public void onResume() {
 	    super.onResume();
-	// acquire wake lock
-	    wakeLock.acquire();
+	    ctfWakeLock.acquire();
 	}
 
 	public void onPause(){
 	   super.onPause();
-	// destroy wake lock
-	   wakeLock.release();
+	   ctfWakeLock.release();
 	}
 	
 	/**
@@ -206,7 +205,7 @@ public class GameCTF extends MapActivity {
 		    	return true;
 		    	
 		    case R.id.game_leave:
-		    	this.finish();
+		    	stopGame();
 		    	return true;
 
 	    	// Can find what we're looking for? Call super
@@ -235,51 +234,49 @@ public class GameCTF extends MapActivity {
 	    	
 	    	// If our accuracy doesn't suck, update
 	    	if(CurrentUser.getAccuracy() < MIN_ACCURACY) {
-	    		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
+	    		
+
+	    		String gameId = CurrentUser.getGameId().replaceAll(" ", "%20");
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameId);
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
-				Connections.sendRequest(req, new ResponseListener() {
-					public void onResponseReceived(HttpResponse response) {
-						
-						// Clear all map points
-						mapOverlays.clear();
-						itemizedoverlay.clear();
-						
-						// Pull response message
-						String data = Connections.responseToString(response);
-						
-						// JSON IS FUN!
-						try {
-							JSONObject jObject, jSubObj;
-							jObject = new JSONObject(data);
-							
-							// Process centering requests
-							processCentering(jObject);
-							
-							// Process Players
-							jSubObj = jObject.getJSONObject("players");
-							processPlayers(jSubObj);
-							
-							// Process Game data
-							processGame(jObject);
-							
-						    // Add map overlays
-							mapOverlays.add(bounds);
-						    mapOverlays.add(itemizedoverlay);
-						    mapView.invalidate();
-							
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						Log.i(TAG, "Game Data: " + data);
-						
-					}
-				});
+				
+				String data = Connections.sendFlatRequest(req);
+		
+				// Clear all map points
+				mapOverlays.clear();
+				itemizedoverlay.clear();
+				
+				// JSON IS FUN!
+				try {
+					JSONObject jObject, jSubObj;
+					jObject = new JSONObject(data);
+					
+					// Process centering requests
+					processCentering(jObject);
+					
+					// Process Players
+					jSubObj = jObject.getJSONObject("players");
+					processPlayers(jSubObj);
+					
+					// Process Game data
+					processGame(jObject);
+					
+				    // Add map overlays
+					mapOverlays.add(bounds);
+				    mapOverlays.add(itemizedoverlay);
+				    mapView.invalidate();
+					
+				} catch (JSONException e) {
+					Log.e(TAG, "Error parsing JSON.", e);
+				}
+				
+				Log.i(TAG, "Game Data: " + data);
+
 	    	}
 	    	
-	    	gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    	if(isRunning) {
+	    		gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    	}
 	    }
 	    
 	    /**
@@ -404,6 +401,7 @@ public class GameCTF extends MapActivity {
 							
 						}
 						
+						// Done? Lets add it :D
 						itemizedoverlay.addOverlay(overlayitem);
 					}
 
@@ -493,6 +491,13 @@ public class GameCTF extends MapActivity {
 
 	};
 
+	/**
+	 * Removes the user from the game and stops contact with the server.
+	 */
+	public void stopGame() {
+		isRunning = false;
+		this.finish();
+	}
 
 	/**
 	 * Returns false (required by MapActivity)

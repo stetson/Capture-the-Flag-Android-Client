@@ -22,6 +22,7 @@ public class Connections {
 	 * @param responseListener
 	 */
 	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
+		Log.i(TAG, "ConnectionR: " + request.getURI());
 		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
 	}
 	
@@ -31,6 +32,9 @@ public class Connections {
 	 * @return response
 	 */
 	public static String sendFlatRequest(HttpRequestBase request) {
+		
+		Log.i(TAG, "ConnectionF: " + request.getURI());
+		
 		try {
 			HttpClient client = new DefaultHttpClient();
 			HttpResponse resp;
