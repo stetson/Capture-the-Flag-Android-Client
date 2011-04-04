@@ -235,9 +235,7 @@ public class GameCTF extends MapActivity {
 	    	// If our accuracy doesn't suck, update
 	    	if(CurrentUser.getAccuracy() < MIN_ACCURACY) {
 	    		
-
-	    		String gameId = CurrentUser.getGameId().replaceAll(" ", "%20");
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameId);
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
 				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
 				
 				String data = Connections.sendFlatRequest(req);
