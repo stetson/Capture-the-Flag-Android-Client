@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-    android:layout_width="fill_parent" 
-    android:layout_height="fill_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+    >
  
  	<LinearLayout
 		android:id="@+id/gameInfo"
-		android:layout_width="fill_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:orientation="horizontal"
+		android:gravity="bottom"
 		android:weightSum="1.0"
+		android:orientation="horizontal"
 		android:padding="3px"
  		>
  		<TextView
@@ -31,17 +33,77 @@
 			android:layout_weight=".50"
  		/>
  	</LinearLayout>
- 	
+ 	         	
     <com.google.android.maps.MapView 
 		android:id="@+id/mapView"
 		android:layout_width="wrap_content"
-		android:layout_height="fill_parent"
-		android:layout_gravity="bottom"
-		android:layout_below="@+id/gameInfo"
+		android:layout_height="wrap_content"
+		android:gravity="bottom"
+		android:layout_weight="1"
 		android:enabled="true"
 		android:clickable="true"
-		android:layout_weight="1"
 		android:apiKey="0_55jNcDoyLz4SV0wenbdDiE5Hj-XGGFIaVsSLw"
-        />
-       
-</RelativeLayout>
+	/>
+        
+    <LinearLayout
+		android:id="@+id/gameMenu"
+		android:layout_height="wrap_content"
+		android:weightSum="1.0"
+		android:padding="3px" 
+		android:orientation="horizontal" 
+		android:layout_width="fill_parent"
+		android:background="@drawable/menu_bg"
+		>
+ 		<TextView
+ 			android:text="Self"
+ 			android:drawableTop="@drawable/center_self"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+ 			android:text="Red"
+ 			android:drawableTop="@drawable/center_self"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+ 			android:text="Blue"
+ 			android:drawableTop="@drawable/center_self"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+ 			android:text="Scores"
+ 			android:drawableTop="@drawable/center_self"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+ 			android:text="Quit"
+ 			android:drawableTop="@drawable/center_self"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 	</LinearLayout>
+ 	
+</LinearLayout>

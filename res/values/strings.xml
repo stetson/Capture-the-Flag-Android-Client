@@ -26,4 +26,7 @@
     <string name="game_info_accuracy">Accuracy: </string>
 	<string name="game_info_loading">Loading...</string>
 	
+	<!-- Colors -->
+	<color name="menu_text">#111111</color>
+	
 </resources>
