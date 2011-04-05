@@ -302,6 +302,11 @@ public class GameCTF extends MapActivity {
 		protected JSONObject doInBackground(Void... params) {
 			
 			Log.i(TAG, "Grabbing game data...");
+			
+			/*
+			 * Mark hasn't fixed this yet... Once he fixes the /location/ function, please update this to:
+			 * HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
+			 */
 			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
 			CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
