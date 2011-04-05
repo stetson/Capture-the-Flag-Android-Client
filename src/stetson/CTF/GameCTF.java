@@ -1,10 +1,8 @@
 package stetson.CTF;
 
-import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,13 +12,10 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.os.PowerManager;
 
 import com.google.android.maps.GeoPoint;
@@ -165,54 +160,40 @@ public class GameCTF extends MapActivity {
 		CurrentUser.setAccuracy(-1);
 	}
 	
+	/**
+	 * The activity has regained focus. Acquire a wake lock.
+	 */
 	public void onResume() {
 	    super.onResume();
 	    ctfWakeLock.acquire();
 	}
-
+	
+	/**
+	 * The activity has lost focus. Release the wake lock.
+	 */
 	public void onPause(){
 	   super.onPause();
 	   ctfWakeLock.release();
 	}
 	
 	/**
-	 * Called when the menu is requested.
+	 * Handles action when the Menu button is pressed.
+	 * Toggles the graphical menu.
 	 */
-	public boolean onCreateOptionsMenu(Menu menu) {
-	   MenuInflater inflater = getMenuInflater();
-	   inflater.inflate(R.menu.game_menu, menu);
-	   return true;
+	public boolean onCreateOptionsMenu(Menu x) {
+		
+		// Toggle the visibility of the menu
+		LinearLayout menu = (LinearLayout) this.findViewById(R.id.gameMenu);
+		if(menu.getVisibility() == LinearLayout.VISIBLE) {
+			menu.setVisibility(LinearLayout.GONE);
+		} else {
+			menu.setVisibility(LinearLayout.VISIBLE);
+		}
+		
+		// True means the native menu was launched successfully, so we must return false!
+		return false;
 	}
 	
-	/**
-	 * Handle menu selections.
-	 */
-	public boolean onOptionsItemSelected(MenuItem item) {
-	    
-		// which option?
-	    switch (item.getItemId()) {
-
-		    case R.id.center_self:
-		    	isCentering = CENTER_SELF;
-		    	return true;
-		    	
-		    case R.id.center_red:
-		    	isCentering = CENTER_RED;
-		    	return true;
-		    	
-		    case R.id.center_blue:
-		    	isCentering = CENTER_BLUE;
-		    	return true;
-		    	
-		    case R.id.game_leave:
-		    	stopGame();
-		    	return true;
-
-	    	// Can find what we're looking for? Call super
-		    default:
-		        return super.onOptionsItemSelected(item);
-	    }
-	}
 	/**
 	 * Game processor. Runs every GAME_UPDATE_DELAY (ms).
 	 */
