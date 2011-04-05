@@ -17,10 +17,11 @@
     <string name="failed_to_join">Failed to join game! It probably doesn\'t exist.</string>
     
     <!--  Game Layout Strings -->
-    <string name="game_center_self">Find Self</string>
-    <string name="game_center_red">Red Flag</string>
-    <string name="game_center_blue">Blue Flag</string>
-    <string name="game_leave">Leave Game</string>
+    <string name="menu_self">Self</string>
+    <string name="menu_red_flag">Red Flag</string>
+    <string name="menu_blue_flag">Blue Flag</string>
+    <string name="menu_scores">Scores</string>
+    <string name="menu_quit">Quit</string>
     <string name="game_info_red">Red: </string>
     <string name="game_info_blue">Blue: </string>
     <string name="game_info_accuracy">Accuracy: </string>

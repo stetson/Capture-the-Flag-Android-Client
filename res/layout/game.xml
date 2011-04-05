@@ -55,7 +55,8 @@
 		android:background="@drawable/menu_bg"
 		>
  		<TextView
- 			android:text="Self"
+ 			android:id="@+id/menu_self"
+ 			android:text="@string/menu_self"
  			android:drawableTop="@drawable/center_self"
  			android:textColor="@color/menu_text"
 			android:layout_width="wrap_content"
@@ -65,7 +66,30 @@
 			android:clickable="true"
 		/>
  		<TextView
- 			android:text="Red"
+  			android:id="@+id/menu_red_flag"
+ 			android:text="@string/menu_red_flag"
+ 			android:drawableTop="@drawable/red_flag"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+  			android:id="@+id/menu_blue_flag"
+ 			android:text="@string/menu_blue_flag"
+ 			android:drawableTop="@drawable/blue_flag"
+ 			android:textColor="@color/menu_text"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_weight="0.20"
+			android:gravity="center"
+			android:clickable="true"
+		/>
+ 		<TextView
+  			android:id="@+id/menu_scores"
+ 			android:text="@string/menu_scores"
  			android:drawableTop="@drawable/center_self"
  			android:textColor="@color/menu_text"
 			android:layout_width="wrap_content"
@@ -75,27 +99,8 @@
 			android:clickable="true"
 		/>
  		<TextView
- 			android:text="Blue"
- 			android:drawableTop="@drawable/center_self"
- 			android:textColor="@color/menu_text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="0.20"
-			android:gravity="center"
-			android:clickable="true"
-		/>
- 		<TextView
- 			android:text="Scores"
- 			android:drawableTop="@drawable/center_self"
- 			android:textColor="@color/menu_text"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="0.20"
-			android:gravity="center"
-			android:clickable="true"
-		/>
- 		<TextView
- 			android:text="Quit"
+  			android:id="@+id/menu_quit"
+ 			android:text="@string/menu_quit"
  			android:drawableTop="@drawable/center_self"
  			android:textColor="@color/menu_text"
 			android:layout_width="wrap_content"

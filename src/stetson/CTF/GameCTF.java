@@ -14,6 +14,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.PowerManager;
@@ -27,15 +31,17 @@ import com.google.android.maps.OverlayItem;
 
 public class GameCTF extends MapActivity {
 	
-	// Delay in gameProcess (in ms) [2.5 seconds]
+	// Constant: How often should we wait between game update cycles?
 	public static final int GAME_UPDATE_DELAY = 2500;
 	
+	// Constants: Where should we center to on the next game update cycle?
 	public static final int CENTER_NONE = -1;
 	public static final int CENTER_ORIGIN = 0;
 	public static final int CENTER_SELF = 1;
 	public static final int CENTER_RED = 2;
 	public static final int CENTER_BLUE = -3;
-	// accuracy in meters
+	
+	// Constant: What is the minimum accuracy (in meters) we should expect ?
 	public static final int MIN_ACCURACY = 40;
 	
 	// Data members
@@ -49,7 +55,6 @@ public class GameCTF extends MapActivity {
 	List<Overlay> mapOverlays;
 	
 	boolean isRunning = false;
-	
 	int isCentering = CENTER_NONE;
 	
 	private Drawable drawable_unknown;
@@ -81,7 +86,7 @@ public class GameCTF extends MapActivity {
 		
 		// Make sure the user is actually in a game
 		if(CurrentUser.getGameId().equals("")) {
-			this.finish();
+			this.stopGame();
 			return;
 		}
 		
@@ -141,6 +146,9 @@ public class GameCTF extends MapActivity {
 		// Setup the wake lock
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		ctfWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
+		
+		// Setup menu button listeners
+		buildMenuListeners();
 
 	}
 	
@@ -477,7 +485,52 @@ public class GameCTF extends MapActivity {
 		isRunning = false;
 		this.finish();
 	}
+	
+	/**
+	 * Handles incoming menu clicks.
+	 */
+	private OnClickListener onMenuClick = new OnClickListener() {
+		public void onClick(View v) {
+			switch(v.getId()) {
+				
+				case R.id.menu_self:
+					isCentering = CENTER_SELF;
+					break;
+					
+				case R.id.menu_red_flag:
+					isCentering = CENTER_RED;
+					break;
+					
+				case R.id.menu_blue_flag:
+					isCentering = CENTER_BLUE;
+					break;
+					
+				case R.id.menu_scores:
+					// display score board
+					break;
+					
+				case R.id.menu_quit:
+					stopGame();
+					break;
+					
+			}
+		}
+	};
+	
+	
+	/**
+	 * Adds an onClick listener to each of the menu items.
+	 */
+	private void buildMenuListeners() {
+		
+		findViewById(R.id.menu_self).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_red_flag).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_blue_flag).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_scores).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_quit).setOnClickListener(onMenuClick);
 
+	}
+	
 	/**
 	 * Returns false (required by MapActivity)
 	 * @return false
