@@ -7,9 +7,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -20,6 +23,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.os.PowerManager;
 
 import com.google.android.maps.GeoPoint;
@@ -129,10 +133,7 @@ public class GameCTF extends MapActivity {
 		
 		mapOverlays = mapView.getOverlays();
         itemizedoverlay = new GameCTFOverlays(drawable_unknown);
-		
-		// Start game processor
-		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
-		
+				
 		// Clear game info
 		TextView text;
 		text = (TextView) findViewById(R.id.gameInfo_red);
@@ -149,6 +150,9 @@ public class GameCTF extends MapActivity {
 		
 		// Setup menu button listeners
 		buildMenuListeners();
+		
+		// Start game processor
+		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
 
 	}
 	
@@ -202,71 +206,155 @@ public class GameCTF extends MapActivity {
 		return false;
 	}
 	
-	/**
-	 * Game processor. Runs every GAME_UPDATE_DELAY (ms).
-	 */
-	private final Runnable gameProcess = new Runnable()
-	{
-		/**
-		 * Main gameProcess function.
-		 */
-	    public void run() 
-	    {
-	    	
-	    	// Don't run if we don't have a game anymore
-	    	if(!isRunning) {
-	    		return;
-	    	}
-	    	
-	    	Log.i(TAG, "Game Process()");
-	    	
-	    	
-	    	// If our accuracy doesn't suck, update
-	    	if(CurrentUser.getAccuracy() < MIN_ACCURACY) {
-	    		
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
-				CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
-				
-				String data = Connections.sendFlatRequest(req);
-		
-				// Clear all map points
-				mapOverlays.clear();
-				itemizedoverlay.clear();
-				
-				// JSON IS FUN!
-				try {
-					JSONObject jObject, jSubObj;
-					jObject = new JSONObject(data);
-					
-					// Process centering requests
-					processCentering(jObject);
-					
-					// Process Players
-					jSubObj = jObject.getJSONObject("players");
-					processPlayers(jSubObj);
-					
-					// Process Game data
-					processGame(jObject);
-					
-				    // Add map overlays
-					mapOverlays.add(bounds);
-				    mapOverlays.add(itemizedoverlay);
-				    mapView.invalidate();
-					
-				} catch (JSONException e) {
-					Log.e(TAG, "Error parsing JSON.", e);
-				}
-				
-				Log.i(TAG, "Game Data: " + data);
+	
 
-	    	}
-	    	
+	/**
+	 * Removes the user from the game and stops contact with the server.
+	 */
+	public void stopGame() {
+		isRunning = false;
+		this.finish();
+	}
+	
+	/**
+	 * Handles incoming menu clicks.
+	 */
+	private OnClickListener onMenuClick = new OnClickListener() {
+		public void onClick(View v) {
+			switch(v.getId()) {
+				
+				case R.id.menu_self:
+					isCentering = CENTER_SELF;
+					break;
+					
+				case R.id.menu_red_flag:
+					isCentering = CENTER_RED;
+					break;
+					
+				case R.id.menu_blue_flag:
+					isCentering = CENTER_BLUE;
+					break;
+					
+				case R.id.menu_scores:
+					// display score board
+					break;
+					
+				case R.id.menu_quit:
+					stopGame();
+					break;
+					
+			}
+		}
+	};
+	
+	/**
+	 * Adds an onClick listener to each of the menu items.
+	 */
+	private void buildMenuListeners() {
+		
+		findViewById(R.id.menu_self).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_red_flag).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_blue_flag).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_scores).setOnClickListener(onMenuClick);
+		findViewById(R.id.menu_quit).setOnClickListener(onMenuClick);
+
+	}
+	
+	/**
+	 * Returns false (required by MapActivity)
+	 * @return false
+	 */
+	protected boolean isRouteDisplayed() {
+		return false;
+	}	
+	
+	/**
+	 * Game processor. Runs the GameProcess task every GAME_UPDATE_DELAY (ms).
+	 */
+	private final Runnable gameProcess = new Runnable() {
+	    public void run() {
+
+	    	// Is the game still in progress?
 	    	if(isRunning) {
+	    		
+	    		// Only call for another execution if the previous one is finished (we don't want to overload on data)
+	    		Log.i(TAG, "Processor Status: " + new TaskGameProcess().getStatus());
+	    		new TaskGameProcess().execute();
+	    		
+	    		// Call for another execution later
 	    		gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	    		
 	    	}
 	    }
 	    
-	    /**
+	};
+	
+	/**
+     * The AsyncTask used for processing game updates.
+     * (Generics: Params, Progress, Result)
+     */
+	private class TaskGameProcess extends AsyncTask<Void, Void, JSONObject> {
+		
+		/**
+		 * Run as the work on another thread.
+		 * Sends a location update and grabs data from the server.
+		 */
+		protected JSONObject doInBackground(Void... params) {
+			
+			Log.i(TAG, "Grabbing game data...");
+			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
+			CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
+			String data = Connections.sendFlatRequest(req);
+			try {
+				JSONObject jObject = new JSONObject(data);
+				return jObject;
+			} catch (JSONException e) {
+				Log.e(TAG, "Error parsing JSON.", e);
+			}
+			
+			// If we get here, we had problems with json.
+			return null;
+			
+		}
+		
+		/**
+		 * Run after execution on the UI thread.
+		 * Processes the game object retrieved from the worker thread.
+		 * If game is NULL then the game will be stopped and the activity terminated.
+		 */
+		protected void onPostExecute(final JSONObject gameObject) {
+			Log.i(TAG, "Processing game data.");
+			// Clear all overlays
+			mapOverlays.clear();
+			itemizedoverlay.clear();
+			
+			// Stop game if the game is null
+			if(gameObject == null) {
+				stopGame();
+				return;
+			}
+			
+			// For catching unforeseen errors
+			try {
+
+				// Run the processing functions...
+				processCentering(gameObject);
+				processPlayers(gameObject);
+				processGame(gameObject);
+				
+			    // Add map overlays
+				mapOverlays.add(bounds);
+			    mapOverlays.add(itemizedoverlay);
+			    mapView.invalidate();
+			    
+			} catch (Exception e) {
+				Log.e(TAG, "Critical Error!", e);
+			}
+			
+		}
+		
+		/**
 	     * If there is a request to center around the origin, do it.
 	     * @param jObject
 	     */
@@ -323,10 +411,13 @@ public class GameCTF extends MapActivity {
 	     * Handles other players.
 	     * @param jSubObj containing all players.
 	     */
-	    private void processPlayers(JSONObject jSubObj) {
+	    private void processPlayers(JSONObject jObject) {
 			try {
 	
 				// Loop through all players
+				JSONObject jSubObj = jObject.getJSONObject("players");
+				
+				
 				JSONObject player;
 				String playerKey;
 				
@@ -475,68 +566,5 @@ public class GameCTF extends MapActivity {
 				Log.e(TAG, "Error in gameProcess().processGame()", e);
 			}
 	    }
-
-	};
-
-	/**
-	 * Removes the user from the game and stops contact with the server.
-	 */
-	public void stopGame() {
-		isRunning = false;
-		this.finish();
 	}
-	
-	/**
-	 * Handles incoming menu clicks.
-	 */
-	private OnClickListener onMenuClick = new OnClickListener() {
-		public void onClick(View v) {
-			switch(v.getId()) {
-				
-				case R.id.menu_self:
-					isCentering = CENTER_SELF;
-					break;
-					
-				case R.id.menu_red_flag:
-					isCentering = CENTER_RED;
-					break;
-					
-				case R.id.menu_blue_flag:
-					isCentering = CENTER_BLUE;
-					break;
-					
-				case R.id.menu_scores:
-					// display score board
-					break;
-					
-				case R.id.menu_quit:
-					stopGame();
-					break;
-					
-			}
-		}
-	};
-	
-	
-	/**
-	 * Adds an onClick listener to each of the menu items.
-	 */
-	private void buildMenuListeners() {
-		
-		findViewById(R.id.menu_self).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_red_flag).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_blue_flag).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_scores).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_quit).setOnClickListener(onMenuClick);
-
-	}
-	
-	/**
-	 * Returns false (required by MapActivity)
-	 * @return false
-	 */
-	protected boolean isRouteDisplayed() {
-		return false;
-	}	
-	
 }
