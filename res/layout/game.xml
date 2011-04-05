@@ -7,7 +7,7 @@
  
  	<LinearLayout
 		android:id="@+id/gameInfo"
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="bottom"
 		android:weightSum="1.0"
@@ -36,7 +36,7 @@
  	         	
     <com.google.android.maps.MapView 
 		android:id="@+id/mapView"
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="bottom"
 		android:layout_weight="1"
@@ -49,7 +49,8 @@
 		android:id="@+id/gameMenu"
 		android:layout_height="wrap_content"
 		android:weightSum="1.0"
-		android:padding="3px" 
+		android:paddingTop="5px"
+		android:paddingBottom="5px"
 		android:orientation="horizontal" 
 		android:layout_width="fill_parent"
 		android:background="@drawable/menu_bg"

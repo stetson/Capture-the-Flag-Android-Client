@@ -139,8 +139,22 @@ public class CurrentUser {
 		return params;
 	}
 	
-    /**
+	
+	/**
+	 * Stops the locationListener given a location manager.
+	 * @param lm
+	 */
+	public static void stopLocation(LocationManager lm) {
+		if(locationListener != null) {
+			lm.removeUpdates(locationListener);
+			locationListener = null;
+		}
+	}
+	
+	/**
 	 * Periodically updates the users location.
+	 * @param lm
+	 * @param frequency
 	 */
 	public static void userLocation(LocationManager lm, int frequency) {
 		
@@ -148,10 +162,7 @@ public class CurrentUser {
 		locationManager = lm;
 		
 		// Remove all updates for the current listener (if one exists)
-		if(locationListener != null) {
-			locationManager.removeUpdates(locationListener);
-			locationListener = null;
-		}
+		CurrentUser.stopLocation(lm);
 		
 		// Setup our location listener
 		locationListener = new LocationListener() {
@@ -182,8 +193,8 @@ public class CurrentUser {
 				break;
 		}
 		
-		Log.i(TAG, "New GPS Parsing: FREQ=" + frequency + ", DIST=" + distThreshold);
 		// Start requesting updates per given time
+		Log.i(TAG, "New GPS Parsing: FREQ=" + frequency + ", DIST=" + distThreshold);
 		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, frequency, distThreshold, locationListener);
 		
 	}

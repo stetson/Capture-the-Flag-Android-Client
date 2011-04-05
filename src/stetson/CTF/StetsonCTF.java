@@ -1,6 +1,7 @@
 package stetson.CTF;
 
-import org.apache.http.HttpResponse;
+import java.util.ArrayList;
+
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.json.JSONArray;
@@ -12,8 +13,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,26 +27,22 @@ import android.widget.Toast;
 
 public class StetsonCTF extends Activity {
 	
-	// All constants for Application
+	// Constants: To be used across entire application
 	public static final String TAG = "StetsonCTF";
 	public static final String SERVER_URL = "http://ctf.no.de";
-	public static final String CREATE_SUCCESS = "{\"response\":\"OK\"}";
 	
-	// 3 seconds, 10 seconds, 1 minute
+	// Constants: GPS Update Frequency
 	public static final int GPS_UPDATE_FREQUENCY_GAME = 3000;
 	public static final int GPS_UPDATE_FREQUENCY_INTRO = 10000;
 	public static final int GPS_UPDATE_FREQUENCY_BACKGROUND = 60000;
 	
-	// meters
+	// Constants: GPS Update Threshold
 	public static final int GPS_UPDATE_DISTANCE_GAME = 0;
 	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
 	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
 	
-	public static final int LOADING_PAUSE = 1000;
-	
-	private Handler gamesHandler;
-	private boolean isGameStarting = false;
-	
+	// Data Members
+
 	/**
 	 * Called when the activity is first created.
 	 * @param saved instance state
@@ -60,38 +57,37 @@ public class StetsonCTF extends Activity {
 		// Move back to the game selection panel
 		setContentView(R.layout.intro);
 		
-		// Connect components
+		// Build listeners
 		buildListeners();
-		gamesHandler = new Handler();
-
+		
 		Log.i(TAG, "Activity ready!");
 	}
 	
 	/**
-	 * Rebuild games list when the application regains focus.
-	 * (After leave a game, answering a call, etc...)
+	 * Start GPS and rebuild games list.
 	 */
-	public void onStart() {
+	public void onResume() {
 		
-		super.onStart();
-		buildGamesList();
-		isGameStarting = false;
+		super.onResume();
 		
-		// Change GPS Freq
+		// Start GPS
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_INTRO);
+		
+		// Build a new games list
+		buildGamesList();
+	
 	}
 	
 	/**
 	 * Slow down GPS updates a lot when the application is in the background.
 	 */
-	public void onStop() {
+	public void onPause() {
 
-		super.onStop();
+		super.onPause();
 		
-		// Change GPS Freq
-		if(!isGameStarting) {
-			CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_BACKGROUND);
-		}
+		// Stop GPS
+		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
+		
 	}
 	
 	/**
@@ -164,167 +160,19 @@ public class StetsonCTF extends Activity {
 	 */
 	private void buildGamesList() {
 		
-		Log.i(TAG, "Build games list. (Loading...)");
+		Log.i(TAG, "(UI) Building games list.");
+		new TaskGenerateGamesList().execute();
 		
-		// Start the handle (so we don't weigh down the thread)
-		gamesHandler.post(new Runnable() {
-			public void run() {
-				
-				// Clear all games and messages
-				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-				gamesGroup.removeAllViews();
-				
-				TextView loadText;
-				
-				// Acquiring location
-				if(!CurrentUser.hasLocation()) {
-					
-					// Post a message
-					loadText = new TextView(gamesGroup.getContext());
-					loadText.setText(R.string.loading_location);
-					gamesGroup.addView(loadText);
-					
-					// Check again in a little bit
-					gamesHandler.postDelayed(this, LOADING_PAUSE);
-					
-				// Acquiring games
-				} else {
-					
-					// Post a message
-					loadText = new TextView(gamesGroup.getContext());
-					loadText.setText(R.string.loading_games);
-					gamesGroup.addView(loadText);
-					
-					// Build an send a request for game data
-					HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
-					Connections.sendRequest(req, new ResponseListener() {
-
-						public void onResponseReceived(HttpResponse response) {
-							
-							RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-							gamesGroup.removeAllViews();
-							
-							// Pull response message
-							String data = Connections.responseToString(response);
-							Log.i(TAG, "Response: " + data);
-							
-							try {
-								
-								JSONObject games = new JSONObject(data);
-								// Post a message
-								TextView textResponse = new TextView(gamesGroup.getContext());
-
-								// There was a server response with an error message
-								if(games.has("error")) {
-									
-									textResponse.setText("Error: " + games.getString("error"));
-									
-								// A list of games was returned
-								} else if (games.has("games")) {
-									
-									RadioButton rb;
-									JSONArray list = games.getJSONArray("games");
-									for(int n = 0; n < list.length(); n++) {
-										Log.i(TAG, "Adding game to view (" + list.optString(n) + ")");
-										rb = new RadioButton(gamesGroup.getContext());
-										rb.setText(list.optString(n));
-										gamesGroup.addView(rb);
-									}
-									
-									if(list.length() == 0) {
-										textResponse.setText(R.string.no_games);
-									}
-									
-								
-								// An unexpected response from the server (probably blank)
-								} else {
-									Log.e(TAG, "Unexpected server response: " + data);
-								}
-								
-								// If we have a text response, diplay it 
-								if(!textResponse.getText().equals("")) {
-									gamesGroup.addView(textResponse);
-								}
-
-							} catch (JSONException e) {
-								Log.e(TAG, "Error parsing JSON.", e);
-							}
-							
-						}
-						
-					});
-
-				}
-				
-
-			}
-		});
-				
 	}
 
 	/**
 	 * Joins or creates a new game. If game is empty, then a new game will be created.
 	 * @param name
 	 * @param game
-	 * @return did the user join the game successfully
 	 */
-    protected boolean joinGame(String name, String game) {
-    	
-    	Log.i(TAG, "joinGame(" + name + ", " + game + ")");
-    	
-    	// Update the user
-    	updateUser(name);
-    	
-    	// We need to get current location data to make or join a game
-		double longitude = CurrentUser.getLongitude();
-		double latitude = CurrentUser.getLatitude();
-		CurrentUser.setLocation(latitude, longitude);
-
-		// Show the user a loading screen thingy
-		ProgressDialog dialog = ProgressDialog.show(this, "", "Loading. Please wait...", true);
-    	
-		// If a game name wasn't provided, lets make a game! Build the request and stuff :)
-		if(game.equals("")) {
-			
-			// Set the game name to the user's name
-			CurrentUser.setGameId(CurrentUser.getName());
-			
-			// Make the request, NOT asynchronous, we need an answer now
-			HttpPost hp = new HttpPost(SERVER_URL + "/game/");
-			CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
-			String data = Connections.sendFlatRequest(hp);
-			if(!data.equals(CREATE_SUCCESS)) {
-				dialog.hide();
-				Toast.makeText(this, R.string.failed_to_create, Toast.LENGTH_SHORT).show();
-				return false;
-			}
-
-		}
-		
-		// Join the game!
-		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-		HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
-		CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
-		String data = Connections.sendFlatRequest(hp);
-		
-		try {
-			JSONObject jsonGame = new JSONObject(data);
-			if(jsonGame.has("error")) {
-				dialog.hide();
-				Toast.makeText(this, "Error: " + jsonGame.getString("error"), Toast.LENGTH_SHORT).show();
-				return false;
-			}
-		} catch (JSONException e) {
-			Log.e(TAG, "JSON Parsing Error.", e);
-			return false;
-		}
-
-		// Nothing else to load, start the game :)
-		isGameStarting = true;
-		dialog.hide();
-	    Intent i = new Intent(this, GameCTF.class);
-	    startActivity(i);
-	    return true;
+    protected void joinGame(String name, String game) {
+    	Log.i(TAG, "(UI) joinGame(" + name + ", " + game + ")");
+    	new TaskJoinGame().execute(name, game);
     }
     
     /**
@@ -343,5 +191,214 @@ public class StetsonCTF extends Activity {
 		uid = uid.toUpperCase();
 		CurrentUser.setUID(uid);
     }
-    	
+    
+    
+    /**
+     * The AsyncTask used for generating a new list of games.
+     * (Generics: Params, Progress, Result)
+     */
+    private class TaskGenerateGamesList extends AsyncTask<Void, String, ArrayList<String>> {
+		
+    	protected static final long GPS_CHECK_PAUSE = 500;
+		private Context mContext = StetsonCTF.this;
+		private RadioGroup gamesGroup;
+		
+		/**
+		 * Run before execution on the UI thread.
+		 * Remove all children from group view and post a loading message.
+		 */
+		protected void onPreExecute() {
+			gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
+			gamesGroup.removeAllViews();
+		}
+		
+		/**
+		 * Runs every time publicProgress() is called.
+		 * Clears the gamesGroup view and adds a message with the progress text.
+		 */
+	     protected void onProgressUpdate(String... progress) {
+	    	 gamesGroup.removeAllViews();
+	    	 TextView text = new TextView(mContext);
+	    	 text.setText(progress[0]);
+	    	 gamesGroup.addView(text);
+	     }
+	     
+		/**
+		 * Run after execution on the UI thread.
+		 * Clears the gameGroup view and adds a list of games to it.
+		 */
+		protected void onPostExecute(final ArrayList<String> response) {
+			gamesGroup.removeAllViews();
+			
+			// Something bad happened, unknown error :o
+			if(response == null) {
+		    	 TextView text = new TextView(mContext);
+		    	 text.setText(R.string.no_games_error);
+		    	 gamesGroup.addView(text);
+		    	 
+		    // We have no games :(
+			} else if(response.isEmpty()) {
+		    	 TextView text = new TextView(mContext);
+		    	 text.setText(R.string.no_games);
+		    	 gamesGroup.addView(text);
+		    	 
+		    // We have some games! Add them to the list :)
+			} else {
+				for(int i = 0; i < response.size(); i++) {
+					RadioButton rb;
+					Log.i(TAG, "Adding game to view (" + response.get(i) + ")");
+					rb = new RadioButton(mContext);
+					rb.setText(response.get(i));
+					gamesGroup.addView(rb);
+				}
+			}
+			
+		}
+		
+		/**
+		 * Run as the work on another thread.
+		 */
+		protected ArrayList<String> doInBackground(Void... params) {
+			
+			ArrayList<String> gamesList = new ArrayList<String>();
+			
+			publishProgress(mContext.getString(R.string.loading_location));
+			
+			// We might still be waiting for a location...
+			while(!CurrentUser.hasLocation()) {
+				try {
+					Thread.sleep(GPS_CHECK_PAUSE);
+				} catch (InterruptedException e) {
+					Log.e(TAG, "Can't sleep :(", e);
+				}
+			}
+			
+			publishProgress(mContext.getString(R.string.loading_games));
+			
+			// Sweet, we have a location, lets grab a list of games
+			HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
+			String data = Connections.sendFlatRequest(req);
+			try {
+				
+				JSONObject games = new JSONObject(data);
+				if (games.has("games")) {
+					
+					// Add all the games to a list
+					JSONArray list = games.getJSONArray("games");
+					for(int n = 0; n < list.length(); n++) {
+						gamesList.add(list.getString(n));
+					}
+					
+					// Ok, that's all, return the games list
+					return gamesList;
+					
+				} else {
+					Log.e(TAG, "Unexpected Server Response: " + data);
+				}
+			} catch (JSONException e) {
+				Log.e(TAG, "Error parsing JSON.", e);
+			}
+			
+			// Everything fell through, meaning bad stuff happened, check LogCat :(
+			return null;
+		}
+    }
+    
+    /**
+     * The AsyncTask used for creating and joining a game.
+     * (Generics: Params, Progress, Result)
+     */
+	private class TaskJoinGame extends AsyncTask<String, Void, String> {
+		
+		private final static String GOOD_RESPONSE = "OK";
+		private Context mContext = StetsonCTF.this;
+		private ProgressDialog dialog;
+		
+		/**
+		 * Run before execution on the UI thread.
+		 */
+		protected void onPreExecute() {
+			dialog = ProgressDialog.show(mContext, "Joining Game", "Please wait...", true);
+		}
+		
+		/**
+		 * Run after execution on the UI thread.
+		 * If the response string is equal to GOOD_RESPONSE then the game activity
+		 * is started. If not, a toast showing the error message is sent.
+		 */
+		protected void onPostExecute(final String response) {
+			
+			dialog.hide();
+			
+			if(response.equals(GOOD_RESPONSE)) {
+			    Intent i = new Intent(mContext, GameCTF.class);
+			    startActivity(i);
+			} else {
+				Toast.makeText(mContext, response, Toast.LENGTH_LONG).show();
+			}
+			
+		}
+		
+		/**
+		 * Run as the work on another thread.
+		 */
+		protected String doInBackground(final String... params) {
+			
+			// More friendly parameters :)
+			String name = params[0];
+			String game = params[1];
+			Log.i(TAG, "(WORKER) joinGame(" + name + ", " + game + ")");
+			
+			// Build a UID
+			updateUser(name);
+			
+			// If a game name wasn't given, then we need to make a game.
+			if(game.equals("")) {
+				
+				CurrentUser.setGameId(CurrentUser.getName());
+				HttpPost hp = new HttpPost(SERVER_URL + "/game/");
+				CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
+				String data = Connections.sendFlatRequest(hp);
+
+				try {
+					JSONObject response = new JSONObject(data);
+					Log.i(TAG, "(WORKER) create game response: " + data);
+					if(response.has("response") && !response.getString("response").equals(GOOD_RESPONSE)) {
+						return "Unexpected server response #1";
+					} else if (response.has("error")) {
+						return "Server Error: " + response.get("error");
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, "Error parsing JSON.", e);
+					return "Unexpected server response #2";
+				}
+				
+			}
+			
+			// If a game was created, then it was a success at this point! Now we must join the game.
+			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+			HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
+			CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
+			String data = Connections.sendFlatRequest(hp);
+			
+			try {
+				JSONObject jsonGame = new JSONObject(data);
+				if(jsonGame.has("error")) {
+					return "Server Error: " + jsonGame.get("error");
+				}
+			} catch (JSONException e) {
+				Log.e(TAG, "Error parsing JSON.", e);
+				return "Unexpected server response #3";
+			}
+
+		    return GOOD_RESPONSE;
+		}
+		
+
+	     
+	}
+	
 }
+
+
+
