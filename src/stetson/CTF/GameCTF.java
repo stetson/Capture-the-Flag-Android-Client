@@ -305,12 +305,7 @@ public class GameCTF extends MapActivity {
 			
 			Log.i(TAG, "Grabbing game data...");
 			
-			/*
-			 * Mark hasn't fixed this yet... Once he fixes the /location/ function, please update this to:
-			 * HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
-			 */
-			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
+			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
 			CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
 			String data = Connections.sendFlatRequest(req);
 			try {
