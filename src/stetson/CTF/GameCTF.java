@@ -7,9 +7,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -19,11 +17,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.os.PowerManager;
 
 import com.google.android.maps.GeoPoint;
@@ -132,7 +127,7 @@ public class GameCTF extends MapActivity {
 		drawable_blue_player.setBounds(0, 0, drawable_blue_player.getIntrinsicWidth(), drawable_blue_player.getIntrinsicHeight());
 		
 		mapOverlays = mapView.getOverlays();
-        itemizedoverlay = new GameCTFOverlays(drawable_unknown);
+        itemizedoverlay = new GameCTFOverlays(drawable_unknown, mapView);
 				
 		// Clear game info
 		TextView text;
@@ -210,8 +205,11 @@ public class GameCTF extends MapActivity {
 
 	/**
 	 * Removes the user from the game and stops contact with the server.
+	 * Stops game processing if it is in progress and prohibits it from running until
+	 * it is created again (in a new activity).
 	 */
 	public void stopGame() {
+		new TaskGameProcess().cancel(true);
 		isRunning = false;
 		this.finish();
 	}
@@ -328,7 +326,8 @@ public class GameCTF extends MapActivity {
 		 * Processes the game object retrieved from the worker thread.
 		 * If game is NULL then the game will be stopped and the activity terminated.
 		 */
-		protected void onPostExecute(final JSONObject gameObject) {
+		protected void onPostExecute(final JSONObject gameObject) {			
+			
 			Log.i(TAG, "Processing game data.");
 			// Clear all overlays
 			mapOverlays.clear();

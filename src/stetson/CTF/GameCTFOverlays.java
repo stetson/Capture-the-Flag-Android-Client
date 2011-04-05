@@ -1,35 +1,28 @@
 package stetson.CTF;
 
 import java.util.ArrayList;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 
 public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 
-	private Context mContext;
+	private MapView mapView;
 	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
-	
-	/**
-	 * 
-	 * @param defaultMarker
-	 */
-	public GameCTFOverlays(Drawable defaultMarker) {
-		  super(boundCenterBottom(defaultMarker));
-	}
 	
 	/**
 	 * 
 	 * @param defaultMarker
 	 * @param context
 	 */
-	public GameCTFOverlays(Drawable defaultMarker, Context context) {
+	public GameCTFOverlays(Drawable defaultMarker, MapView mv) {
 		  super(defaultMarker);
-		  mContext = context;
+		  mapView = mv;
 	}
 	
 	/**
@@ -47,16 +40,15 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 	 * @return true
 	 */
 	protected boolean onTap(int index) {
+		
 		OverlayItem item = mOverlays.get(index);
 		Log.i("MAP", "Tapped " + item.getTitle());
-		/*
-		  OverlayItem item = mOverlays.get(index);
-		  AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-		  dialog.setTitle(item.getTitle());
-		  dialog.setMessage(item.getSnippet());
-		  dialog.show();
-		  */
-	  return true;
+		
+		Toast toast = Toast.makeText(mapView.getContext(), item.getTitle(), Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 32);
+		toast.show();
+
+		return true;
 	}
 	
 	/**
