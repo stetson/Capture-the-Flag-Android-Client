@@ -1,6 +1,9 @@
 package stetson.CTF;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+
 import java.util.List;
 
 import org.apache.http.client.methods.HttpPost;
@@ -27,6 +30,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
+
 
 public class GameCTF extends MapActivity {
 	
@@ -56,13 +60,8 @@ public class GameCTF extends MapActivity {
 	boolean isRunning = false;
 	int isCentering = CENTER_NONE;
 	
-	private Drawable drawable_unknown;
-	private Drawable drawable_red_owner;
-	private Drawable drawable_blue_owner;
-	private Drawable drawable_red_flag;
-	private Drawable drawable_blue_flag;
-	private Drawable drawable_red_player;
-	private Drawable drawable_blue_player;
+	private HashMap<Integer,Drawable> drawable = new HashMap<Integer, Drawable>(10);
+	
 	Boundaries bounds;
 	
 	//Dim Wake Lock
@@ -101,33 +100,7 @@ public class GameCTF extends MapActivity {
 		mapView.setBuiltInZoomControls(true);
 		
 		// Setting up the overlay marker images
-		drawable_unknown = this.getResources().getDrawable(R.drawable.star);
-		drawable_unknown.setBounds(0, 0, drawable_unknown.getIntrinsicWidth(), drawable_unknown.getIntrinsicHeight());
-		
-		drawable_red_owner = this.getResources().getDrawable(R.drawable.person_red_owner);
-		drawable_red_owner.setBounds(0, 0, drawable_red_owner.getIntrinsicWidth(), drawable_red_owner.getIntrinsicHeight());
-		
-		drawable_blue_owner = this.getResources().getDrawable(R.drawable.person_blue_owner);
-		drawable_blue_owner.setBounds(0, 0, drawable_blue_owner.getIntrinsicWidth(), drawable_blue_owner.getIntrinsicHeight());
-		
-		drawable_red_flag = this.getResources().getDrawable(R.drawable.red_flag);
-		int redW = drawable_red_flag.getIntrinsicWidth();
-		int redH = drawable_red_flag.getIntrinsicHeight();
-		drawable_red_flag.setBounds(-redW / 2, -redH, redH / 2, 0);
-		
-		drawable_blue_flag = this.getResources().getDrawable(R.drawable.blue_flag);
-		int blueW = drawable_blue_flag.getIntrinsicWidth();
-		int blueH = drawable_blue_flag.getIntrinsicHeight();
-		drawable_blue_flag.setBounds(-blueW / 2, -blueH, blueH / 2, 0);
-		
-		drawable_red_player = this.getResources().getDrawable(R.drawable.person_red);
-		drawable_red_player .setBounds(0, 0, drawable_red_player.getIntrinsicWidth(), drawable_red_player.getIntrinsicHeight());
-		
-		drawable_blue_player = this.getResources().getDrawable(R.drawable.person_blue);
-		drawable_blue_player.setBounds(0, 0, drawable_blue_player.getIntrinsicWidth(), drawable_blue_player.getIntrinsicHeight());
-		
-		mapOverlays = mapView.getOverlays();
-        itemizedoverlay = new GameCTFOverlays(drawable_unknown, mapView);
+
 				
 		// Clear game info
 		TextView text;
@@ -144,6 +117,7 @@ public class GameCTF extends MapActivity {
 		ctfWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, TAG);
 		
 		// Setup menu button listeners
+		buildDrawables();
 		buildMenuListeners();
 		
 		// Start game processor
@@ -256,6 +230,36 @@ public class GameCTF extends MapActivity {
 		findViewById(R.id.menu_scores).setOnClickListener(onMenuClick);
 		findViewById(R.id.menu_quit).setOnClickListener(onMenuClick);
 
+	}
+	
+	/**
+	 * Sets up all the drawables to be used as markers
+	 */
+	
+	private void buildDrawables() {
+		
+		// All of our markers here
+		drawable.put(R.drawable.star, this.getResources().getDrawable(R.drawable.star));
+		drawable.put(R.drawable.red_flag, this.getResources().getDrawable(R.drawable.red_flag));
+		drawable.put(R.drawable.blue_flag, this.getResources().getDrawable(R.drawable.blue_flag));
+		drawable.put(R.drawable.person_red_owner, this.getResources().getDrawable(R.drawable.person_red_owner));
+		drawable.put(R.drawable.person_blue_owner, this.getResources().getDrawable(R.drawable.person_blue_owner));
+		drawable.put(R.drawable.person_red, this.getResources().getDrawable(R.drawable.person_red));
+		drawable.put(R.drawable.person_blue, this.getResources().getDrawable(R.drawable.person_blue));
+		
+		// Set the anchors here
+		Collection<Drawable> c = drawable.values();
+	    Iterator<Drawable> itr = c.iterator();
+	    while(itr.hasNext()) {
+	    	Drawable icon = itr.next();
+			int redW = icon.getIntrinsicWidth();
+			int redH = icon.getIntrinsicHeight();
+			icon.setBounds(-redW / 2, -redH, redH / 2, 0);
+	  	}
+
+	    // Setup overlay stuff
+		mapOverlays = mapView.getOverlays();
+        itemizedoverlay = new GameCTFOverlays(drawable.get(R.drawable.star), mapView);
 	}
 	
 	/**
@@ -425,10 +429,10 @@ public class GameCTF extends MapActivity {
 				JSONObject player;
 				String playerKey;
 				
-				Iterator plrIterator = jSubObj.keys();
+				Iterator<String> plrIterator = jSubObj.keys();
 			    while(plrIterator.hasNext()) {
 			    	
-			    	playerKey = (String) plrIterator .next();
+			    	playerKey = plrIterator.next();
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
 			    	/*
@@ -449,7 +453,7 @@ public class GameCTF extends MapActivity {
 	
 						Log.i(TAG, "Adding player: " + player.getString("name") + " with  KEY=" + playerKey + " @ LAT " + player.getString("latitude") + ", LONG " + player.getString("longitude"));
 						GeoPoint marker = new GeoPoint(lati, loni);
-						OverlayItem overlayitem = new OverlayItem(marker, player.getString("name"), player.getString("name"));
+						OverlayItem overlayitem = new OverlayItem(marker, "Player: " + player.getString("name"), player.getString("name"));
 						
 						boolean hasFlag = player.getBoolean("has_flag");
 						boolean isCurrentPlayer = playerKey.equals(CurrentUser.getUID());
@@ -457,28 +461,28 @@ public class GameCTF extends MapActivity {
 						
 						// Red team member has blue flag
 						if(team.equals("red") && hasFlag) {
-							overlayitem.setMarker(drawable_blue_flag);	
+							overlayitem.setMarker(drawable.get(R.drawable.blue_flag));	
 							
 						// Blue team member has red flag
 						} else if(team.equals("blue") && hasFlag) {
-							overlayitem.setMarker(drawable_red_flag);	
+							overlayitem.setMarker(drawable.get(R.drawable.red_flag));	
 							
 						// Just a red player
 						} else if(team.equals("red")) {
 							
 							if(isCurrentPlayer) {
-								overlayitem.setMarker(drawable_red_owner);
+								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
 							} else {
-								overlayitem.setMarker(drawable_red_player);
+								overlayitem.setMarker(drawable.get(R.drawable.person_red));
 							}
 							
 						// Just a blue player
 						} else if(team.equals("blue")) {
 							
 							if(isCurrentPlayer) {
-								overlayitem.setMarker(drawable_blue_owner);
+								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
 							} else {
-								overlayitem.setMarker(drawable_blue_player);
+								overlayitem.setMarker(drawable.get(R.drawable.person_blue));
 							}
 							
 						}
@@ -519,8 +523,8 @@ public class GameCTF extends MapActivity {
 		    	int lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
 
 				GeoPoint red_marker = new GeoPoint(lat, lon);
-				OverlayItem red_overlayitem = new OverlayItem(red_marker, "red_flag", "red_flag");
-				red_overlayitem.setMarker(drawable_red_flag);
+				OverlayItem red_overlayitem = new OverlayItem(red_marker, "Red Flag", "");
+				red_overlayitem.setMarker(drawable.get(R.drawable.red_flag));
 				itemizedoverlay.addOverlay(red_overlayitem);
 				
 				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
@@ -531,14 +535,11 @@ public class GameCTF extends MapActivity {
 		    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
 
 				GeoPoint blue_marker = new GeoPoint(lat, lon);
-				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "blue_flag", "blue_flag");
-				blue_overlayitem.setMarker(drawable_blue_flag);
+				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "Blue Flag", "");
+				blue_overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
 				itemizedoverlay.addOverlay(blue_overlayitem);
 				
 				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
-				
-				
-				// Adding boundaries
 				
 				// Get Red boundaries
 				JSONObject redBounds = game.getJSONObject("red_bounds");
