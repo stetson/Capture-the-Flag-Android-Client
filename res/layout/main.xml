@@ -12,9 +12,10 @@ android:background="#d5d5d5"
 		<ImageView
 		android:id="@+id/loading_image"
 		android:background="@drawable/load_screen"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
 		android:layout_centerInParent="true"
+		android:scaleType="fitXY"
 		/>
 		
 </RelativeLayout>
