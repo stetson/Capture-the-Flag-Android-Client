@@ -32,8 +32,6 @@ public class CurrentUser {
 	private static double latitude = -1;
 	private static double longitude = -1;
 	private static double accuracy = -1;
-	private static boolean hasRedFlag = false;
-	private static boolean hasBlueFlag = false;
 	private static boolean isObserver = false;
 	
 	// Game Info
@@ -60,12 +58,6 @@ public class CurrentUser {
 	public static void setAccuracy(double accuracy) {
 		CurrentUser.accuracy = accuracy;
 	}
-	public static void setHasRedFlag(boolean hasFlag) {
-		CurrentUser.hasRedFlag = hasFlag;
-	}
-	public static void setHasBlueFlag(boolean hasFlag) {
-		CurrentUser.hasBlueFlag = hasFlag;
-	}
 	public static void setIsObserver(boolean isObserver) {
 		CurrentUser.isObserver = isObserver;
 	}
@@ -89,12 +81,6 @@ public class CurrentUser {
 	}
 	public static double getLatitude() {
 		return CurrentUser.latitude;
-	}
-	public static boolean getHasRedFlag() {
-		return hasRedFlag;
-	}
-	public static boolean getHasBlueFlag() {
-		return hasBlueFlag;
 	}
 	public static boolean getIsObserver() {
 		return isObserver;

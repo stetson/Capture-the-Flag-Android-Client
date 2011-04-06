@@ -51,6 +51,8 @@ public class GameCTF extends MapActivity {
 	private MapView mapView;
 	private Handler gameHandler = new Handler();
 	private static final String TAG = "GameCTF";
+	private boolean isBlueFlagTaken = false;
+	private boolean isRedFlagTaken = false;
 	
 	MapController mapController;
 	GameCTFOverlays itemizedoverlay;
@@ -341,6 +343,10 @@ public class GameCTF extends MapActivity {
 			// For catching unforeseen errors
 			try {
 
+				// Reset flag booleans
+				isRedFlagTaken = false;
+				isBlueFlagTaken = false;
+				
 				// Run the processing functions...
 				processCentering(gameObject);
 				processPlayers(gameObject);
@@ -387,7 +393,6 @@ public class GameCTF extends MapActivity {
 						} else if (isCentering == CENTER_BLUE) {
 							subObject = jObject.getJSONObject("blue_flag");
 						} else {
-							// nothing to center on
 							isCentering = CENTER_NONE;
 							return;
 						}
@@ -511,33 +516,33 @@ public class GameCTF extends MapActivity {
 				
 				int lat,lon;
 				
-				// Adding red flag, if it hasn't been captured
-				if(!CurrentUser.getHasRedFlag()) {
-				JSONObject red_flag = game.getJSONObject("red_flag");
-				lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
-		    	lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
-
-				GeoPoint red_marker = new GeoPoint(lat, lon);
-				OverlayItem red_overlayitem = new OverlayItem(red_marker, "Red Flag", "");
-				red_overlayitem.setMarker(drawable.get(R.drawable.red_flag));
-				itemizedoverlay.addOverlay(red_overlayitem);
-				
-				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				// Adding red flag, if it hasn't been taken
+				if(!isRedFlagTaken) {
+					JSONObject red_flag = game.getJSONObject("red_flag");
+					lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
+			    	lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
+	
+					GeoPoint red_marker = new GeoPoint(lat, lon);
+					OverlayItem red_overlayitem = new OverlayItem(red_marker, "Red Flag", "");
+					red_overlayitem.setMarker(drawable.get(R.drawable.red_flag));
+					itemizedoverlay.addOverlay(red_overlayitem);
+					
+					Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
 				}
 				
-				// Adding blue flag, if it hasn't been captured
-				if(!CurrentUser.getHasBlueFlag()) {
-				JSONObject blue_flag = game.getJSONObject("blue_flag");
-				lat = (int) (1E6 * Double.parseDouble(blue_flag.getString("latitude")));
-		    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
-
-				GeoPoint blue_marker = new GeoPoint(lat, lon);
-				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "Blue Flag", "");
-				blue_overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
-				
-				itemizedoverlay.addOverlay(blue_overlayitem);
-				
-				Log.i(TAG, "Adding blue_flag: " + blue_flag.getString("latitude") + blue_flag.getString("longitude"));
+				// Adding blue flag, if it hasn't been taken
+				if(!isBlueFlagTaken) {
+					JSONObject blue_flag = game.getJSONObject("blue_flag");
+					lat = (int) (1E6 * Double.parseDouble(blue_flag.getString("latitude")));
+			    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
+	
+					GeoPoint blue_marker = new GeoPoint(lat, lon);
+					OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "Blue Flag", "");
+					blue_overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
+					
+					itemizedoverlay.addOverlay(blue_overlayitem);
+					
+					Log.i(TAG, "Adding blue_flag: " + blue_flag.getString("latitude") + blue_flag.getString("longitude"));
 				}
 				
 				// Get Red boundaries
