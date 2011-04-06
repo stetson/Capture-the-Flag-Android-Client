@@ -430,17 +430,7 @@ public class GameCTF extends MapActivity {
 			    	playerKey = plrIterator.next();
 			    	player = jSubObj.getJSONObject(playerKey);
 			    	
-			    	/*
-			    	 * We should be using the following line below:
-			    	 * if(player.has("team") && !player.has("observer_mode")) {
-			    	 * 
-			    	 * But due to unhandled logic on the server, observer_mode should be
-			    	 * ignored for the time being. I've made a request for the server
-			    	 * to send a boolean to let us know that the game is active or in progress.
-			    	 * Currently, the server is attempt to rapidly assign teams and its causing
-			    	 * a bunch of problems with observer mode and teams.
-			    	 * 
-			    	 */
+
 			    	if(player.has("team")) {
 
 				    	int lati = (int) (1E6 * Double.parseDouble(player.getString("latitude")));
@@ -458,81 +448,35 @@ public class GameCTF extends MapActivity {
 						
 						
 						// if player is on the red team
-						if(team.equals("red"))
-						{
-							// Player is red
+						if(team.equals("red")) {
+							
+							// Default marker for a red member
 							overlayitem.setMarker(drawable.get(R.drawable.person_red));
 							
-							// if player is Current Player
-							if(isCurrentPlayer)
-							{
-							// Player is now red owner
-								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
-								
-								// if Current Player has flag
-								if(hasFlag)
-								{
-									overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
-								}
-								// if Current Player is in observer mode
-								
-								if(isObserver)
-								{
-									CurrentUser.setIsObserver(true);
-								}
-								else
-								{
-									CurrentUser.setIsObserver(false);
-								}
-							}
-							// if red player has the blue flag
-							if(hasFlag)
-							{
+							// Logical order: flag, observer, self
+							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
-								CurrentUser.setHasBlueFlag(true);
+							} else if(isObserver) {
+								overlayitem.setMarker(drawable.get(R.drawable.person_red));
+							} else if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
 							}
-							else
-							{
-								CurrentUser.setHasBlueFlag(false);
-							}
-						}
-						// player must be on blue team
-						else
-						{
-							// Player is blue
+						
+						// if player is on the blue team
+						} else if(team.equals("blue")) {
+							
+							// Default marker for a blue member
 							overlayitem.setMarker(drawable.get(R.drawable.person_blue));
 							
-							// if player is Current Player
-							if(isCurrentPlayer)
-							{
-							// Player is now blue owner
-								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
-								
-								// if Current Player has flag
-								if(hasFlag)
-								{
-									overlayitem.setMarker(drawable.get(R.drawable.red_flag));
-								}
-								// if Current Player is in observer mode
-								if(isObserver)
-								{
-									CurrentUser.setIsObserver(true);
-								}
-								else
-								{
-									CurrentUser.setIsObserver(false);
-								}
-							}
-							// if blue player has the red flag
-							if(hasFlag)
-							{
+							// Logical order: flag, observer, self
+							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.red_flag));
-								CurrentUser.setHasRedFlag(true);
+							} else if(isObserver) {
+								overlayitem.setMarker(drawable.get(R.drawable.person_blue));
+							} else if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
 							}
-							else
-							{
-								CurrentUser.setHasRedFlag(false);
-							}
+							
 						}
 												
 						// Done? Lets add it :D
