@@ -53,6 +53,7 @@ public class GameCTF extends MapActivity {
 	private static final String TAG = "GameCTF";
 	private boolean isBlueFlagTaken = false;
 	private boolean isRedFlagTaken = false;
+	private TaskGameProcess cycle;
 	
 	MapController mapController;
 	GameCTFOverlays itemizedoverlay;
@@ -281,9 +282,13 @@ public class GameCTF extends MapActivity {
 	    	// Is the game still in progress?
 	    	if(isRunning) {
 	    		
-	    		// Only call for another execution if the previous one is finished (we don't want to overload on data)
-	    		Log.i(TAG, "Processor Status: " + new TaskGameProcess().getStatus());
-	    		new TaskGameProcess().execute();
+	    		
+	    		// Run the task only if the previous one is null or finished
+	    		// AsyncTasks are designed to run only ONCE per lifetime
+	    		if(cycle == null || cycle.getStatus() == AsyncTask.Status.FINISHED) {
+		    		cycle = new TaskGameProcess();
+		    		cycle.execute();
+	    		}
 	    		
 	    		// Call for another execution later
 	    		gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
@@ -327,18 +332,24 @@ public class GameCTF extends MapActivity {
 		 * Processes the game object retrieved from the worker thread.
 		 * If game is NULL then the game will be stopped and the activity terminated.
 		 */
-		protected void onPostExecute(final JSONObject gameObject) {			
-			
-			Log.i(TAG, "Processing game data.");
-			// Clear all overlays
-			mapOverlays.clear();
-			itemizedoverlay.clear();
+		protected void onPostExecute(final JSONObject gameObject) {		
 			
 			// Stop game if the game is null
 			if(gameObject == null) {
 				stopGame();
 				return;
 			}
+			
+			if(!isValidGameObject(gameObject)) {
+				Log.e(TAG, "Invalid game object!");
+				return;
+			}
+			
+			Log.i(TAG, "Processing game data.");
+			
+			// Clear all overlays
+			mapOverlays.clear();
+			itemizedoverlay.clear();
 			
 			// For catching unforeseen errors
 			try {
@@ -467,7 +478,7 @@ public class GameCTF extends MapActivity {
 								overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
 								isBlueFlagTaken = true;
 							} else if(isObserver) {
-								overlayitem.setMarker(drawable.get(R.drawable.person_red));
+								// set observer mode image here
 							} else if(isCurrentPlayer) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
 							}
@@ -483,7 +494,7 @@ public class GameCTF extends MapActivity {
 								overlayitem.setMarker(drawable.get(R.drawable.red_flag));
 								isRedFlagTaken = true;
 							} else if(isObserver) {
-								overlayitem.setMarker(drawable.get(R.drawable.person_blue));
+								// set observer mode image here
 							} else if(isCurrentPlayer) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
 							}
@@ -580,6 +591,27 @@ public class GameCTF extends MapActivity {
 			} catch (JSONException e) {
 				Log.e(TAG, "Error in gameProcess().processGame()", e);
 			}
+	    }
+	    
+	    /**
+	     * Is the game object provided valid?
+	     * @param jSubObj
+	     * @return
+	     */
+	    private boolean isValidGameObject(JSONObject game) {
+    		if(!game.has("origin") || !game.has("red_flag") || !game.has("blue_flag")) {
+    			Log.e(TAG, "Missing basic game data!");
+    			return false;
+    		}
+    		if(!game.has("red_bounds") || !game.has("blue_bounds")) {
+    			Log.e(TAG, "Missing bounds data!");
+    			return false;
+    		}
+    		if(!game.has("players")) {
+    			Log.e(TAG, "Missing bounds data!");
+    			return false;
+    		}
+	    	return true;
 	    }
 	}
 }
