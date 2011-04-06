@@ -100,7 +100,7 @@
  		<TextView
   			android:id="@+id/menu_scores"
  			android:text="@string/menu_scores"
- 			android:drawableTop="@drawable/center_self"
+ 			android:drawableTop="@drawable/scoreboard"
  			android:textColor="@color/menu_text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
  		<TextView
   			android:id="@+id/menu_quit"
  			android:text="@string/menu_quit"
- 			android:drawableTop="@drawable/center_self"
+ 			android:drawableTop="@drawable/exit"
  			android:textColor="@color/menu_text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

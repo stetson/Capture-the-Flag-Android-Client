@@ -249,6 +249,8 @@ public class GameCTF extends MapActivity {
 		drawable.put(R.drawable.person_blue_owner, this.getResources().getDrawable(R.drawable.person_blue_owner));
 		drawable.put(R.drawable.person_red, this.getResources().getDrawable(R.drawable.person_red));
 		drawable.put(R.drawable.person_blue, this.getResources().getDrawable(R.drawable.person_blue));
+		drawable.put(R.drawable.grey_observer, this.getResources().getDrawable(R.drawable.grey_observer));
+		drawable.put(R.drawable.grey_observer_owner, this.getResources().getDrawable(R.drawable.grey_observer_owner));
 		
 		// Set the anchors here
 		Collection<Drawable> c = drawable.values();
@@ -467,8 +469,16 @@ public class GameCTF extends MapActivity {
 							CurrentUser.setIsObserver(isObserver);
 						}
 						
+						// if player is observer, we don't care about their team
+						if(isObserver) {
+							if(isCurrentPlayer) {
+								overlayitem.setMarker(drawable.get(R.drawable.grey_observer_owner));
+							} else {
+								overlayitem.setMarker(drawable.get(R.drawable.grey_observer));
+							}
+						
 						// if player is on the red team
-						if(team.equals("red")) {
+						} else if (team.equals("red")) {
 							
 							// Default marker for a red member
 							overlayitem.setMarker(drawable.get(R.drawable.person_red));
@@ -477,8 +487,6 @@ public class GameCTF extends MapActivity {
 							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
 								isBlueFlagTaken = true;
-							} else if(isObserver) {
-								// set observer mode image here
 							} else if(isCurrentPlayer) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
 							}
@@ -493,8 +501,6 @@ public class GameCTF extends MapActivity {
 							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.red_flag));
 								isRedFlagTaken = true;
-							} else if(isObserver) {
-								// set observer mode image here
 							} else if(isCurrentPlayer) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
 							}
