@@ -88,6 +88,15 @@ public class StetsonCTF extends Activity {
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
 		
 	}
+	public void onDestroy() {
+
+		super.onDestroy();
+		
+		// Stop GPS
+		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
+		firstStart = false;
+		
+	}
 	
 	/**
 	 * Connects the view components to listeners
