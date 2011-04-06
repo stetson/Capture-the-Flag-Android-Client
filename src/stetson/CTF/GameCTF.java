@@ -314,7 +314,7 @@ public class GameCTF extends MapActivity {
 			
 			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
 			CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
-			String data = Connections.sendFlatRequest(req);
+			String data = Connections.sendRequest(req);
 			try {
 				JSONObject jObject = new JSONObject(data);
 				return jObject;

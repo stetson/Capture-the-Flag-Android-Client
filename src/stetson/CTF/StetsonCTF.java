@@ -291,7 +291,7 @@ public class StetsonCTF extends Activity {
 			
 			// Sweet, we have a location, lets grab a list of games
 			HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
-			String data = Connections.sendFlatRequest(req);
+			String data = Connections.sendRequest(req);
 			try {
 				
 				JSONObject games = new JSONObject(data);
@@ -372,7 +372,7 @@ public class StetsonCTF extends Activity {
 				CurrentUser.setGameId(CurrentUser.getName());
 				HttpPost hp = new HttpPost(SERVER_URL + "/game/");
 				CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
-				String data = Connections.sendFlatRequest(hp);
+				String data = Connections.sendRequest(hp);
 
 				try {
 					JSONObject response = new JSONObject(data);
@@ -393,7 +393,7 @@ public class StetsonCTF extends Activity {
 			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 			HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
 			CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
-			String data = Connections.sendFlatRequest(hp);
+			String data = Connections.sendRequest(hp);
 			
 			try {
 				JSONObject jsonGame = new JSONObject(data);

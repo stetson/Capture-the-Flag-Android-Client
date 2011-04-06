@@ -17,21 +17,11 @@ public class Connections {
 	public final static String TAG = "Connections";
 	
 	/**
-	 * Makes an HTTP request and sends it to a response listener once completed.
-	 * @param request
-	 * @param responseListener
-	 */
-	public static void sendRequest(final HttpRequestBase request, ResponseListener responseListener) {
-		Log.i(TAG, "ConnectionR: " + request.getURI());
-		(new AsynchronousSender(request, new Handler(), new CallbackWrapper(responseListener))).start();
-	}
-	
-	/**
 	 * Makes an HTTP request and returns a response as a string.
 	 * @param request
 	 * @return response
 	 */
-	public static String sendFlatRequest(HttpRequestBase request) {
+	public static String sendRequest(HttpRequestBase request) {
 		
 		Log.i(TAG, "ConnectionF: " + request.getURI());
 		
