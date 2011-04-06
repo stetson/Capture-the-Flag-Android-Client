@@ -295,7 +295,7 @@ public class GameCTF extends MapActivity {
      * The AsyncTask used for processing game updates.
      * (Generics: Params, Progress, Result)
      */
-	private class TaskGameProcess extends AsyncTask<Void, Void, JSONObject> {
+	public class TaskGameProcess extends AsyncTask<Void, Void, JSONObject> {
 		
 		/**
 		 * Run as the work on another thread.
@@ -450,38 +450,91 @@ public class GameCTF extends MapActivity {
 						GeoPoint marker = new GeoPoint(lati, loni);
 						OverlayItem overlayitem = new OverlayItem(marker, "Player: " + player.getString("name"), player.getString("name"));
 						
-						boolean hasFlag = player.getBoolean("has_flag");
 						boolean isCurrentPlayer = playerKey.equals(CurrentUser.getUID());
+						boolean isObserver = player.getBoolean("observer_mode");
+						boolean hasFlag = player.getBoolean("has_flag");
+						
 						String team = player.getString("team");
 						
-						// Red team member has blue flag
-						if(team.equals("red") && hasFlag) {
-							overlayitem.setMarker(drawable.get(R.drawable.blue_flag));	
-							
-						// Blue team member has red flag
-						} else if(team.equals("blue") && hasFlag) {
-							overlayitem.setMarker(drawable.get(R.drawable.red_flag));	
-							
-						// Just a red player
-						} else if(team.equals("red")) {
-							
-							if(isCurrentPlayer) {
-								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
-							} else {
-								overlayitem.setMarker(drawable.get(R.drawable.person_red));
-							}
-							
-						// Just a blue player
-						} else if(team.equals("blue")) {
-							
-							if(isCurrentPlayer) {
-								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
-							} else {
-								overlayitem.setMarker(drawable.get(R.drawable.person_blue));
-							}
-							
-						}
 						
+						// if player is on the red team
+						if(team.equals("red"))
+						{
+							// Player is red
+							overlayitem.setMarker(drawable.get(R.drawable.person_red));
+							
+							// if player is Current Player
+							if(isCurrentPlayer)
+							{
+							// Player is now red owner
+								overlayitem.setMarker(drawable.get(R.drawable.person_red_owner));
+								
+								// if Current Player has flag
+								if(hasFlag)
+								{
+									overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
+								}
+								// if Current Player is in observer mode
+								
+								if(isObserver)
+								{
+									CurrentUser.setIsObserver(true);
+								}
+								else
+								{
+									CurrentUser.setIsObserver(false);
+								}
+							}
+							// if red player has the blue flag
+							if(hasFlag)
+							{
+								overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
+								CurrentUser.setHasBlueFlag(true);
+							}
+							else
+							{
+								CurrentUser.setHasBlueFlag(false);
+							}
+						}
+						// player must be on blue team
+						else
+						{
+							// Player is blue
+							overlayitem.setMarker(drawable.get(R.drawable.person_blue));
+							
+							// if player is Current Player
+							if(isCurrentPlayer)
+							{
+							// Player is now blue owner
+								overlayitem.setMarker(drawable.get(R.drawable.person_blue_owner));
+								
+								// if Current Player has flag
+								if(hasFlag)
+								{
+									overlayitem.setMarker(drawable.get(R.drawable.red_flag));
+								}
+								// if Current Player is in observer mode
+								if(isObserver)
+								{
+									CurrentUser.setIsObserver(true);
+								}
+								else
+								{
+									CurrentUser.setIsObserver(false);
+								}
+							}
+							// if blue player has the red flag
+							if(hasFlag)
+							{
+								overlayitem.setMarker(drawable.get(R.drawable.red_flag));
+								CurrentUser.setHasRedFlag(true);
+							}
+							else
+							{
+								CurrentUser.setHasRedFlag(false);
+							}
+						}
+												
 						// Done? Lets add it :D
 						itemizedoverlay.addOverlay(overlayitem);
 					}
@@ -512,10 +565,13 @@ public class GameCTF extends MapActivity {
 				text = (TextView) findViewById(R.id.gameInfo_connection);
 				text.setText(getString(R.string.game_info_accuracy) + CurrentUser.getAccuracy());
 				
-				// Adding red flag
+				int lat,lon;
+				
+				// Adding red flag, if it hasn't been captured
+				if(!CurrentUser.getHasRedFlag()) {
 				JSONObject red_flag = game.getJSONObject("red_flag");
-				int lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
-		    	int lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
+				lat = (int) (1E6 * Double.parseDouble(red_flag.getString("latitude")));
+		    	lon = (int) (1E6 * Double.parseDouble(red_flag.getString("longitude")));
 
 				GeoPoint red_marker = new GeoPoint(lat, lon);
 				OverlayItem red_overlayitem = new OverlayItem(red_marker, "Red Flag", "");
@@ -523,8 +579,10 @@ public class GameCTF extends MapActivity {
 				itemizedoverlay.addOverlay(red_overlayitem);
 				
 				Log.i(TAG, "Adding red_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				}
 				
-				// Adding blue flag
+				// Adding blue flag, if it hasn't been captured
+				if(!CurrentUser.getHasBlueFlag()) {
 				JSONObject blue_flag = game.getJSONObject("blue_flag");
 				lat = (int) (1E6 * Double.parseDouble(blue_flag.getString("latitude")));
 		    	lon = (int) (1E6 * Double.parseDouble(blue_flag.getString("longitude")));
@@ -532,9 +590,11 @@ public class GameCTF extends MapActivity {
 				GeoPoint blue_marker = new GeoPoint(lat, lon);
 				OverlayItem blue_overlayitem = new OverlayItem(blue_marker, "Blue Flag", "");
 				blue_overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
+				
 				itemizedoverlay.addOverlay(blue_overlayitem);
 				
-				Log.i(TAG, "Adding blue_flag: " + red_flag.getString("latitude") + red_flag.getString("longitude"));
+				Log.i(TAG, "Adding blue_flag: " + blue_flag.getString("latitude") + blue_flag.getString("longitude"));
+				}
 				
 				// Get Red boundaries
 				JSONObject redBounds = game.getJSONObject("red_bounds");

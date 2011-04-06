@@ -8,10 +8,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import stetson.CTF.GameCTF.TaskGameProcess;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +25,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -40,7 +46,7 @@ public class StetsonCTF extends Activity {
 	public static final int GPS_UPDATE_DISTANCE_GAME = 0;
 	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
 	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
-	
+	public static boolean firstStart = true;
 	// Data Members
 
 	/**
@@ -56,7 +62,6 @@ public class StetsonCTF extends Activity {
 		
 		// Move back to the game selection panel
 		setContentView(R.layout.intro);
-		
 		// Build listeners
 		buildListeners();
 		
@@ -208,8 +213,17 @@ public class StetsonCTF extends Activity {
 		 * Remove all children from group view and post a loading message.
 		 */
 		protected void onPreExecute() {
+			
+			if(StetsonCTF.firstStart)
+			{
+				Intent titleScreen = new Intent(mContext, Title.class);
+				startActivity(titleScreen);
+				StetsonCTF.firstStart = false;
+			}
 			gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
 			gamesGroup.removeAllViews();
+			
+			
 		}
 		
 		/**
