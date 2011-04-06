@@ -8,71 +8,109 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 android:focusable="true" 
 android:focusableInTouchMode="true"
 >
-	<ScrollView
-	android:id="@+id/games_frame"
-	android:layout_height="wrap_content"
-	android:layout_width="fill_parent"
-	android:layout_weight="1"
-	android:gravity="top"
-	android:padding="5px"
-	android:layout_above="@+id/controls_frame"
-	>
 	
-		<LinearLayout
-		android:id="@+id/games_list_container"
+	<RelativeLayout
+	android:id="@+id/loading_frame"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_alignParentTop="true"
+	android:layout_weight="2"
+	android:orientation="vertical"
+	android:background="#d5d5d5"
+	>
+		<ImageView
+		android:background="@drawable/load_screen"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerInParent="true"
+		/>
+		
+		<TextView
+		android:id="@+id/loading_text"
+		android:layout_centerHorizontal="true"
+		android:layout_alignParentBottom="true"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:padding="5px"
+		android:textColor="#000000"
+		android:textSize="18px"
+		/>
+	
+	</RelativeLayout>
+	
+	<RelativeLayout
+	android:id="@+id/games_frame"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_alignParentTop="true"
+	android:visibility="gone"
+	>
+		<ScrollView
+		android:id="@+id/games_frame"
+		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:orientation="vertical"
+		android:layout_weight="1"
+		android:gravity="top"
+		android:padding="5px"
+		android:layout_above="@+id/controls_frame"
 		>
-			<RadioGroup
-			android:id="@+id/games_list_group"
+		
+			<LinearLayout
+			android:id="@+id/games_list_container"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:orientation="vertical"
-			></RadioGroup>
-		</LinearLayout>
-	
-	</ScrollView>
-	
-	<RelativeLayout
-	android:id="@+id/controls_frame"
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:layout_alignParentBottom="true"
-	android:padding="5px"
-	android:layout_weight="1"
-	android:gravity="bottom"
-	>
-		<EditText
-		android:id="@+id/name_text"
+			>
+				<RadioGroup
+				android:id="@+id/games_list_group"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:orientation="vertical"
+				></RadioGroup>
+			</LinearLayout>
+		
+		</ScrollView>
+		
+		<RelativeLayout
+		android:id="@+id/controls_frame"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:hint="@string/enter_name"
-		android:imeOptions="actionSend|flagNoEnterAction"
-		android:textSize="18sp"
-		android:layout_centerHorizontal="true"
-		></EditText>
-		
-		<Button
-		android:id="@+id/joingame_button"
-		android:layout_width="120px"
-		android:layout_height="wrap_content"
-		android:text="@string/join_game"
-		android:layout_below="@id/name_text"
-		android:layout_alignParentLeft="true" 
+		android:layout_alignParentBottom="true"
+		android:padding="5px"
+		android:layout_weight="1"
+		android:gravity="bottom"
 		>
-		</Button>
+			<EditText
+			android:id="@+id/name_text"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:hint="@string/enter_name"
+			android:imeOptions="actionSend|flagNoEnterAction"
+			android:textSize="18sp"
+			android:layout_centerHorizontal="true"
+			></EditText>
+			
+			<Button
+			android:id="@+id/joingame_button"
+			android:layout_width="120px"
+			android:layout_height="wrap_content"
+			android:text="@string/join_game"
+			android:layout_below="@id/name_text"
+			android:layout_alignParentLeft="true" 
+			>
+			</Button>
+			
+			<Button
+			android:id="@+id/newgame_button"
+			android:layout_width="120px"
+			android:layout_height="wrap_content"
+			android:text="@string/create_game"
+			android:layout_below="@id/name_text"
+			android:layout_alignParentRight="true" 
+			>
+			</Button>
 		
-		<Button
-		android:id="@+id/newgame_button"
-		android:layout_width="120px"
-		android:layout_height="wrap_content"
-		android:text="@string/create_game"
-		android:layout_below="@id/name_text"
-		android:layout_alignParentRight="true" 
-		>
-		</Button>
-	
+		</RelativeLayout>
 	</RelativeLayout>
 	
 </RelativeLayout>

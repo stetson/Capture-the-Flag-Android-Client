@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,10 @@ public class StetsonCTF extends Activity {
 	public static final int GPS_UPDATE_DISTANCE_GAME = 0;
 	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
 	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
+	
+	// Constants: Loading window control
+	public static final String UPDATE_LOAD_MESSAGE = "DO_NOTHING";
+	public static final String HIDE_LOAD_SCREEN = "HIDE_LOAD_SCREEN";
 	
 	// Data Members
 
@@ -217,10 +222,24 @@ public class StetsonCTF extends Activity {
 		 * Clears the gamesGroup view and adds a message with the progress text.
 		 */
 	     protected void onProgressUpdate(String... progress) {
-	    	 gamesGroup.removeAllViews();
-	    	 TextView text = new TextView(mContext);
-	    	 text.setText(progress[0]);
-	    	 gamesGroup.addView(text);
+	    	 
+				// Hide load screen if requested
+				if(progress[0].equals(HIDE_LOAD_SCREEN)) {
+					RelativeLayout loadScreen = (RelativeLayout) findViewById(R.id.loading_frame);
+					RelativeLayout gameScreen = (RelativeLayout) findViewById(R.id.games_frame);
+					loadScreen.setVisibility(RelativeLayout.GONE);
+					gameScreen.setVisibility(RelativeLayout.VISIBLE);
+				}
+				
+				// Display a load screen message and games list screen
+				TextView loadScreenText = (TextView) findViewById(R.id.loading_text);
+				loadScreenText.setText(progress[1]);
+				
+				gamesGroup.removeAllViews();
+				TextView text = new TextView(mContext);
+				text.setText(progress[1]);
+				gamesGroup.addView(text);
+
 	     }
 	     
 		/**
@@ -262,7 +281,7 @@ public class StetsonCTF extends Activity {
 			
 			ArrayList<String> gamesList = new ArrayList<String>();
 			
-			publishProgress(mContext.getString(R.string.loading_location));
+			publishProgress(UPDATE_LOAD_MESSAGE, mContext.getString(R.string.loading_location));
 			
 			// We might still be waiting for a location...
 			while(!CurrentUser.hasLocation()) {
@@ -273,7 +292,7 @@ public class StetsonCTF extends Activity {
 				}
 			}
 			
-			publishProgress(mContext.getString(R.string.loading_games));
+			publishProgress(HIDE_LOAD_SCREEN, mContext.getString(R.string.loading_games));
 			
 			// Sweet, we have a location, lets grab a list of games
 			HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
