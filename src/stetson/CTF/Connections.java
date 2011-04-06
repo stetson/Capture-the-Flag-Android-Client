@@ -9,7 +9,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import android.os.Handler;
 import android.util.Log;
 
 public class Connections {

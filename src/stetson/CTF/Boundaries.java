@@ -16,22 +16,32 @@ public class Boundaries extends Overlay {
 	public GeoPoint blueTopLeftBoundary;
 	public GeoPoint blueBottomRightBoundary;
 
-	public void setRedBounds(GeoPoint topLeft, GeoPoint bottomRight)
-	{
+	/**
+	 * Sets the bounds of the red zone.
+	 * @param topLeft
+	 * @param bottomRight
+	 */
+	public void setRedBounds(GeoPoint topLeft, GeoPoint bottomRight) {
 		redTopLeftBoundary = topLeft;
 		redBottomRightBoundary = bottomRight;
 	}
-	public void setBlueBounds(GeoPoint topLeft, GeoPoint bottomRight)
-	{
+	
+	/**
+	 * Sets the bounds of the blue zone.
+	 * @param topLeft
+	 * @param bottomRight
+	 */
+	public void setBlueBounds(GeoPoint topLeft, GeoPoint bottomRight) {
 		blueTopLeftBoundary = topLeft;
 		blueBottomRightBoundary = bottomRight;
 	}
 	
-	public void draw(android.graphics.Canvas canvas, MapView mapView, boolean shadow) 
-	{ 
+	/**
+	 * Draws the red and blue boundaries on the map canvas.
+	 */
+	public void draw(android.graphics.Canvas canvas, MapView mapView, boolean shadow) { 
 		
 		// Draw Red Rectangle
-		
 		Paint redPaint = new Paint();
 		redPaint.setColor(Color.RED);
 		redPaint.setAlpha(40);
@@ -42,7 +52,6 @@ public class Boundaries extends Overlay {
 		canvas.drawRect(new Rect(redTopLeft.x,redTopLeft.y,redBottomRight.x,redBottomRight.y), redPaint);
 		
 		// Draw Blue Rectangle
-		
 		Paint bluePaint = new Paint();
 		bluePaint.setColor(Color.BLUE);
 		bluePaint.setAlpha(40);
@@ -50,8 +59,7 @@ public class Boundaries extends Overlay {
 		Point blueBottomRight = new Point();
 		mapView.getProjection().toPixels(blueTopLeftBoundary,blueTopLeft);
 		mapView.getProjection().toPixels(blueBottomRightBoundary,blueBottomRight);
-		
 		canvas.drawRect(new Rect(blueTopLeft.x,blueTopLeft.y,blueBottomRight.x,blueBottomRight.y), bluePaint);
-		
 	} 
+	
 }
