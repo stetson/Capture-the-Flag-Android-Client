@@ -451,6 +451,10 @@ public class GameCTF extends MapActivity {
 						
 						String team = player.getString("team");
 						
+						// Set observer mode bool for current player
+						if(isCurrentPlayer) {
+							CurrentUser.setIsObserver(isObserver);
+						}
 						
 						// if player is on the red team
 						if(team.equals("red")) {
@@ -461,6 +465,7 @@ public class GameCTF extends MapActivity {
 							// Logical order: flag, observer, self
 							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.blue_flag));
+								isBlueFlagTaken = true;
 							} else if(isObserver) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_red));
 							} else if(isCurrentPlayer) {
@@ -476,6 +481,7 @@ public class GameCTF extends MapActivity {
 							// Logical order: flag, observer, self
 							if(hasFlag) {
 								overlayitem.setMarker(drawable.get(R.drawable.red_flag));
+								isRedFlagTaken = true;
 							} else if(isObserver) {
 								overlayitem.setMarker(drawable.get(R.drawable.person_blue));
 							} else if(isCurrentPlayer) {
