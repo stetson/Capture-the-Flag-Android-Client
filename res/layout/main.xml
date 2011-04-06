@@ -11,7 +11,7 @@ android:background="#d5d5d5"
 	
 		<ImageView
 		android:id="@+id/loading_image"
-		android:background="@drawable/load_screen"
+		android:background="@drawable/load_screen3"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:layout_centerInParent="true"
