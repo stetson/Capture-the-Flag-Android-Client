@@ -2,7 +2,6 @@ package stetson.CTFGame;
 
 import java.util.ArrayList;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.Toast;

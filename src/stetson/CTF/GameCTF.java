@@ -10,7 +10,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import stetson.CTFGame.Boundaries;
 import stetson.CTFGame.GameCTFOverlays;
 import stetson.CTFGame.GameData;
 import stetson.CTFGame.Player;
