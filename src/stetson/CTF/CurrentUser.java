@@ -111,7 +111,7 @@ public class CurrentUser {
         params.add(new BasicNameValuePair("longitude", Double.toString(CurrentUser.longitude)));
         
         // Accuracy and UID for joining a game and requesting location updates
-        if(type == JOIN_PARAMS || type == UPDATE_PARAMS) {
+        if(type == JOIN_PARAMS || type == UPDATE_PARAMS || type == CREATE_PARAMS) {
         	params.add(new BasicNameValuePair("accuracy",  Double.toString(CurrentUser.accuracy)));
         	params.add(new BasicNameValuePair("user_id", CurrentUser.uid));
         }
