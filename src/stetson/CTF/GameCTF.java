@@ -21,6 +21,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -117,9 +119,18 @@ public class GameCTF extends MapActivity {
         
         myGameData = new GameData();
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
-
+		
+		mapView.setLongClickable(true);
+		registerForContextMenu(mapView);
 	}
-	
+
+    public void onCreateContextMenu(ContextMenu menu, View v,ContextMenuInfo menuInfo) {
+    	super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle("Context Menu");
+		menu.add(0, v.getId(), 0, "Action 1");
+		menu.add(0, v.getId(), 0, "Action 2");
+	}
+
 	/**
 	 * When the activity is ended, we need to clear the users game and location.
 	 */
@@ -250,6 +261,10 @@ public class GameCTF extends MapActivity {
 				return;
 		}
 		
+		// Reset centering
+		isCentering = CENTER_NONE;
+		
+		// Move the map view
 		if(location != null) {
 			mapView.getController().animateTo(location);
 		}
