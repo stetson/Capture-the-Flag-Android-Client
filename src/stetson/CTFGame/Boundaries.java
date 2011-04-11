@@ -1,4 +1,4 @@
-package stetson.CTF;
+package stetson.CTFGame;
 
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,10 +11,10 @@ import com.google.android.maps.Overlay;
 
 public class Boundaries extends Overlay {
 	
-	public GeoPoint redTopLeftBoundary;
-	public GeoPoint redBottomRightBoundary;
-	public GeoPoint blueTopLeftBoundary;
-	public GeoPoint blueBottomRightBoundary;
+	private GeoPoint redTopLeftBoundary;
+	private GeoPoint redBottomRightBoundary;
+	private GeoPoint blueTopLeftBoundary;
+	private GeoPoint blueBottomRightBoundary;
 
 	/**
 	 * Sets the bounds of the red zone.
