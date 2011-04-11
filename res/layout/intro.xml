@@ -23,13 +23,22 @@ android:focusableInTouchMode="true"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
 		android:orientation="vertical"
-		>
+		>	
 			<RadioGroup
 			android:id="@+id/games_list_group"
 			android:layout_width="fill_parent"
 			android:layout_height="fill_parent"
 			android:orientation="vertical"
-			></RadioGroup>
+			>
+			</RadioGroup>
+			
+			<Button 
+			android:id="@+id/joingame_button"
+			android:text="@string/join_game" 
+			android:layout_height="45px" 
+			android:layout_width="120px"
+			>
+			</Button>	
 		</LinearLayout>
 
 	</ScrollView>
@@ -54,23 +63,12 @@ android:focusableInTouchMode="true"
 		></EditText>
 
 		<Button
-		android:id="@+id/joingame_button"
-		android:layout_width="120px"
-		android:layout_height="wrap_content"
-		android:text="@string/join_game"
-		android:layout_below="@id/name_text"
-		android:layout_alignParentLeft="true" 
-		>
-		</Button>
-
-		<Button
 		android:id="@+id/newgame_button"
-		android:layout_width="120px"
-		android:layout_height="wrap_content"
 		android:text="@string/create_game"
 		android:layout_below="@id/name_text"
 		android:layout_alignParentRight="true" 
-		>
+		android:layout_width="fill_parent" 
+		android:layout_height="100px">
 		</Button>
 
 	</RelativeLayout>

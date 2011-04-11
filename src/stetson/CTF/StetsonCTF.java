@@ -24,6 +24,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+//import android.media.MediaPlayer;
 
 public class StetsonCTF extends Activity {
 	
@@ -41,6 +42,9 @@ public class StetsonCTF extends Activity {
 	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
 	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
 	public static boolean firstStart = true;
+	//Sound file
+	//public MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.absorb1);
+	
 	// Data Members
 
 	/**
@@ -60,6 +64,7 @@ public class StetsonCTF extends Activity {
 		buildListeners();
 		
 		Log.i(TAG, "Activity ready!");
+		
 	}
 	
 	/**
@@ -71,6 +76,8 @@ public class StetsonCTF extends Activity {
 		
 		// Start GPS
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_INTRO);
+		//mp.start();
+		
 		
 		// Build a new games list
 		buildGamesList();
@@ -86,6 +93,7 @@ public class StetsonCTF extends Activity {
 		
 		// Stop GPS
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
+		//mp.stop();
 		
 	}
 	public void onDestroy() {
@@ -95,6 +103,7 @@ public class StetsonCTF extends Activity {
 		// Stop GPS
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
 		firstStart = false;
+		//mp.stop();
 		
 	}
 	
@@ -263,10 +272,18 @@ public class StetsonCTF extends Activity {
 			} else {
 				for(int i = 0; i < response.size(); i++) {
 					RadioButton rb;
+					Button jb;
+					
 					Log.i(TAG, "Adding game to view (" + response.get(i) + ")");
 					rb = new RadioButton(mContext);
 					rb.setText(response.get(i));
+					
+					jb = new Button(mContext);
+					jb.setText("Join");
+					
+					gamesGroup.addView(jb, 120, 45);
 					gamesGroup.addView(rb);
+					
 				}
 			}
 			
