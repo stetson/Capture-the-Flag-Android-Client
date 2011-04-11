@@ -106,6 +106,7 @@ public class GameCTF extends MapActivity {
 		mapView = (MapView) findViewById(R.id.mapView);
 		mapView.getController();
 		mapView.setBuiltInZoomControls(true);
+		mapView.setSatellite(true);
 		
 		// Build everything we need to run
 		buildDrawables();

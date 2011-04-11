@@ -13,64 +13,54 @@ android:focusableInTouchMode="true"
 	android:layout_height="wrap_content"
 	android:layout_width="fill_parent"
 	android:layout_weight="1"
-	android:gravity="top"
+	android:gravity="bottom"
 	android:padding="5px"
 	android:layout_above="@+id/controls_frame"
 	>
 
-		<LinearLayout
-		android:id="@+id/games_list_container"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:orientation="vertical"
-		>	
-			<RadioGroup
-			android:id="@+id/games_list_group"
-			android:layout_width="fill_parent"
-			android:layout_height="fill_parent"
-			android:orientation="vertical"
-			>
-			</RadioGroup>
-			
-			<Button 
-			android:id="@+id/joingame_button"
-			android:text="@string/join_game" 
-			android:layout_height="45px" 
-			android:layout_width="120px"
-			>
-			</Button>	
-		</LinearLayout>
+ 
+		<TableLayout 
+		android:id="@+id/tableLayout"
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent" 
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:stretchColumns="0">
+	
+	<TableRow>
+	<TextView
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="fill_parent"
+	    	android:text="TEST"/>
+		<Button 
+	    	android:id="@+id/join"
+	    	android:text="Join"
+	    	
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="fill_parent" 
+	    	
+	    	/>
+	</TableRow>
+</TableLayout>
 
 	</ScrollView>
 
-	<RelativeLayout
-	android:id="@+id/controls_frame"
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:layout_alignParentBottom="true"
-	android:padding="5px"
-	android:layout_weight="1"
-	android:gravity="bottom"
-	>
-		<EditText
-		android:id="@+id/name_text"
+		<Button
+		android:id="@+id/refresh_button"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:hint="@string/enter_name"
-		android:imeOptions="actionSend|flagNoEnterAction"
-		android:textSize="18sp"
-		android:layout_centerHorizontal="true"
-		></EditText>
-
+		android:text="Refresh"
+		android:layout_above="@+id/newgame_button"
+		>
+		</Button>
 		<Button
 		android:id="@+id/newgame_button"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
 		android:text="@string/create_game"
-		android:layout_below="@id/name_text"
-		android:layout_alignParentRight="true" 
-		android:layout_width="fill_parent" 
-		android:layout_height="100px">
+		android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true" 
+		
+		>
 		</Button>
-
+		
 	</RelativeLayout>
-
-</RelativeLayout>

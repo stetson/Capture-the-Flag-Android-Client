@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,10 +19,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 //import android.media.MediaPlayer;
@@ -57,7 +61,16 @@ public class StetsonCTF extends Activity {
 		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
-		
+		new Thread(new Runnable() {
+		    public void run() {
+		    	if(StetsonCTF.firstStart)
+				{
+					Intent titleScreen = new Intent(getBaseContext(), Title.class);
+					startActivity(titleScreen);
+					StetsonCTF.firstStart = false;
+				}
+		    }
+		  }).start();
 		// Move back to the game selection panel
 		setContentView(R.layout.intro);
 		// Build listeners
@@ -80,7 +93,7 @@ public class StetsonCTF extends Activity {
 		
 		
 		// Build a new games list
-		buildGamesList();
+//		buildGamesList();
 	
 	}
 	
@@ -95,6 +108,7 @@ public class StetsonCTF extends Activity {
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
 		//mp.stop();
 		
+		
 	}
 	public void onDestroy() {
 
@@ -102,8 +116,10 @@ public class StetsonCTF extends Activity {
 		
 		// Stop GPS
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
-		firstStart = false;
+		firstStart = true;
+		CurrentUser.setName("");
 		//mp.stop();
+		//mp.release();
 		
 	}
 	
@@ -119,57 +135,22 @@ public class StetsonCTF extends Activity {
 		newGameButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
 				
-				// Do nothing if we have no loction (still loading)
-				if(!CurrentUser.hasLocation()) {
-					return;
-				}
-				
-				// Get name
-				EditText et = (EditText) findViewById(R.id.name_text);
-				CurrentUser.setName(et.getText().toString());
-				
 				// Create the new game :)
 				joinGame(CurrentUser.getName(), "");
 				
 			}
 		});
+
 		
-		// Join a game
-		final Button joinGameButton = (Button) findViewById(R.id.joingame_button);
-		joinGameButton.setOnClickListener(new OnClickListener() {
+		// refresh list of games when user clicks
+		final Button refreshButton = (Button) findViewById(R.id.refresh_button);
+		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
-				
-				// Do nothing if we have no loction (still loading)
-				if(!CurrentUser.hasLocation()) {
-					return;
-				}
-				
-				RadioGroup gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-				String game = "";
 
-				int selected = gamesGroup.getCheckedRadioButtonId();
-				
-				// Join the specified game
-				if(selected > -1) {
-					RadioButton rb = (RadioButton) findViewById(selected);
-					game = (String) rb.getText();
-					CurrentUser.setGameId(game);
-					
-					// Get name
-					EditText et = (EditText) findViewById(R.id.name_text);
-					CurrentUser.setName(et.getText().toString());
-					
-					// Create the new game :)
-					joinGame(CurrentUser.getName(), CurrentUser.getGameId());
-					
-				// No game selected, notify user
-				} else {
-					Toast.makeText(view.getContext(), R.string.no_game_selected, Toast.LENGTH_SHORT).show();
-				}
-
+				buildGamesList();
 			}
 		});
-		
+
 	}
 	
 	/**
@@ -218,7 +199,11 @@ public class StetsonCTF extends Activity {
 		
     	protected static final long GPS_CHECK_PAUSE = 500;
 		private Context mContext = StetsonCTF.this;
-		private RadioGroup gamesGroup;
+		private int i;
+		private TextView[] text;
+		private Button[] button;
+		private TableRow row;
+		private TableLayout table;
 		
 		/**
 		 * Run before execution on the UI thread.
@@ -226,14 +211,11 @@ public class StetsonCTF extends Activity {
 		 */
 		protected void onPreExecute() {
 			
-			if(StetsonCTF.firstStart)
-			{
-				Intent titleScreen = new Intent(mContext, Title.class);
-				startActivity(titleScreen);
-				StetsonCTF.firstStart = false;
-			}
-			gamesGroup = (RadioGroup) findViewById(R.id.games_list_group);
-			gamesGroup.removeAllViews();
+			i = 0;
+			table = (TableLayout) findViewById(R.id.tableLayout);
+			row = new TableRow(mContext);
+			row.removeAllViews();
+			table.removeAllViews();
 			
 			
 		}
@@ -243,10 +225,13 @@ public class StetsonCTF extends Activity {
 		 * Clears the gamesGroup view and adds a message with the progress text.
 		 */
 	     protected void onProgressUpdate(String... progress) {
-	    	 gamesGroup.removeAllViews();
+	    	 table.removeAllViews();
+	    	 row.removeAllViews();
 	    	 TextView text = new TextView(mContext);
 	    	 text.setText(progress[0]);
-	    	 gamesGroup.addView(text);
+	    	 row.addView(text);
+	    	 table.removeAllViews();
+	    	 row.removeAllViews();
 	     }
 	     
 		/**
@@ -254,36 +239,41 @@ public class StetsonCTF extends Activity {
 		 * Clears the gameGroup view and adds a list of games to it.
 		 */
 		protected void onPostExecute(final ArrayList<String> response) {
-			gamesGroup.removeAllViews();
 			
+			row.removeAllViews();
+			table.removeAllViews();
 			// Something bad happened, unknown error :o
 			if(response == null) {
 		    	 TextView text = new TextView(mContext);
 		    	 text.setText(R.string.no_games_error);
-		    	 gamesGroup.addView(text);
+		    	 row.addView(text);
 		    	 
 		    // We have no games :(
 			} else if(response.isEmpty()) {
 		    	 TextView text = new TextView(mContext);
 		    	 text.setText(R.string.no_games);
-		    	 gamesGroup.addView(text);
+		    	 row.addView(text);
 		    	 
 		    // We have some games! Add them to the list :)
 			} else {
+				table.removeAllViews();
+				text = new TextView[response.size()];
+				button = new Button[response.size()];
 				for(int i = 0; i < response.size(); i++) {
-					RadioButton rb;
-					Button jb;
-					
 					Log.i(TAG, "Adding game to view (" + response.get(i) + ")");
-					rb = new RadioButton(mContext);
-					rb.setText(response.get(i));
-					
-					jb = new Button(mContext);
-					jb.setText("Join");
-					
-					gamesGroup.addView(jb, 120, 45);
-					gamesGroup.addView(rb);
-					
+					row = new TableRow(mContext);
+					text[i] = new TextView(mContext);
+					String gameName = response.get(i); 
+					 text[i].setText(gameName);
+					 
+					button[i]=  new Button(mContext);
+
+					button[i].setText("Join");
+					button[i].setTag(gameName);
+					button[i].setOnClickListener(new listener());
+					row.addView(text[i]);
+					row.addView(button[i]);
+					table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 				}
 			}
 			
@@ -427,9 +417,19 @@ public class StetsonCTF extends Activity {
 
 		    return GOOD_RESPONSE;
 		}
-		
-
 	     
+	}
+	
+	private class listener implements OnClickListener
+	{
+
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			String myGameName = (String) v.getTag();
+			CurrentUser.setGameId(myGameName);
+			joinGame(CurrentUser.getName(), myGameName);
+		}
+		
 	}
 	
 }

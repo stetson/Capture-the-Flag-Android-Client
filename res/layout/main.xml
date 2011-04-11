@@ -17,5 +17,22 @@ android:background="#d5d5d5"
 		android:layout_centerInParent="true"
 		android:scaleType="fitXY"
 		/>
+		<Button
+		android:id="@+id/guest"
+		android:layout_width="120px"
+		android:layout_height="wrap_content"
+		android:text="Guest"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentBottom="true" 
+		>
+		</Button><Button
+		android:id="@+id/facebook"
+		android:layout_width="120px"
+		android:layout_height="wrap_content"
+		android:text="Facebook"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true"
+		>
+		</Button>
 		
 </RelativeLayout>
