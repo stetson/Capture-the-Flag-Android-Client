@@ -14,6 +14,7 @@ import stetson.CTFGame.GameCTFOverlays;
 import stetson.CTFGame.GameData;
 import stetson.CTFGame.Player;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -119,16 +120,7 @@ public class GameCTF extends MapActivity {
         
         myGameData = new GameData();
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
-		
-		mapView.setLongClickable(true);
-		registerForContextMenu(mapView);
-	}
 
-    public void onCreateContextMenu(ContextMenu menu, View v,ContextMenuInfo menuInfo) {
-    	super.onCreateContextMenu(menu, v, menuInfo);
-		menu.setHeaderTitle("Context Menu");
-		menu.add(0, v.getId(), 0, "Action 1");
-		menu.add(0, v.getId(), 0, "Action 2");
 	}
 
 	/**
@@ -212,7 +204,7 @@ public class GameCTF extends MapActivity {
 					break;
 					
 				case R.id.menu_scores:
-					// display score board
+					buildScoreBoard();
 					break;
 					
 				case R.id.menu_quit:
@@ -223,6 +215,56 @@ public class GameCTF extends MapActivity {
 			centerMapView();
 		}
 	};
+	
+	private void buildScoreBoard() {
+		
+		if(myGameData == null || myGameData.hasError()) {
+			return;
+		}
+		
+		/*
+		 * This wont work because you can't change things on dialog before it is prepared.
+		 * Need to do stuff like this in onPrepareDialog()
+		 * - Jeremy
+		Dialog dialog = new Dialog(getApplicationContext());
+		dialog.setContentView(R.layout.game_scoreboard);
+		dialog.setTitle("Scoreboard");
+
+		LinearLayout board = (LinearLayout) this.findViewById(R.id.layout_root);
+		board.removeAllViews();
+		
+		// Add all the players to the score board
+		for(int p = 0; p < myGameData.getPlayerCount();p++) {
+			board.addView(buildScoreBoardLine(myGameData.getPlayer(p)));
+		}
+		
+		dialog.show();
+		*/
+		
+
+	}
+	
+	private LinearLayout buildScoreBoardLine(Player plr) {
+		LinearLayout line = new LinearLayout(this);
+		line.setOrientation(LinearLayout.HORIZONTAL);
+		
+		TextView text;
+		
+		text = new TextView(this);
+		text.setText(plr.getName());
+		line.addView(text);
+		
+		text = new TextView(this);
+		text.setText(plr.getTags());
+		line.addView(text);
+		
+		text = new TextView(this);
+		text.setText(plr.getCaptures());
+		line.addView(text);
+		
+		return line;
+		
+	}
 	
 	/*----------------------------------*
 	/* GAME RELATED FUNCTIONS START

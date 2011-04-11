@@ -1,6 +1,9 @@
 package stetson.CTFGame;
 
 import java.util.ArrayList;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -100,6 +103,15 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 		// Long Tap (show context menu)
 		if(isLongTap) {
 			
+			final CharSequence[] items = {"Option 1", "Option 2", "Option 3"};
+			AlertDialog.Builder builder = new AlertDialog.Builder(mapView.getContext());
+			builder.setTitle("Hello There!");
+			builder.setItems(items, new DialogInterface.OnClickListener() {
+			    public void onClick(DialogInterface dialog, int item) {
+			       
+			    }
+			});
+			AlertDialog alert = builder.create();
 			
 		// Short Tap (show toast)
 		} else {
