@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import stetson.CTF.GameCTF;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.MotionEvent;

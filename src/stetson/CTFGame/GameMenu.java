@@ -4,7 +4,7 @@ import com.google.android.maps.GeoPoint;
 
 import stetson.CTF.GameCTF;
 import stetson.CTF.R;
-import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,6 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class GameMenu {
+	
+	// Constants: To be used across entire application
+	public static final String TAG = "GameMenu";
 	
 	// Constants: Menu options
 	public static final int MENU_DEFAULT = 0;
@@ -57,22 +60,24 @@ public class GameMenu {
 		
 		// Add elements to the new alternate menu based on the type
 		if(type == MENU_FLAG){
-			altMenu.addView(createMenuOption("What?", myGame.getResources().getDrawable(R.drawable.center_self)));
-			altMenu.addView(createMenuOption("Move", myGame.getResources().getDrawable(R.drawable.center_self)));
+			altMenu.addView(createMenuOption("What?", R.id.menu_option_what, R.drawable.center_self));
+			altMenu.addView(createMenuOption("Move", R.id.menu_option_move, R.drawable.center_self));
 		} else if (type == MENU_PLAYER) {
-			altMenu.addView(createMenuOption("Who?", myGame.getResources().getDrawable(R.drawable.center_self)));
-			altMenu.addView(createMenuOption("Waypoints", myGame.getResources().getDrawable(R.drawable.center_self)));
+			altMenu.addView(createMenuOption("Who?", R.id.menu_option_who, R.drawable.center_self));
+			altMenu.addView(createMenuOption("Waypoints", R.id.menu_option_waypoints, R.drawable.center_self));
 		}
 		
 		// Fill the blank spots
-		altMenu.addView(createMenuOption("", null));
-		altMenu.addView(createMenuOption("", null));
+		altMenu.addView(createMenuOption("", -1, -1));
+		altMenu.addView(createMenuOption("", -1, -1));
 		
 		// Back Button
-		TextView backButton = createMenuOption("Back", myGame.getResources().getDrawable(R.drawable.exit));
+		TextView backButton = createMenuOption("Back", R.id.menu_option_back, R.drawable.exit);
 		backButton.setOnClickListener(onMenuClick);
+		altMenu.addView(backButton);
 
 	}
+	
 	/**
 	 * Toggles the currently visible menu (game or alternate).
 	 */
@@ -104,14 +109,22 @@ public class GameMenu {
 	 * @param text
 	 * @return
 	 */
-	private TextView createMenuOption(String text, Drawable icon) {
+	private TextView createMenuOption(String text, int id, int drawableID) {
 		TextView tv = new TextView(myGame);
 		tv.setTextColor(myGame.getResources().getColor(R.color.menu_text));
 		tv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT,(float) 0.20));
 		tv.setClickable(true);
 		tv.setGravity(Gravity.CENTER);
 		tv.setText(text);
-		tv.setCompoundDrawablesWithIntrinsicBounds(null,icon, null, null);
+		
+		if(id != -1) {
+			tv.setId(id);
+		}
+		
+		if(drawableID != -1) {
+			tv.setCompoundDrawablesWithIntrinsicBounds(null, myGame.getResources().getDrawable(drawableID), null, null);
+		}
+		
 		return tv;
 	}
 	
@@ -135,6 +148,7 @@ public class GameMenu {
 		public void onClick(View v) {
 			switch(v.getId()) {
 
+				// Default menu options
 				case R.id.menu_self:
 					myGame.centerMapView(GameCTF.CENTER_SELF);
 					break;
@@ -153,6 +167,27 @@ public class GameMenu {
 					
 				case R.id.menu_quit:
 					myGame.stopGame();
+					break;
+				
+				// Alternate menu options
+				case R.id.menu_option_who:
+					Log.i(TAG, "MENU OPTIONS -> WHO (PLAYER)");
+					break;
+					
+				case R.id.menu_option_what:
+					Log.i(TAG, "MENU OPTIONS -> WHAT (FLAG)");
+					break;
+					
+				case R.id.menu_option_move:
+					Log.i(TAG, "MENU OPTIONS -> MOVE FLAG");
+					break;
+					
+				case R.id.menu_option_waypoints:
+					Log.i(TAG, "MENU OPTIONS -> WAY POINTS");
+					break;
+					
+				case R.id.menu_option_back:
+					setMenu(GameMenu.MENU_DEFAULT, null, null, null);
 					break;
 					
 			}

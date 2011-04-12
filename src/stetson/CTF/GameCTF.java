@@ -15,7 +15,6 @@ import stetson.CTFGame.GameData;
 import stetson.CTFGame.GameMenu;
 import stetson.CTFGame.Player;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -23,13 +22,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
 import android.view.Menu;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.PowerManager;
@@ -88,11 +81,7 @@ public class GameCTF extends MapActivity {
 		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
-		
-		// Create the menu
-		myMenu = new GameMenu(this);
-		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null, null);
-		
+				
 		// Make sure the user is actually in a game
 		if(CurrentUser.getGameId().equals("")) {
 			this.stopGame();
@@ -105,6 +94,10 @@ public class GameCTF extends MapActivity {
 		
 		// Move back to the game selection panel
 		setContentView(R.layout.game);
+		
+		// Create the menu [must be created after setContentView() is run]
+		myMenu = new GameMenu(this);
+		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null, null);
 		
 		// Make sure gps is running at the right speed
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);

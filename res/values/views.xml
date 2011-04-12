@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<!-- View IDs to be used in dynamic alternate menus -->
+	<item type="id" name="menu_option_who" />
+	<item type="id" name="menu_option_what" />
+	<item type="id" name="menu_option_waypoints" />
+	<item type="id" name="menu_option_move" />
+    <item type="id" name="menu_option_back" />
+    
+</resources>
