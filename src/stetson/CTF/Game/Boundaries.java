@@ -62,4 +62,11 @@ public class Boundaries extends Overlay {
 		canvas.drawRect(new Rect(blueTopLeft.x,blueTopLeft.y,blueBottomRight.x,blueBottomRight.y), bluePaint);
 	} 
 	
+	public GeoPoint getTopLeft() {
+		return redTopLeftBoundary;
+	}
+	
+	public GeoPoint getBottomRight() {
+		return blueBottomRightBoundary;
+	}
 }

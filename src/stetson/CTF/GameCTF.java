@@ -349,9 +349,20 @@ public class GameCTF extends MapActivity {
 			Log.i(TAG, "GameProcess()...");
 			
 			// Is this the first map data we have gotten?
-			if(hasCenteredOrigin) {
-				centerMapView(GameCTF.CENTER_ORIGIN);
+			if(!hasCenteredOrigin) {
+				
 				hasCenteredOrigin = true;
+				
+				GeoPoint topLeft = myGameData.getBounds().getTopLeft();
+				GeoPoint botRight = myGameData.getBounds().getBottomRight();
+				
+				int maxLatitude = topLeft.getLatitudeE6();
+				int minLatitude = botRight.getLatitudeE6();
+				int maxLongitude = topLeft.getLongitudeE6();
+				int minLongitude = botRight.getLongitudeE6();
+				
+				mapView.getController().zoomToSpan((maxLatitude - minLatitude),(maxLongitude - minLongitude));
+				centerMapView(GameCTF.CENTER_ORIGIN);
 			}
 			
 			// Remove all overlay items
