@@ -175,11 +175,11 @@ public class GameMenu {
 					break;
 					
 				case R.id.menu_scores:
-					myGame.buildScoreBoard();
+					myGame.getGameScores().showScores();
 					break;
 					
 				case R.id.menu_quit:
-					myGame.stopGame();
+					myGame.finish();
 					break;
 				
 				// Alternate menu options

@@ -14,6 +14,7 @@ import stetson.CTFGame.GameCTFOverlays;
 import stetson.CTFGame.GameData;
 import stetson.CTFGame.GameInfoBar;
 import stetson.CTFGame.GameMenu;
+import stetson.CTFGame.GameScores;
 import stetson.CTFGame.Player;
 
 import android.content.Context;
@@ -24,8 +25,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.os.PowerManager;
 
 import com.google.android.maps.GeoPoint;
@@ -56,20 +55,22 @@ public class GameCTF extends MapActivity {
 	// Drawables hash map
 	private HashMap<Integer,Drawable> drawable = new HashMap<Integer, Drawable>(10);
 	
-	// Data members
-	private GameData myGameData;
+	// Application Mechanics
 	private PowerManager.WakeLock ctfWakeLock;
+	
+	// Map Mechanics
 	private MapView mapView;
-	private Handler gameHandler = new Handler();
-	private TaskGameProcess cycle;
-	
 	private boolean hasCenteredOrigin = false;
-	
-	private GameMenu myMenu;
-	private GameInfoBar myInfoBar;
-	
 	private List<Overlay> mapOverlay;
 	private GameCTFOverlays mapOverlayMarkers;
+	
+	// Game Mechanics
+	private GameData myGameData;
+	private GameMenu myMenu;
+	private GameInfoBar myInfoBar;
+	private GameScores myScores;
+	private TaskGameProcess cycle;
+	private Handler gameHandler = new Handler();
 	
 	/*----------------------------------*
 	/* ACTIVITY RELATED FUNCTIONS START
@@ -88,7 +89,7 @@ public class GameCTF extends MapActivity {
 				
 		// Make sure the user is actually in a game
 		if(CurrentUser.getGameId().equals("")) {
-			this.stopGame();
+			this.finish();
 			return;
 		}
 		
@@ -107,10 +108,13 @@ public class GameCTF extends MapActivity {
 		myInfoBar = new GameInfoBar(this);
 		myInfoBar.setLoading();
 		
+		// Create the class for game scores
+		myScores = new GameScores(this);
+		
 		// Make sure gps is running at the right speed
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);
 		
- 		// Turns on built-in zoom controls
+ 		// Turns on built-in zoom controls and satellite view
 		mapView = (MapView) findViewById(R.id.mapView);
 		mapView.getController();
 		mapView.setBuiltInZoomControls(true);
@@ -123,23 +127,45 @@ public class GameCTF extends MapActivity {
 		mapOverlay = mapView.getOverlays();
         mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), this);
         
+        // Start game processing
         myGameData = new GameData();
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
 
 	}
 
 	/**
-	 * When the activity is ended, we need to clear the users game and location.
+	 * Run when the activity is stopped, such as .finish()
 	 */
 	public void onDestroy() {
 		
-		super.onDestroy();
+		// Stop any running cycle that may exist
+		if(cycle != null) {
+			cycle.cancel(true);
+			cycle = null;
+		}
 		
-		Log.i(TAG, "Stopping Map Activity");
+		// Remove the user from the game on the front end
 		CurrentUser.setGameId("");
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
 		
+		// Remove the user from the game on the back end
+		// We're using an anonymous thread here because we don't care about the response
+		// This is not a strictly required event
+		new Thread(new Runnable() {
+			public void run() {
+				/*
+				 * This is a stub. The server requirements are not yet known.
+				 * LEAVE_PARAMS must also be added to current user.
+				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/??????/");
+				CurrentUser.buildHttpParams(req, CurrentUser.LEAVE_PARAMS);
+				Connections.sendRequest(req);
+				*/
+			}
+		});
+			  
+		// Call last
+		super.onDestroy();
 	}
 	
 	/**
@@ -164,67 +190,13 @@ public class GameCTF extends MapActivity {
 	 */
 	public boolean onCreateOptionsMenu(Menu x) {
 		
-		// Toggle the visibility of the menu
 		myMenu.toggleMenu();
 		
 		// True means the native menu was launched successfully, so we must return false!
 		return false;
-	}
-		
-	public void buildScoreBoard() {
-		
-		if(myGameData == null || myGameData.hasError()) {
-			return;
-		}
-		
-		/*
-		 * This wont work because you can't change things on dialog before it is prepared.
-		 * Need to do stuff like this in onPrepareDialog()
-		 * - Jeremy
-		Dialog dialog = new Dialog(getApplicationContext());
-		dialog.setContentView(R.layout.game_scoreboard);
-		dialog.setTitle("Scoreboard");
-
-		LinearLayout board = (LinearLayout) this.findViewById(R.id.layout_root);
-		board.removeAllViews();
-		
-		// Add all the players to the score board
-		for(int p = 0; p < myGameData.getPlayerCount();p++) {
-			board.addView(buildScoreBoardLine(myGameData.getPlayer(p)));
-		}
-		
-		dialog.show();
-		*/
-		
-
-	}
-	
-	private LinearLayout buildScoreBoardLine(Player plr) {
-		LinearLayout line = new LinearLayout(this);
-		line.setOrientation(LinearLayout.HORIZONTAL);
-		
-		TextView text;
-		
-		text = new TextView(this);
-		text.setText(plr.getName());
-		line.addView(text);
-		
-		text = new TextView(this);
-		text.setText(plr.getTags());
-		line.addView(text);
-		
-		text = new TextView(this);
-		text.setText(plr.getCaptures());
-		line.addView(text);
-		
-		return line;
 		
 	}
-	
-	/*----------------------------------*
-	/* GAME RELATED FUNCTIONS START
-	/*----------------------------------*/
-	
+			
 	/**
 	 * Centers the map view on the requested centering target.
 	 */
@@ -269,21 +241,6 @@ public class GameCTF extends MapActivity {
 	}
 	
 	/**
-	 * Removes the user from the game and stops contact with the server.
-	 * Stops game processing if it is in progress and prohibits it from running until
-	 * it is created again (in a new activity).
-	 */
-	public void stopGame() {
-		
-		if(cycle != null) {
-			cycle.cancel(true);
-		}
-		
-		this.finish();
-		
-	}
-	
-	/**
 	 * Sets up all the drawables to be used as markers
 	 */
 	private void buildDrawables() {
@@ -320,39 +277,21 @@ public class GameCTF extends MapActivity {
 	}	
 	
 	/**
-	 * Returns a reference to the game's menu
-	 * @return
-	 */
-	public GameMenu getGameMenu() {
-		return myMenu;
-	}
-	
-	/**
-	 * Returns a reference to the game's game data
-	 * @return
-	 */
-	public GameData getGameData() {
-		return myGameData;
-	}
-	
-	/**
 	 * Game processor. Runs the GameProcess task every GAME_UPDATE_DELAY (ms).
 	 */
 	private final Runnable gameProcess = new Runnable() {
 	    public void run() {
-		
-		// Run the task only if the previous one is null or finished
-		// AsyncTasks are designed to run only ONCE per lifetime
-		if(cycle == null || cycle.getStatus() == AsyncTask.Status.FINISHED) {
-    		cycle = new TaskGameProcess();
-    		cycle.execute();
-		}
-		
-		// Call for another execution later
-		gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
-
-	    }
-	    
+			// Run the task only if the previous one is null or finished
+			// AsyncTasks are designed to run only ONCE per lifetime
+			if(cycle == null || cycle.getStatus() == AsyncTask.Status.FINISHED) {
+	    		cycle = new TaskGameProcess();
+	    		cycle.execute();
+			}
+			
+			// Call for another execution later
+			gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
+	
+	   }
 	};
 	
 	/**
@@ -492,6 +431,30 @@ public class GameCTF extends MapActivity {
 		    mapView.invalidate();
 			
 		}
+	}
+	
+	/**
+	 * Returns a reference to the game's menu
+	 * @return
+	 */
+	public GameScores getGameScores() {
+		return myScores;
+	}
+	
+	/**
+	 * Returns a reference to the game's menu
+	 * @return
+	 */
+	public GameMenu getGameMenu() {
+		return myMenu;
+	}
+	
+	/**
+	 * Returns a reference to the game's game data
+	 * @return
+	 */
+	public GameData getGameData() {
+		return myGameData;
 	}
 
 }
