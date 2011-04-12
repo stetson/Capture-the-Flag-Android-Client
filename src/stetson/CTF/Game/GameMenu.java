@@ -1,4 +1,4 @@
-package stetson.CTFGame;
+package stetson.CTF.Game;
 
 import com.google.android.maps.GeoPoint;
 

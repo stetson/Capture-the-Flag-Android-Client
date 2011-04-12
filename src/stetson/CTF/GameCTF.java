@@ -10,12 +10,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import stetson.CTFGame.GameCTFOverlays;
-import stetson.CTFGame.GameData;
-import stetson.CTFGame.GameInfoBar;
-import stetson.CTFGame.GameMenu;
-import stetson.CTFGame.GameScores;
-import stetson.CTFGame.Player;
+import stetson.CTF.Game.GameCTFOverlays;
+import stetson.CTF.Game.GameData;
+import stetson.CTF.Game.GameInfoBar;
+import stetson.CTF.Game.GameMenu;
+import stetson.CTF.Game.GameScores;
+import stetson.CTF.Game.Player;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

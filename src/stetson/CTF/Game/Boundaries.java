@@ -1,4 +1,4 @@
-package stetson.CTFGame;
+package stetson.CTF.Game;
 
 import android.graphics.Color;
 import android.graphics.Paint;

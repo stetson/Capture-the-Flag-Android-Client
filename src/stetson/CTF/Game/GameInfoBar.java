@@ -1,4 +1,4 @@
-package stetson.CTFGame;
+package stetson.CTF.Game;
 
 import android.widget.TextView;
 import stetson.CTF.GameCTF;
