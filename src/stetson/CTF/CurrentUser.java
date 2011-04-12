@@ -31,7 +31,7 @@ public class CurrentUser {
 	private static String uid = "";
 	private static double latitude = -1;
 	private static double longitude = -1;
-	private static double accuracy = -1;
+	private static float accuracy = -1;
 	private static boolean isObserver = false;
 	
 	// Game Info
@@ -55,7 +55,7 @@ public class CurrentUser {
 	public static void setGameId(String game) {
 		CurrentUser.gameId = game;
 	}
-	public static void setAccuracy(double accuracy) {
+	public static void setAccuracy(float accuracy) {
 		CurrentUser.accuracy = accuracy;
 	}
 	public static void setIsObserver(boolean isObserver) {
@@ -64,7 +64,7 @@ public class CurrentUser {
 	
 	
 	// Accessors
-	public static double getAccuracy() {
+	public static float getAccuracy() {
 		return CurrentUser.accuracy;
 	}
 	public static String getGameId() {
@@ -177,7 +177,7 @@ public class CurrentUser {
 			public void onLocationChanged(Location location) {
 				Log.i(TAG, "Update Location.");
 				CurrentUser.setLocation(location.getLatitude(), location.getLongitude());
-				CurrentUser.setAccuracy((double)location.getAccuracy());
+				CurrentUser.setAccuracy(location.getAccuracy());
 			}
 	
 			public void onStatusChanged(String provider, int status, Bundle extras) {}

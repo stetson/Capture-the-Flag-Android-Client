@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import stetson.CTFGame.GameCTFOverlays;
 import stetson.CTFGame.GameData;
+import stetson.CTFGame.GameInfoBar;
 import stetson.CTFGame.GameMenu;
 import stetson.CTFGame.Player;
 
@@ -63,7 +64,10 @@ public class GameCTF extends MapActivity {
 	private TaskGameProcess cycle;
 	
 	private boolean hasCenteredOrigin = false;
+	
 	private GameMenu myMenu;
+	private GameInfoBar myInfoBar;
+	
 	private List<Overlay> mapOverlay;
 	private GameCTFOverlays mapOverlayMarkers;
 	
@@ -99,6 +103,10 @@ public class GameCTF extends MapActivity {
 		myMenu = new GameMenu(this);
 		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null);
 		
+		// Create the game info bar (top of screen)
+		myInfoBar = new GameInfoBar(this);
+		myInfoBar.setLoading();
+		
 		// Make sure gps is running at the right speed
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);
 		
@@ -110,10 +118,7 @@ public class GameCTF extends MapActivity {
 		
 		// Build everything we need to run
 		buildDrawables();
-		
-		// Let the user know we're loading
-		clearGameInfo();
-		
+				
 	    // Setup overlay stuff
 		mapOverlay = mapView.getOverlays();
         mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), this);
@@ -262,38 +267,6 @@ public class GameCTF extends MapActivity {
 		}
 		
 	}
-
-	/**
-	 * Sets the game info bar to a loading state.
-	 */
-	public void clearGameInfo() {
-		TextView text;
-		text = (TextView) findViewById(R.id.gameInfo_red);
-		text.setText(getString(R.string.game_info_loading));
-		text = (TextView) findViewById(R.id.gameInfo_blue);
-		text.setText("");
-		text = (TextView) findViewById(R.id.gameInfo_connection);
-		text.setText("");
-	}
-	
-	/**
-	 * Updates the game info bar.
-	 */
-	public void updateGameInfo() {
-		
-		if(myGameData == null || myGameData.hasError()) {
-			return;
-		}
-		
-		TextView text;
-		text = (TextView) findViewById(R.id.gameInfo_red);
-		text.setText(getString(R.string.game_info_red) + myGameData.getRedScore());
-		text = (TextView) findViewById(R.id.gameInfo_blue);
-		text.setText(getString(R.string.game_info_blue) + myGameData.getBlueScore());
-		text = (TextView) findViewById(R.id.gameInfo_connection);
-		text.setText(getString(R.string.game_info_accuracy) + CurrentUser.getAccuracy());
-		
-	}
 	
 	/**
 	 * Removes the user from the game and stops contact with the server.
@@ -356,6 +329,7 @@ public class GameCTF extends MapActivity {
 	
 	/**
 	 * Returns a reference to the game's game data
+	 * @return
 	 */
 	public GameData getGameData() {
 		return myGameData;
@@ -439,7 +413,7 @@ public class GameCTF extends MapActivity {
 			mapOverlayMarkers.clear();
 						
 			// Update game info bar
-			updateGameInfo();
+			myInfoBar.update(myGameData.getRedScore(), myGameData.getBlueScore(), CurrentUser.getAccuracy());
 			
 			// Add Flags
 			if(!myGameData.isRedFlagTaken()) {
@@ -519,4 +493,5 @@ public class GameCTF extends MapActivity {
 			
 		}
 	}
+
 }

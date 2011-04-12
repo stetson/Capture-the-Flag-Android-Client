@@ -109,9 +109,13 @@ public class GameMenu {
 		
 	}
 	
+
 	/**
 	 * Creates a TextView button to be used within setMenu()
-	 * @param text
+	 * Any parameter may be set to -1 for no value.
+	 * @param the resource id for button text
+	 * @param the resource id for the button component
+	 * @param the resource id for the drawable
 	 * @return
 	 */
 	private TextView createMenuOption(int stringID, int componentID, int drawableID) {
