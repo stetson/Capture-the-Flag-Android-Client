@@ -155,12 +155,19 @@ public class GameCTF extends MapActivity {
 		new Thread(new Runnable() {
 			public void run() {
 				/*
-				 * This is a stub. The server requirements are not yet known.
-				 * LEAVE_PARAMS must also be added to current user.
-				HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/??????/");
-				CurrentUser.buildHttpParams(req, CurrentUser.LEAVE_PARAMS);
-				Connections.sendRequest(req);
-				*/
+				 * Leaving games has been implemented on the backend, but we cannot use them
+				 * without re-writing our connections base and overriding a bunch of functions
+				 * for HttpDelete. The specification for HTTP DELETE says that an entity should 
+				 * not be present and the APIs for connections was written accordingly. The server
+				 * is expecting an entity which we cannot provide without a lot of work and the
+				 * Violation of the HTTP DELETE specification.
+				 * - Jeremy
+				String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+				HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
+				req.setEntity(CurrentUser.buildHttpParams(CurrentUser.LEAVE_PARAMS));
+				String data = Connections.sendRequest(req);
+				Log.i(TAG, "LEAVE GAME => " + data);
+				 */
 			}
 		});
 			  
@@ -309,7 +316,7 @@ public class GameCTF extends MapActivity {
 			Log.i(TAG, "Grabbing game data...");
 			
 			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
-			CurrentUser.buildHttpParams(req, CurrentUser.UPDATE_PARAMS);
+			req.setEntity(CurrentUser.buildHttpParams(CurrentUser.UPDATE_PARAMS));
 			String data = Connections.sendRequest(req);
 			try {
 				JSONObject jObject = new JSONObject(data);

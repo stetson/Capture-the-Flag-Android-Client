@@ -378,7 +378,7 @@ public class StetsonCTF extends Activity {
 				
 				CurrentUser.setGameId(CurrentUser.getName());
 				HttpPost hp = new HttpPost(SERVER_URL + "/game/");
-				CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
+				hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.CREATE_PARAMS));
 				String data = Connections.sendRequest(hp);
 				Log.i(TAG, "RESPONSE: " +data);
 				
@@ -400,7 +400,7 @@ public class StetsonCTF extends Activity {
 			// If a game was created, then it was a success at this point! Now we must join the game.
 			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 			HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
-			CurrentUser.buildHttpParams(hp, CurrentUser.JOIN_PARAMS);
+			hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.JOIN_PARAMS));
 			String data = Connections.sendRequest(hp);
 			
 			try {
