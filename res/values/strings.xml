@@ -23,6 +23,14 @@
     <string name="menu_blue_flag">Blue Flag</string>
     <string name="menu_scores">Scores</string>
     <string name="menu_quit">Quit</string>
+    
+    <string name="menu_who">Who?</string>
+    <string name="menu_what">What?</string>
+    <string name="menu_move">Move</string>
+    <string name="menu_waypoints">Waypoint</string>
+    <string name="menu_back">Back</string>
+    
+    
     <string name="game_info_red">Red: </string>
     <string name="game_info_blue">Blue: </string>
     <string name="game_info_accuracy">Accuracy: </string>

@@ -4,12 +4,12 @@ import com.google.android.maps.GeoPoint;
 
 import stetson.CTF.GameCTF;
 import stetson.CTF.R;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class GameMenu {
 	
@@ -21,6 +21,7 @@ public class GameMenu {
 	public static final int MENU_FLAG = 1;
 	public static final int MENU_PLAYER = 2;
 	
+	private String alternateInfo;
 	private int menuType;
 	private GameCTF myGame;
 	
@@ -30,17 +31,20 @@ public class GameMenu {
 	}
 	
 	/**
-	 * 
-	 * @param type
-	 * @param id
-	 * @param text
-	 * @param point
+	 * Sets which menu to be displayed. If no menu is visible, one will be come visible.
+	 * To set default game menu, set 'info' and 'point' to null.
+	 * @param type of menu to be displayed
+	 * @param information used in alternate menus
+	 * @param point to highlight on the map
 	 */
-	public void setMenu(int type, String id, String text, GeoPoint point) {
+	public void setMenu(int type, String info, GeoPoint point) {
 		
 		LinearLayout gameMenu = (LinearLayout) myGame.findViewById(R.id.gameMenu);
 		LinearLayout altMenu = (LinearLayout) myGame.findViewById(R.id.altMenu);
 		
+		// Reset alternate menu
+		alternateInfo = null;
+
 		// Always clear the alternate menu
 		altMenu.removeAllViews();
 		
@@ -53,28 +57,29 @@ public class GameMenu {
 			gameMenu.setVisibility(LinearLayout.VISIBLE);
 			return;
 		}
-		
+				
 		// If we're making a new alternate menu, make sure its visible
 		gameMenu.setVisibility(LinearLayout.GONE);
 		altMenu.setVisibility(LinearLayout.VISIBLE);
 		
+		// And make sure we get the info string
+		alternateInfo = info;
+		
 		// Add elements to the new alternate menu based on the type
 		if(type == MENU_FLAG){
-			altMenu.addView(createMenuOption("What?", R.id.menu_option_what, R.drawable.center_self));
-			altMenu.addView(createMenuOption("Move", R.id.menu_option_move, R.drawable.center_self));
+			altMenu.addView(createMenuOption(R.string.menu_what, R.id.menu_option_what, R.drawable.center_self));
+			altMenu.addView(createMenuOption(R.string.menu_move, R.id.menu_option_move, R.drawable.center_self));
 		} else if (type == MENU_PLAYER) {
-			altMenu.addView(createMenuOption("Who?", R.id.menu_option_who, R.drawable.center_self));
-			altMenu.addView(createMenuOption("Waypoints", R.id.menu_option_waypoints, R.drawable.center_self));
+			altMenu.addView(createMenuOption(R.string.menu_who, R.id.menu_option_who, R.drawable.center_self));
+			altMenu.addView(createMenuOption(R.string.menu_waypoints, R.id.menu_option_waypoints, R.drawable.center_self));
 		}
 		
 		// Fill the blank spots
-		altMenu.addView(createMenuOption("", -1, -1));
-		altMenu.addView(createMenuOption("", -1, -1));
+		altMenu.addView(createMenuOption(-1, -1, -1));
+		altMenu.addView(createMenuOption(-1, -1, -1));
 		
 		// Back Button
-		TextView backButton = createMenuOption("Back", R.id.menu_option_back, R.drawable.exit);
-		backButton.setOnClickListener(onMenuClick);
-		altMenu.addView(backButton);
+		altMenu.addView(createMenuOption(R.string.menu_back, R.id.menu_option_back, R.drawable.exit));
 
 	}
 	
@@ -109,16 +114,20 @@ public class GameMenu {
 	 * @param text
 	 * @return
 	 */
-	private TextView createMenuOption(String text, int id, int drawableID) {
+	private TextView createMenuOption(int stringID, int componentID, int drawableID) {
 		TextView tv = new TextView(myGame);
 		tv.setTextColor(myGame.getResources().getColor(R.color.menu_text));
 		tv.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT,(float) 0.20));
-		tv.setClickable(true);
 		tv.setGravity(Gravity.CENTER);
-		tv.setText(text);
 		
-		if(id != -1) {
-			tv.setId(id);
+		if(stringID != -1) {
+			tv.setText(myGame.getResources().getString(stringID));
+		}
+		
+		if(componentID != -1) {
+			tv.setId(componentID);
+			tv.setClickable(true);
+			tv.setOnClickListener(onMenuClick);
 		}
 		
 		if(drawableID != -1) {
@@ -171,28 +180,80 @@ public class GameMenu {
 				
 				// Alternate menu options
 				case R.id.menu_option_who:
-					Log.i(TAG, "MENU OPTIONS -> WHO (PLAYER)");
+					menuWho();
 					break;
 					
 				case R.id.menu_option_what:
-					Log.i(TAG, "MENU OPTIONS -> WHAT (FLAG)");
+					menuWhat();
 					break;
 					
 				case R.id.menu_option_move:
-					Log.i(TAG, "MENU OPTIONS -> MOVE FLAG");
+					menuMoveFlag();
 					break;
 					
 				case R.id.menu_option_waypoints:
-					Log.i(TAG, "MENU OPTIONS -> WAY POINTS");
+					menuWaypoints();
 					break;
 					
 				case R.id.menu_option_back:
-					setMenu(GameMenu.MENU_DEFAULT, null, null, null);
+					setMenu(GameMenu.MENU_DEFAULT, null, null);
 					break;
 					
 			}
 			
 		}
 	};
+	
+	/**
+	 * Requests WHO a player is.
+	 */
+	private void menuWho() {
+		
+		GameData data = myGame.getGameData();
+		Player player;
+		for(int p = 0; p < data.getPlayerCount(); p++) {			
+			player = data.getPlayer(p);
+			if(player.getUID().equals(alternateInfo)) {
+				String status = "";
+				if(player.hasObserverMode()) {
+					status = " (Observer)";
+				}			
+				sendToast(player.getTeam() + " Player: " + player.getName() + status);
+				break;
+			}
+		}
+
+	}
+	
+	/**
+	 * Requests WHAT the object is.
+	 */
+	private void menuWhat() {
+		sendToast(alternateInfo);
+	}
+	
+	/**
+	 * Requests to move the selected flags position.
+	 */
+	private void menuMoveFlag() {
+		sendToast(".. wants to move flag ..");
+	}
+	
+	/**
+	 * Requests to send a suggested way point to another player.
+	 */
+	private void menuWaypoints() {
+		sendToast(".. wants to send waypoints ..");
+	}
+	
+	/**
+	 * Sends a toast containing the provided text to the upper-right hand corner of the game screen.
+	 * @param text
+	 */
+	private void sendToast(String text) {
+		Toast toast = Toast.makeText(myGame, text, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 32);
+		toast.show();
+	}
 	
 }

@@ -97,7 +97,7 @@ public class GameCTF extends MapActivity {
 		
 		// Create the menu [must be created after setContentView() is run]
 		myMenu = new GameMenu(this);
-		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null, null);
+		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null);
 		
 		// Make sure gps is running at the right speed
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);
@@ -116,7 +116,7 @@ public class GameCTF extends MapActivity {
 		
 	    // Setup overlay stuff
 		mapOverlay = mapView.getOverlays();
-        mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), mapView, this);
+        mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), this);
         
         myGameData = new GameData();
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
@@ -347,11 +347,18 @@ public class GameCTF extends MapActivity {
 	}	
 	
 	/**
-	 * Returns a refrence to the game's menu
+	 * Returns a reference to the game's menu
 	 * @return
 	 */
 	public GameMenu getGameMenu() {
 		return myMenu;
+	}
+	
+	/**
+	 * Returns a reference to the game's game data
+	 */
+	public GameData getGameData() {
+		return myGameData;
 	}
 	
 	/**
@@ -436,14 +443,14 @@ public class GameCTF extends MapActivity {
 			
 			// Add Flags
 			if(!myGameData.isRedFlagTaken()) {
-				OverlayItem redFlag = new OverlayItem(myGameData.getRedFlag(), "Red Flag", "");
+				OverlayItem redFlag = new OverlayItem(myGameData.getRedFlag(), GameCTFOverlays.OVERLAY_FLAG, "Red Flag");
 				redFlag.setMarker(drawable.get(R.drawable.red_flag));
 				mapOverlayMarkers.addOverlay(redFlag);
 				Log.i(TAG, "Added red flag.");
 			}
 			
 			if(!myGameData.isBlueFlagTaken()) {
-				OverlayItem blueFlag = new OverlayItem(myGameData.getBlueFlag(), "Blue Flag", "");
+				OverlayItem blueFlag = new OverlayItem(myGameData.getBlueFlag(), GameCTFOverlays.OVERLAY_FLAG, "Blue Flag");
 				blueFlag.setMarker(drawable.get(R.drawable.blue_flag));
 				mapOverlayMarkers.addOverlay(blueFlag);
 				Log.i(TAG, "Added blue flag.");
@@ -459,7 +466,7 @@ public class GameCTF extends MapActivity {
 				Log.i(TAG, "Added player: " + player.getName());
 				
 				GeoPoint playerPoint = new GeoPoint(player.getLatitude(), player.getLongitude());
-				OverlayItem playerItem = new OverlayItem(playerPoint, "Player: " + player.getName(), "");
+				OverlayItem playerItem = new OverlayItem(playerPoint, GameCTFOverlays.OVERLAY_PLAYER, player.getUID());
 				
 				boolean isCurrentPlayer = player.getUID().equals(CurrentUser.getUID());
 				
