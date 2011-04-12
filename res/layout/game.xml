@@ -120,5 +120,17 @@
 			android:clickable="true"
 		/>
  	</LinearLayout>
- 	
+	<LinearLayout
+		android:id="@+id/altMenu"
+		android:layout_height="wrap_content"
+		android:weightSum="1.0"
+		android:paddingTop="5px"
+		android:paddingBottom="5px"
+		android:orientation="horizontal" 
+		android:layout_width="fill_parent"
+		android:background="@drawable/menu_bg"
+		android:visibility="gone"
+		>
+
+ 	</LinearLayout>
 </LinearLayout>

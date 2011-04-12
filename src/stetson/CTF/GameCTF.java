@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import stetson.CTFGame.GameCTFOverlays;
 import stetson.CTFGame.GameData;
+import stetson.CTFGame.GameMenu;
 import stetson.CTFGame.Player;
 
 import android.app.Dialog;
@@ -24,9 +25,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.os.PowerManager;
@@ -52,7 +55,7 @@ public class GameCTF extends MapActivity {
 	public static final int CENTER_SELF = 1;
 	public static final int CENTER_RED = 2;
 	public static final int CENTER_BLUE = -3;
-	
+		
 	// Constant: What is the minimum accuracy (in meters) we should expect ?
 	public static final int MIN_ACCURACY = 40;	
 		
@@ -65,8 +68,9 @@ public class GameCTF extends MapActivity {
 	private MapView mapView;
 	private Handler gameHandler = new Handler();
 	private TaskGameProcess cycle;
-	private int isCentering = CENTER_NONE;
 	
+	private boolean hasCenteredOrigin = false;
+	private GameMenu myMenu;
 	private List<Overlay> mapOverlay;
 	private GameCTFOverlays mapOverlayMarkers;
 	
@@ -81,10 +85,13 @@ public class GameCTF extends MapActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		
 		Log.i(TAG, "Starting map activity...");
-		isCentering = CENTER_ORIGIN;
 		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
+		
+		// Create the menu
+		myMenu = new GameMenu(this);
+		myMenu.setMenu(GameMenu.MENU_DEFAULT, null, null, null);
 		
 		// Make sure the user is actually in a game
 		if(CurrentUser.getGameId().equals("")) {
@@ -110,14 +117,13 @@ public class GameCTF extends MapActivity {
 		
 		// Build everything we need to run
 		buildDrawables();
-		buildMenuListeners();
 		
 		// Let the user know we're loading
 		clearGameInfo();
 		
 	    // Setup overlay stuff
 		mapOverlay = mapView.getOverlays();
-        mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), mapView);
+        mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), mapView, this);
         
         myGameData = new GameData();
 		gameHandler.postDelayed(gameProcess, GAME_UPDATE_DELAY);
@@ -161,63 +167,13 @@ public class GameCTF extends MapActivity {
 	public boolean onCreateOptionsMenu(Menu x) {
 		
 		// Toggle the visibility of the menu
-		LinearLayout menu = (LinearLayout) this.findViewById(R.id.gameMenu);
-		if(menu.getVisibility() == LinearLayout.VISIBLE) {
-			menu.setVisibility(LinearLayout.GONE);
-		} else {
-			menu.setVisibility(LinearLayout.VISIBLE);
-		}
+		myMenu.toggleMenu();
 		
 		// True means the native menu was launched successfully, so we must return false!
 		return false;
 	}
-
-	/**
-	 * Adds an onClick listener to each of the menu items.
-	 */
-	private void buildMenuListeners() {
 		
-		findViewById(R.id.menu_self).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_red_flag).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_blue_flag).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_scores).setOnClickListener(onMenuClick);
-		findViewById(R.id.menu_quit).setOnClickListener(onMenuClick);
-
-	}
-	
-	/**
-	 * Handles incoming menu clicks.
-	 */
-	private OnClickListener onMenuClick = new OnClickListener() {
-		public void onClick(View v) {
-			switch(v.getId()) {
-				
-				case R.id.menu_self:
-					isCentering = CENTER_SELF;
-					break;
-					
-				case R.id.menu_red_flag:
-					isCentering = CENTER_RED;
-					break;
-					
-				case R.id.menu_blue_flag:
-					isCentering = CENTER_BLUE;
-					break;
-					
-				case R.id.menu_scores:
-					buildScoreBoard();
-					break;
-					
-				case R.id.menu_quit:
-					stopGame();
-					break;
-					
-			}
-			centerMapView();
-		}
-	};
-	
-	private void buildScoreBoard() {
+	public void buildScoreBoard() {
 		
 		if(myGameData == null || myGameData.hasError()) {
 			return;
@@ -274,7 +230,7 @@ public class GameCTF extends MapActivity {
 	/**
 	 * Centers the map view on the requested centering target.
 	 */
-	public void centerMapView() {
+	public void centerMapView(int isCentering) {
 		
 		// We can't center if there isn't any data!
 		if(myGameData == null || myGameData.hasError()) {
@@ -398,6 +354,14 @@ public class GameCTF extends MapActivity {
 	}	
 	
 	/**
+	 * Returns a refrence to the game's menu
+	 * @return
+	 */
+	public GameMenu getGameMenu() {
+		return myMenu;
+	}
+	
+	/**
 	 * Game processor. Runs the GameProcess task every GAME_UPDATE_DELAY (ms).
 	 */
 	private final Runnable gameProcess = new Runnable() {
@@ -464,15 +428,16 @@ public class GameCTF extends MapActivity {
 			// No errors, parsing was a success!
 			Log.i(TAG, "GameProcess()...");
 			
+			// Is this the first map data we have gotten?
+			if(hasCenteredOrigin) {
+				centerMapView(GameCTF.CENTER_ORIGIN);
+				hasCenteredOrigin = true;
+			}
+			
 			// Remove all overlay items
 			mapOverlay.clear();
 			mapOverlayMarkers.clear();
-			
-			// Make sure we update our centering target!
-			if(isCentering != CENTER_NONE) {
-				centerMapView();
-			}
-			
+						
 			// Update game info bar
 			updateGameInfo();
 			

@@ -2,6 +2,8 @@ package stetson.CTFGame;
 
 import java.util.ArrayList;
 
+import stetson.CTF.GameCTF;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -17,6 +19,7 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 
 	public final static long LONG_CLICK_TIME = 2000;
 	private MapView mapView;
+	private GameCTF gameCTF;
 	private ArrayList<OverlayItem> mOverlays = new ArrayList<OverlayItem>();
 	
 	/**
@@ -24,9 +27,10 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 	 * @param defaultMarker
 	 * @param context
 	 */
-	public GameCTFOverlays(Drawable defaultMarker, MapView mv) {
+	public GameCTFOverlays(Drawable defaultMarker, MapView mv, GameCTF game) {
 		  super(defaultMarker);
 		  mapView = mv;
+		  gameCTF = game;
 	}
 	
 	/**
@@ -103,6 +107,13 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 		// Long Tap (show context menu)
 		if(isLongTap) {
 			
+			String id = item.getTitle();
+			String text = item.getSnippet();
+			
+			
+			gameCTF.getGameMenu().setMenu(GameMenu.MENU_FLAG, id, text, item.getPoint());
+			
+			/*
 			final CharSequence[] items = {"Option 1", "Option 2", "Option 3"};
 			AlertDialog.Builder builder = new AlertDialog.Builder(mapView.getContext());
 			builder.setTitle("Hello There!");
@@ -112,6 +123,7 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 			    }
 			});
 			AlertDialog alert = builder.create();
+			*/
 			
 		// Short Tap (show toast)
 		} else {

@@ -383,7 +383,8 @@ public class StetsonCTF extends Activity {
 				HttpPost hp = new HttpPost(SERVER_URL + "/game/");
 				CurrentUser.buildHttpParams(hp, CurrentUser.CREATE_PARAMS);
 				String data = Connections.sendRequest(hp);
-
+				Log.i(TAG, "RESPONSE: " +data);
+				
 				try {
 					JSONObject response = new JSONObject(data);
 					Log.i(TAG, "(WORKER) create game response: " + data);
