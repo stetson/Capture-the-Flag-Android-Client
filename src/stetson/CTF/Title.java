@@ -25,11 +25,13 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -78,7 +80,6 @@ public class Title extends Activity {
 			public void onClick(View v) {
 				// Perform action on click
 				AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
-
 			    alertDialog.setTitle("Enter your name: ");
 			    final EditText input = new EditText(v.getContext()); 
 			    input.setText(R.string.guest_button);
@@ -89,11 +90,17 @@ public class Title extends Activity {
 					}
 			    	
 			    });
+			    
 			    alertDialog.setView(input);
 			    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
 			      public void onClick(DialogInterface dialog, int which) {
 
 			    	  String text = input.getText().toString();
+//			    	  input.setInputType(InputType.TYPE_NULL);
+						InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+						 mgr.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						// only will trigger it if no physical keyboard is open
+//						mgr.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
 			    	  CurrentUser.setName(text);
 			    	  gpsLock();
 			    	  
@@ -110,6 +117,7 @@ public class Title extends Activity {
 			    }}); 
 
 			    alertDialog.show();
+			    
 				
 			}
 		});
