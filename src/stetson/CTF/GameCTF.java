@@ -10,9 +10,9 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import stetson.CTF.Game.GameCTFOverlays;
@@ -168,20 +168,10 @@ public class GameCTF extends MapActivity {
 		// This is not a strictly required event
 		new Thread(new Runnable() {
 			public void run() {
-				/*
-				 * Leaving games has been implemented on the backend, but we cannot use them
-				 * without re-writing our connections base and overriding a bunch of functions
-				 * for HttpDelete. The specification for HTTP DELETE says that an entity should 
-				 * not be present and the APIs for connections was written accordingly. The server
-				 * is expecting an entity which we cannot provide without a lot of work and the
-				 * Violation of the HTTP DELETE specification.
-				 * - Jeremy
 				String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-				HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
-				req.setEntity(CurrentUser.buildHttpParams(CurrentUser.LEAVE_PARAMS));
+				HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
 				String data = Connections.sendRequest(req);
 				Log.i(TAG, "LEAVE GAME => " + data);
-				 */
 			}
 		}).start();
 			  

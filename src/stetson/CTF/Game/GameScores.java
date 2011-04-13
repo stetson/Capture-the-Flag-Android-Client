@@ -2,14 +2,11 @@ package stetson.CTF.Game;
 
 import java.util.ArrayList;
 
-import com.facebook.android.Facebook;
-
 import stetson.CTF.CurrentUser;
 import stetson.CTF.R;
 import stetson.CTF.Title;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;

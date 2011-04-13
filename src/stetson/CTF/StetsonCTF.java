@@ -2,13 +2,6 @@ package stetson.CTF;
 
 import java.util.ArrayList;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
