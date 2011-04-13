@@ -166,7 +166,8 @@ public class Title extends Activity {
 
 		facebook.authorizeCallback(requestCode, resultCode, data);
 		mAsyncRunner.request("me", new IDRequestListener());
-		new loadingDialog().execute();
+//		new loadingDialog().execute();
+//		gpsLock();
 	}
 	// Listener for name request, sets CurrentUser name
 	private class IDRequestListener implements RequestListener {
@@ -175,17 +176,19 @@ public class Title extends Activity {
 				// process the response here: executed in background thread
 				Log.d(TAG, "Response: " + response.toString());
 				JSONObject json = Util.parseJson(response);
-				final String name = json.getString("name");		
+				final String name = json.getString("name");	
+				
 				// then post the processed result back to the UI thread
 				// if we do not do this, an runtime exception will be generated
 				// e.g. "CalledFromWrongThreadException: Only the original
 				// thread that created a view hierarchy can touch its views."
-				new Thread(new Runnable() {
+				runOnUiThread(new Runnable() {
 					public void run() {
-						CurrentUser.setName(name);
-						gpsLock();
-					}
-				});
+					CurrentUser.setName(name);
+					gpsLock();
+				}
+			});	
+						
 			} catch (JSONException e) {
 				Log.w(TAG, "JSON Error in response");
 			} catch (FacebookError e) {
@@ -249,12 +252,12 @@ public class Title extends Activity {
 	}
 	public void setLoadingMessage(String msg, boolean visible)
 	{
-		TextView loading = (TextView) findViewById(R.id.loading);
-		if(visible)
-		{
-			loading.setVisibility(TextView.VISIBLE);
-		}
-		loading.setText(msg);
+//		TextView loading = (TextView) findViewById(R.id.loading);
+//		if(visible)
+//		{
+//			loading.setVisibility(TextView.VISIBLE);
+//		}
+//		loading.setText(msg);
 	}
 	 private class loadingDialog extends AsyncTask<Void,Void, Void> {
 		 ProgressDialog progressDialog;
