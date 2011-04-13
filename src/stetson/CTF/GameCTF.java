@@ -163,7 +163,7 @@ public class GameCTF extends MapActivity {
 		// This is not a strictly required event
 		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
 		HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
-		String data = Connections.sendRequest(req);
+		Connections.sendRequest(req);
 
 		// Remove the user from the game on the front end
 		CurrentUser.setGameId("");
@@ -261,6 +261,7 @@ public class GameCTF extends MapActivity {
 		drawable.put(R.drawable.person_blue, this.getResources().getDrawable(R.drawable.person_blue));
 		drawable.put(R.drawable.grey_observer, this.getResources().getDrawable(R.drawable.grey_observer));
 		drawable.put(R.drawable.grey_observer_owner, this.getResources().getDrawable(R.drawable.grey_observer_owner));
+		drawable.put(R.drawable.selection_reticle, this.getResources().getDrawable(R.drawable.selection_reticle));
 		
 		// Set the anchors here
 		Collection<Drawable> c = drawable.values();
@@ -410,6 +411,14 @@ public class GameCTF extends MapActivity {
 			
 			// Add Flags
 			if(!myGameData.isRedFlagTaken()) {
+				
+				// Selection reticle for menus
+				if(myMenu.getMenuFocus().equals("Red Flag")) {
+					OverlayItem reticleItem = new OverlayItem(myGameData.getRedFlag(), GameCTFOverlays.OVERLAY_OTHER, "");
+					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
+					mapOverlayMarkers.addOverlay(reticleItem);
+				}
+				
 				OverlayItem redFlag = new OverlayItem(myGameData.getRedFlag(), GameCTFOverlays.OVERLAY_FLAG, "Red Flag");
 				redFlag.setMarker(drawable.get(R.drawable.red_flag));
 				mapOverlayMarkers.addOverlay(redFlag);
@@ -417,6 +426,14 @@ public class GameCTF extends MapActivity {
 			}
 			
 			if(!myGameData.isBlueFlagTaken()) {
+				
+				// Selection reticle for menus
+				if(myMenu.getMenuFocus().equals("Blue Flag")) {
+					OverlayItem reticleItem = new OverlayItem(myGameData.getBlueFlag(), GameCTFOverlays.OVERLAY_OTHER, "");
+					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
+					mapOverlayMarkers.addOverlay(reticleItem);
+				}
+				
 				OverlayItem blueFlag = new OverlayItem(myGameData.getBlueFlag(), GameCTFOverlays.OVERLAY_FLAG, "Blue Flag");
 				blueFlag.setMarker(drawable.get(R.drawable.blue_flag));
 				mapOverlayMarkers.addOverlay(blueFlag);
@@ -431,6 +448,14 @@ public class GameCTF extends MapActivity {
 				player = myGameData.getPlayer(p);
 	
 				Log.i(TAG, "Added player: " + player.getName());
+				
+				// If we have menu focus on this person, show a reticle
+				if(player.getUID().equals(myMenu.getMenuFocus())) {
+					GeoPoint reticlePoint = new GeoPoint(player.getLatitude(), player.getLongitude());
+					OverlayItem reticleItem = new OverlayItem(reticlePoint, GameCTFOverlays.OVERLAY_OTHER, "");
+					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
+					mapOverlayMarkers.addOverlay(reticleItem);
+				}
 				
 				GeoPoint playerPoint = new GeoPoint(player.getLatitude(), player.getLongitude());
 				OverlayItem playerItem = new OverlayItem(playerPoint, GameCTFOverlays.OVERLAY_PLAYER, player.getUID());

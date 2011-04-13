@@ -15,6 +15,7 @@ public class GameMenu {
 	
 	// Constants: To be used across entire application
 	public static final String TAG = "GameMenu";
+	public static final String NO_SELECTION = "";
 	
 	// Constants: Menu options
 	public static final int MENU_DEFAULT = 0;
@@ -26,6 +27,8 @@ public class GameMenu {
 	private GameCTF myGame;
 	
 	public GameMenu(GameCTF game) {
+		alternateInfo = NO_SELECTION;
+		menuType = MENU_DEFAULT;
 		myGame = game;
 		buildMenuListeners();
 	}
@@ -50,7 +53,7 @@ public class GameMenu {
 		LinearLayout altMenu = (LinearLayout) myGame.findViewById(R.id.altMenu);
 		
 		// Reset alternate menu
-		alternateInfo = null;
+		alternateInfo = NO_SELECTION;
 
 		// Always clear the alternate menu
 		altMenu.removeAllViews();
@@ -273,6 +276,10 @@ public class GameMenu {
 		Toast toast = Toast.makeText(myGame, text, Toast.LENGTH_SHORT);
 		toast.setGravity(Gravity.TOP | Gravity.RIGHT, 0, 32);
 		toast.show();
+	}
+	
+	public String getMenuFocus() {
+		return alternateInfo;
 	}
 	
 }
