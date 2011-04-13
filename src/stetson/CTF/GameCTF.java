@@ -358,13 +358,8 @@ public class GameCTF extends MapActivity {
 		 * Sends a location update and grabs data from the server.
 		 */
 		protected JSONObject doInBackground(Void... params) {
-			
 			Log.i(TAG, "Grabbing game data...");
-			
 			return Connections.getGameData();
-			
-			// If we get here, we had problems with json.
-			
 		}
 		
 		/**
@@ -386,6 +381,41 @@ public class GameCTF extends MapActivity {
 			Log.i(TAG, "GameProcess()...");
 			
 			// Is this the first map data we have gotten?
+			this.firstCenter();
+			
+			// Remove all overlay items
+			mapOverlay.clear();
+			mapOverlayMarkers.clear();
+						
+			// Update game info bar
+			myInfoBar.update(myGameData.getRedScore(), myGameData.getBlueScore(), CurrentUser.getAccuracy());
+			
+			// Add flags
+			addFlagMarker(myGameData.getRedFlag(), "Red Flag", R.drawable.red_flag);
+			addFlagMarker(myGameData.getBlueFlag(), "Blue Flag", R.drawable.blue_flag);
+					
+			// Add players
+			Player player;
+			for(int p = 0; p < myGameData.getPlayerCount(); p++) {
+				player = myGameData.getPlayer(p);
+				this.addPlayerMarker(player);
+				Log.i(TAG, "Added player: " + player.getName());
+			}
+			
+			// Add boundaries & markers
+			mapOverlay.add(myGameData.getBounds());
+		    mapOverlay.add(mapOverlayMarkers);
+		    
+		    // Let the make know we're done!
+		    mapView.invalidate();
+			
+		}
+	
+		/**
+		 * If the map hasn't been centered around the origin and smart-zoomed
+		 * this function will take care of that.
+		 */
+		protected void firstCenter() {
 			if(!hasCenteredOrigin) {
 				
 				hasCenteredOrigin = true;
@@ -401,115 +431,91 @@ public class GameCTF extends MapActivity {
 				mapView.getController().zoomToSpan((maxLatitude - minLatitude),(maxLongitude - minLongitude));
 				centerMapView(GameCTF.CENTER_ORIGIN);
 			}
+		}
+		
+		/**
+		 * Adds a player marker to the map using the given player data.
+		 * @param player
+		 */
+		protected void addPlayerMarker(Player player) {
 			
-			// Remove all overlay items
-			mapOverlay.clear();
-			mapOverlayMarkers.clear();
-						
-			// Update game info bar
-			myInfoBar.update(myGameData.getRedScore(), myGameData.getBlueScore(), CurrentUser.getAccuracy());
+			GeoPoint playerPoint = new GeoPoint(player.getLatitude(), player.getLongitude());
+			OverlayItem playerItem = new OverlayItem(playerPoint, GameCTFOverlays.OVERLAY_PLAYER, player.getUID());
 			
-			// Add Flags
-			if(!myGameData.isRedFlagTaken()) {
-				
-				// Selection reticle for menus
-				if(myMenu.getMenuFocus().equals("Red Flag")) {
-					OverlayItem reticleItem = new OverlayItem(myGameData.getRedFlag(), GameCTFOverlays.OVERLAY_OTHER, "");
-					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
-					mapOverlayMarkers.addOverlay(reticleItem);
-				}
-				
-				OverlayItem redFlag = new OverlayItem(myGameData.getRedFlag(), GameCTFOverlays.OVERLAY_FLAG, "Red Flag");
-				redFlag.setMarker(drawable.get(R.drawable.red_flag));
-				mapOverlayMarkers.addOverlay(redFlag);
-				Log.i(TAG, "Added red flag.");
+			// If we have menu focus on this person, show a reticle
+			if(myMenu.getMenuFocus().equals(player.getUID())) {
+				this.addSelectionReticle(playerPoint);
 			}
 			
-			if(!myGameData.isBlueFlagTaken()) {
-				
-				// Selection reticle for menus
-				if(myMenu.getMenuFocus().equals("Blue Flag")) {
-					OverlayItem reticleItem = new OverlayItem(myGameData.getBlueFlag(), GameCTFOverlays.OVERLAY_OTHER, "");
-					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
-					mapOverlayMarkers.addOverlay(reticleItem);
+			boolean isCurrentPlayer = player.getUID().equals(CurrentUser.getUID());
+			
+			// if player is observer, we don't care about their team
+			if(player.hasObserverMode()) {
+				if(isCurrentPlayer) {
+					playerItem.setMarker(drawable.get(R.drawable.grey_observer_owner));
+				} else {
+					playerItem.setMarker(drawable.get(R.drawable.grey_observer));
 				}
+			
+			// if player is on the red team
+			} else if (player.getTeam().equals("red")) {
 				
-				OverlayItem blueFlag = new OverlayItem(myGameData.getBlueFlag(), GameCTFOverlays.OVERLAY_FLAG, "Blue Flag");
-				blueFlag.setMarker(drawable.get(R.drawable.blue_flag));
-				mapOverlayMarkers.addOverlay(blueFlag);
-				Log.i(TAG, "Added blue flag.");
+				// Default marker for a red member
+				playerItem.setMarker(drawable.get(R.drawable.person_red));
+				
+				// Logical order: flag, observer, self
+				if(player.hasFlag()) {
+					playerItem.setMarker(drawable.get(R.drawable.blue_flag));
+				} else if(isCurrentPlayer) {
+					playerItem.setMarker(drawable.get(R.drawable.person_red_owner));
+				}
+			
+			// if player is on the blue team
+			} else if(player.getTeam().equals("blue")) {
+				
+				// Default marker for a blue member
+				playerItem.setMarker(drawable.get(R.drawable.person_blue));
+				
+				// Logical order: flag, observer, self
+				if(player.hasFlag()) {
+					playerItem.setMarker(drawable.get(R.drawable.red_flag));
+				} else if(isCurrentPlayer) {
+					playerItem.setMarker(drawable.get(R.drawable.person_blue_owner));
+				}
 			}
-			
-			// Add players
-			Player player;
-			
-			for(int p = 0; p < myGameData.getPlayerCount(); p++) {
-				
-				player = myGameData.getPlayer(p);
-	
-				Log.i(TAG, "Added player: " + player.getName());
-				
-				// If we have menu focus on this person, show a reticle
-				if(player.getUID().equals(myMenu.getMenuFocus())) {
-					GeoPoint reticlePoint = new GeoPoint(player.getLatitude(), player.getLongitude());
-					OverlayItem reticleItem = new OverlayItem(reticlePoint, GameCTFOverlays.OVERLAY_OTHER, "");
-					reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
-					mapOverlayMarkers.addOverlay(reticleItem);
-				}
-				
-				GeoPoint playerPoint = new GeoPoint(player.getLatitude(), player.getLongitude());
-				OverlayItem playerItem = new OverlayItem(playerPoint, GameCTFOverlays.OVERLAY_PLAYER, player.getUID());
-				
-				boolean isCurrentPlayer = player.getUID().equals(CurrentUser.getUID());
-				
-				// if player is observer, we don't care about their team
-				if(player.hasObserverMode()) {
-					if(isCurrentPlayer) {
-						playerItem.setMarker(drawable.get(R.drawable.grey_observer_owner));
-					} else {
-						playerItem.setMarker(drawable.get(R.drawable.grey_observer));
-					}
-				
-				// if player is on the red team
-				} else if (player.getTeam().equals("red")) {
-					
-					// Default marker for a red member
-					playerItem.setMarker(drawable.get(R.drawable.person_red));
-					
-					// Logical order: flag, observer, self
-					if(player.hasFlag()) {
-						playerItem.setMarker(drawable.get(R.drawable.blue_flag));
-					} else if(isCurrentPlayer) {
-						playerItem.setMarker(drawable.get(R.drawable.person_red_owner));
-					}
-				
-				// if player is on the blue team
-				} else if(player.getTeam().equals("blue")) {
-					
-					// Default marker for a blue member
-					playerItem.setMarker(drawable.get(R.drawable.person_blue));
-					
-					// Logical order: flag, observer, self
-					if(player.hasFlag()) {
-						playerItem.setMarker(drawable.get(R.drawable.red_flag));
-					} else if(isCurrentPlayer) {
-						playerItem.setMarker(drawable.get(R.drawable.person_blue_owner));
-					}
-				}
 
-				mapOverlayMarkers.addOverlay(playerItem);
-				
-				
+			mapOverlayMarkers.addOverlay(playerItem);
+		}
+		
+		/**
+		 * Adds a flag given the location, title and drawable id.
+		 * @param location
+		 * @param team
+		 */
+		protected void addFlagMarker(GeoPoint location, String title, int iconId) {
+			
+			// Add selection reticles
+			if(myMenu.getMenuFocus().equals(title)) {
+				this.addSelectionReticle(location);
 			}
 			
-			// Add boundaries & markers
-			mapOverlay.add(myGameData.getBounds());
-		    mapOverlay.add(mapOverlayMarkers);
-		    
-		    // Let the make know we're done!
-		    mapView.invalidate();
+			// Add flag
+			OverlayItem flag = new OverlayItem(location, GameCTFOverlays.OVERLAY_FLAG, title);
+			flag.setMarker(drawable.get(iconId));
+			mapOverlayMarkers.addOverlay(flag);
 			
 		}
+		
+		/**
+		 * Adds a selection reticle at the given location.
+		 * @param location
+		 */
+		protected void addSelectionReticle(GeoPoint location) {
+			OverlayItem reticleItem = new OverlayItem(location, GameCTFOverlays.OVERLAY_OTHER, "");
+			reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
+			mapOverlayMarkers.addOverlay(reticleItem);
+		}
+	
 	}
 	
 	/**
