@@ -20,8 +20,8 @@ android:focusableInTouchMode="true"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:text="@string/refresh"
-		android:layout_alignParentTop="true"
-		android:paddingTop="50px"
+		android:layout_below="@+id/main_frame"
+		android:layout_marginTop="10px"
 		/>
 		<Button
 		android:id="@+id/newgame_button"
@@ -48,6 +48,7 @@ android:focusableInTouchMode="true"
 	
 		<TableRow>
 		<TextView
+		android:id="@+id/games"
 	    style="@style/coolFont"
 	    android:text=""
 	    />

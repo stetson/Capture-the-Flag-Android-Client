@@ -2,9 +2,14 @@ package stetson.CTF.Game;
 
 import java.util.ArrayList;
 
+import com.facebook.android.Facebook;
+
+import stetson.CTF.CurrentUser;
 import stetson.CTF.R;
+import stetson.CTF.Title;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
@@ -16,8 +21,10 @@ public class GameScores {
 	
 	// Constants: To be used across entire application
 	public static final String TAG = "GameScores";
-	
+	private String shareMessage = "StetsonCTF!!\n" + CurrentUser.getName() + " has posted the Scores of the game.\nName:\t" +
+	"Tags:\tCaptures:\tTeam:\n";
 	private static final int LIST_COUNT = 10;
+	
 	
 	private GameCTF myGame;
 	
@@ -65,6 +72,11 @@ public class GameScores {
 					break;
 				case DialogInterface.BUTTON2:
 					// do facebook stuff
+					new Thread(new Runnable() {
+					    public void run() {
+					    	Title.postToWall(shareMessage);
+					        }
+					  }).start();
 					break;
 			}
 		}
@@ -103,6 +115,7 @@ public class GameScores {
 		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
 		for(int i =0; i < actualCount; i++) {
 			ScoreTable current = scoreTable.get(i);
+			shareMessage = shareMessage + current.name + "\t\t"+ current.tags + "\t\t\t"+  current.caps+ "\t\t"+ current.team+ "\n";
 			board.addView(createLine(i + 1, current.name, current.tags, current.caps, current.team));
 		}
 		

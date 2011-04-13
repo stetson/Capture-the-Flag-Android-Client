@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class Title extends Activity {
 
@@ -45,6 +47,7 @@ public class Title extends Activity {
 	private static final String[] PERMS = new String[] {"publish_stream" };
 	private static Facebook facebook;
 	private ImageView image;
+	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,18 +56,45 @@ public class Title extends Activity {
 		
 		// load image
 		image = (ImageView) findViewById(R.id.loading_image);
+		// Set music
+		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
 		// set loading message
-		setLoadingMessage("Please enter your name\nor Login through Facebook", true);
-
-		
+		setLoadingMessage("Please enter your name\nor login through Facebook", true);
+		// facebook calls
 		facebook= new Facebook(APP_ID);
 		mAsyncRunner = new AsyncFacebookRunner(facebook);
 		// start button and image listeners
-
 		buildListeners();
 		
 	}
-	// button and image listeners
+	
+	public void onResume()
+	{
+		super.onResume();
+		// start music
+		mp.setLooping(true);
+		mp.start();
+		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_INTRO);	
+		
+	}
+	
+	public void onDestroy()
+	{
+		super.onDestroy();
+		// stop music and call GC
+		mp.stop();
+		mp.release();
+		
+	}
+	// Disable User from exiting
+	public void onBackPressed()
+	{	
+	}
+
+	/**
+	 * Build button and image listeners
+	 * 
+	 */
 	public void buildListeners()
 	{		
 		image.setOnTouchListener(new OnTouchListener() {
@@ -77,56 +107,44 @@ public class Title extends Activity {
 			public void onClick(View v) {
 				// Perform action on click
 				AlertDialog alertDialog = new AlertDialog.Builder(v.getContext()).create();
-			    alertDialog.setTitle("Enter your name: ");
-			    final EditText input = new EditText(v.getContext()); 
-			    input.setText(R.string.guest_button);
-			    input.setOnClickListener(new OnClickListener(){
-
+				alertDialog.setTitle("Enter your name: ");
+				final EditText input = new EditText(v.getContext()); 
+				input.setText(R.string.guest_button);
+				input.setOnClickListener(new OnClickListener(){
 					public void onClick(View arg0) {
 						input.setText("");
 					}
-			    	
-			    });
-			    
-			    alertDialog.setView(input);
-			    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-			      public void onClick(DialogInterface dialog, int which) {
-
-			    	  String text = input.getText().toString();
-//			    	  input.setInputType(InputType.TYPE_NULL);
+				});
+				alertDialog.setView(input);
+				alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						String text = input.getText().toString();
 						InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-						 mgr.hideSoftInputFromWindow(input.getWindowToken(), 0);
-						// only will trigger it if no physical keyboard is open
-//						mgr.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
-			    	  CurrentUser.setName(text);
-			    	  gpsLock();
-			    	  
-			        return;
-
-			    } }); 
-
-			    alertDialog.setButton2("Cancel", new DialogInterface.OnClickListener() {
-
-			      public void onClick(DialogInterface dialog, int which) {
-
-			        return;
-
-			    }}); 
-
-			    alertDialog.show();
-			    
-				
+						mgr.hideSoftInputFromWindow(input.getWindowToken(), 0);
+						CurrentUser.setName(text);
+						gpsLock();
+						return;
+					} }); 
+				alertDialog.setButton2("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						return;
+					}}); 
+				alertDialog.show();
 			}
 		});
 		final Button facebookButton = (Button) findViewById(R.id.facebook);
 		facebookButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// Perform action on click	
+				// Initialize facebook on click
 				intFacebook();	
 			}
 		});
 	}
-	// authorize facebook, login...
+	/**
+	 * authorize facebook, login...
+	 * 
+	 * 
+	 */
 	public void intFacebook()
 	{
 
@@ -136,9 +154,52 @@ public class Title extends Activity {
 			public void onError(DialogError e) {}
 			public void onCancel() {}
 		});
-
 	}
-	// Allows messages to be posted to the Current User's wall
+	/**
+	 * Method forces user to login and wait for GPS signal
+	 * 
+	 * 
+	 * 
+	 */
+	public void gpsLock()
+	{
+		if(!CurrentUser.getName().equals(""))
+		{
+			new loadingDialog().execute();
+		}
+		else
+		{
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage("Please login.");
+			builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+		           public void onClick(DialogInterface dialog, int id) {
+		                
+		           }
+		       });
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+	}
+	/**
+	 * Method sets the loading message text
+	 * 
+	 * @param msg
+	 * @param visible
+	 */
+	public void setLoadingMessage(String msg, boolean visible)
+	{
+		TextView loading = (TextView) findViewById(R.id.games);
+		if(visible)
+		{
+			loading.setVisibility(TextView.VISIBLE);
+		}
+		loading.setText(msg);
+	}	
+	
+	/**
+	 * Allows messages to be posted to the Current User's wall
+	 * @param String msg - message to be posted
+	 */
 	public static boolean postToWall(String msg)
 	{
 		if(facebook.isSessionValid())
@@ -165,16 +226,22 @@ public class Title extends Activity {
 		}
 	}
 
-	// facebook helper method 
+	/**
+	 * facebook helper method 
+	 * 
+	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
 		facebook.authorizeCallback(requestCode, resultCode, data);
 		mAsyncRunner.request("me", new IDRequestListener());
-//		new loadingDialog().execute();
-//		gpsLock();
 	}
-	// Listener for name request, sets CurrentUser name
+	/**
+	 * Facebook
+	 * 
+	 * Listener for name request, sets CurrentUser name
+	 * 
+	 */
 	private class IDRequestListener implements RequestListener {
 		public void onComplete(String response, Object state) {
 			try {
@@ -207,7 +274,10 @@ public class Title extends Activity {
 				Object state) {}
 		public void onFacebookError(FacebookError e, Object state) {}
 	}
-	// Dialog for login,authorize
+	/**
+	 * Facebook login Dialog listener
+	 * 
+	 */
 	private class LoginDialogListener implements DialogListener {
 		/**
 		 * Called when the dialog has completed successfully
@@ -217,8 +287,6 @@ public class Title extends Activity {
 			// Dispatch on its own thread
 			runOnUiThread(new Runnable() {
 				public void run() {
-
-
 				}
 			});
 		}
@@ -226,44 +294,11 @@ public class Title extends Activity {
 		public void onError(DialogError error) {}
 		public void onCancel() {}
 	}
-	public void onResume()
-	{
-		super.onResume();
-		// start GPS
-		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_INTRO);	
-	}
-	public void onBackPressed()
-	{	
-	}
-	public void gpsLock()
-	{
-		if(!CurrentUser.getName().equals(""))
-		{
-			new loadingDialog().execute();
-		}
-		else
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Please enter a name.");
-			builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		                
-		           }
-		       });
-			AlertDialog alert = builder.create();
-			alert.show();
-		}
-		
-	}
-	public void setLoadingMessage(String msg, boolean visible)
-	{
-//		TextView loading = (TextView) findViewById(R.id.loading);
-//		if(visible)
-//		{
-//			loading.setVisibility(TextView.VISIBLE);
-//		}
-//		loading.setText(msg);
-	}
+
+	/**
+	 * Loading dialog for GPS signal
+	 *
+	 */
 	 private class loadingDialog extends AsyncTask<Void,Void, Void> {
 		 ProgressDialog progressDialog;
 		 Context mContext = Title.this;
@@ -275,14 +310,12 @@ public class Title extends Activity {
 			 progressDialog.setMessage("Acquiring GPS signal please wait...");
 			 progressDialog.setIndeterminate(true);
 			 progressDialog.show();
-
 	     }
 		 protected void onPostExecute(Void result)
 	     {
 	         progressDialog.hide();
 	         finish();
 	     }
-		
 		 protected Void doInBackground(Void... params)
 		 {
 

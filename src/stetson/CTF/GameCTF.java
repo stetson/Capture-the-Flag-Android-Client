@@ -375,18 +375,9 @@ public class GameCTF extends MapActivity {
 			
 			Log.i(TAG, "Grabbing game data...");
 			
-			HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
-			req.setEntity(CurrentUser.buildHttpParams(CurrentUser.UPDATE_PARAMS));
-			String data = Connections.sendRequest(req);
-			try {
-				JSONObject jObject = new JSONObject(data);
-				return jObject;
-			} catch (JSONException e) {
-				Log.e(TAG, "Error parsing JSON.", e);
-			}
+			return Connections.getGameData();
 			
 			// If we get here, we had problems with json.
-			return null;
 			
 		}
 		

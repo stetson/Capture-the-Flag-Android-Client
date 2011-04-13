@@ -13,6 +13,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -87,10 +89,6 @@ public class StetsonCTF extends Activity {
 		// Start GPS
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_INTRO);
 		//mp.start();
-		
-		
-		// Build a new games list
-//		buildGamesList();
 	
 	}
 	
@@ -170,23 +168,7 @@ public class StetsonCTF extends Activity {
     	new TaskJoinGame().execute(name, game);
     }
     
-    /**
-     * Sets the user's name and generates a new UID.
-     * @param name
-     */
-    protected void updateUser(String name) {
-    	
-    	// New name
-    	CurrentUser.setName(name);
-    	
-		// Generate a new uid
-		String uid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-		while(uid.contains("x")) 
-		uid = uid.replaceFirst("x", Long.toHexString(Math.round(Math.random() * 16.0)));
-		uid = uid.toUpperCase();
-		CurrentUser.setUID(uid);
-    }
-    
+   
     
     /**
      * The AsyncTask used for generating a new list of games.
@@ -241,13 +223,23 @@ public class StetsonCTF extends Activity {
 			if(response == null) {
 		    	 TextView text = new TextView(mContext);
 		    	 text.setText(R.string.no_games_error);
+		    	 text.setTextSize(20);
+		    	 text.setTypeface(Typeface.MONOSPACE);
+		    	 text.setTypeface(Typeface.DEFAULT_BOLD);
+		    	 text.setTextColor(Color.BLACK);
 		    	 row.addView(text);
+		    	 table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		    	 
 		    // We have no games :(
 			} else if(response.isEmpty()) {
 		    	 TextView text = new TextView(mContext);
 		    	 text.setText(R.string.no_games);
+		    	 text.setTextSize(20);
+		    	 text.setTextColor(Color.BLACK);
+		    	 text.setTypeface(Typeface.MONOSPACE);
+		    	 text.setTypeface(Typeface.DEFAULT_BOLD);
 		    	 row.addView(text);
+		    	 table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		    	 
 		    // We have some games! Add them to the list :)
 			} else {
@@ -258,11 +250,13 @@ public class StetsonCTF extends Activity {
 					Log.i(TAG, "Adding game to view (" + response.get(i) + ")");
 					row = new TableRow(mContext);
 					text[i] = new TextView(mContext);
+					text[i].setTextSize(20);
+					text[i].setTextColor(Color.BLACK);
+					text[i].setTypeface(Typeface.MONOSPACE);
+					text[i].setTypeface(Typeface.DEFAULT_BOLD);
 					String gameName = response.get(i); 
-					 text[i].setText(gameName);
-					 
+					text[i].setText(gameName);
 					button[i]=  new Button(mContext);
-
 					button[i].setText("Join");
 					button[i].setTag(gameName);
 					button[i].setOnClickListener(new listener());
@@ -271,7 +265,6 @@ public class StetsonCTF extends Activity {
 					table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 				}
 			}
-			
 		}
 		
 		/**
@@ -279,10 +272,7 @@ public class StetsonCTF extends Activity {
 		 */
 		protected ArrayList<String> doInBackground(Void... params) {
 			
-			ArrayList<String> gamesList = new ArrayList<String>();
-			
 			publishProgress(mContext.getString(R.string.loading_location));
-			
 			// We might still be waiting for a location...
 			while(!CurrentUser.hasLocation()) {
 				try {
@@ -291,35 +281,8 @@ public class StetsonCTF extends Activity {
 					Log.e(TAG, "Can't sleep :(", e);
 				}
 			}
-			
 			publishProgress(mContext.getString(R.string.loading_games));
-			
-			// Sweet, we have a location, lets grab a list of games
-			HttpGet req = new HttpGet(SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
-			String data = Connections.sendRequest(req);
-			try {
-				
-				JSONObject games = new JSONObject(data);
-				if (games.has("games")) {
-					
-					// Add all the games to a list
-					JSONArray list = games.getJSONArray("games");
-					for(int n = 0; n < list.length(); n++) {
-						gamesList.add(list.getString(n));
-					}
-					
-					// Ok, that's all, return the games list
-					return gamesList;
-					
-				} else {
-					Log.e(TAG, "Unexpected Server Response: " + data);
-				}
-			} catch (JSONException e) {
-				Log.e(TAG, "Error parsing JSON.", e);
-			}
-			
-			// Everything fell through, meaning bad stuff happened, check LogCat :(
-			return null;
+			return Connections.getGames();
 		}
     }
     
@@ -346,76 +309,27 @@ public class StetsonCTF extends Activity {
 		 * is started. If not, a toast showing the error message is sent.
 		 */
 		protected void onPostExecute(final String response) {
-			
 			dialog.hide();
-			
 			if(response.equals(GOOD_RESPONSE)) {
 			    Intent i = new Intent(mContext, GameCTF.class);
 			    startActivity(i);
 			} else {
 				Toast.makeText(mContext, response, Toast.LENGTH_LONG).show();
 			}
-			
 		}
 		
 		/**
 		 * Run as the work on another thread.
 		 */
 		protected String doInBackground(final String... params) {
-			
-			// More friendly parameters :)
-			String name = params[0];
-			String game = params[1];
-			Log.i(TAG, "(WORKER) joinGame(" + name + ", " + game + ")");
-			
-			// Build a UID
-			updateUser(name);
-			
-			// If a game name wasn't given, then we need to make a game.
-			if(game.equals("")) {
-				
-				CurrentUser.setGameId(CurrentUser.getName());
-				HttpPost hp = new HttpPost(SERVER_URL + "/game/");
-				hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.CREATE_PARAMS));
-				String data = Connections.sendRequest(hp);
-				Log.i(TAG, "RESPONSE: " +data);
-				
-				try {
-					JSONObject response = new JSONObject(data);
-					Log.i(TAG, "(WORKER) create game response: " + data);
-					if(response.has("response") && !response.getString("response").equals(GOOD_RESPONSE)) {
-						return "Unexpected server response #1";
-					} else if (response.has("error")) {
-						return "Server Error: " + response.get("error");
-					}
-				} catch (JSONException e) {
-					Log.e(TAG, "Error parsing JSON.", e);
-					return "Unexpected server response #2";
-				}
-				
-			}
-			
-			// If a game was created, then it was a success at this point! Now we must join the game.
-			String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-			HttpPost hp = new HttpPost(SERVER_URL + "/game/" + gameUrl);
-			hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.JOIN_PARAMS));
-			String data = Connections.sendRequest(hp);
-			
-			try {
-				JSONObject jsonGame = new JSONObject(data);
-				if(jsonGame.has("error")) {
-					return "Server Error: " + jsonGame.get("error");
-				}
-			} catch (JSONException e) {
-				Log.e(TAG, "Error parsing JSON.", e);
-				return "Unexpected server response #3";
-			}
-
-		    return GOOD_RESPONSE;
+			return Connections.joinOrCreate(params[0], params[1]);
 		}
-	     
 	}
 	
+	/**
+	 * Custom button listener class
+	 * Triggers join game for the button pushed.
+	 */
 	private class listener implements OnClickListener
 	{
 

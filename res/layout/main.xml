@@ -14,12 +14,26 @@ android:background="#d5d5d5"
 		android:background="@drawable/load_screen3"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
-		android:layout_centerInParent="true"
+		android:scaleType="fitXY"
+		/>
+		<TextView
+		android:id="@+id/games"
+	    style="@style/coolFont"
+	    android:text="a;sdkjfa;skfj;askjf;as"
+	    android:layout_above="@+id/ctfwords"
+	    android:layout_centerHorizontal="true"
+	    />
+		<ImageView
+		android:id="@+id/ctfwords"
+		android:src="@drawable/ctfwords"
+		android:layout_width="wrap_content"
+		android:layout_above="@+id/guest"
+		android:layout_height="50px"
 		android:scaleType="fitXY"
 		/>
 		<Button
 		android:id="@+id/guest"
-		android:layout_width="120px"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="@string/guest_button"
 		android:layout_alignParentLeft="true"
@@ -27,7 +41,7 @@ android:background="#d5d5d5"
 		>
 		</Button><Button
 		android:id="@+id/facebook"
-		android:layout_width="120px"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="@string/facebook_button"
 		android:layout_alignParentRight="true"
