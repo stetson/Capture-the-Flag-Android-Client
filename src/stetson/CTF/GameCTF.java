@@ -1,12 +1,17 @@
 package stetson.CTF;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import java.util.List;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +47,11 @@ public class GameCTF extends MapActivity {
 	// Constant: How often should we wait between game update cycles?
 	public static final int GAME_UPDATE_DELAY = 1500;
 	
+	// Constants: Are we moving a flag?
+	public static final int MOVING_FLAG_NONE = -1;
+	public static final int MOVING_FLAG_RED = 0;
+	public static final int MOVING_FLAG_BLUE = 1;
+	
 	// Constants: Where should we center to on the next game update cycle?
 	public static final int CENTER_NONE = -1;
 	public static final int CENTER_ORIGIN = 0;
@@ -65,6 +75,7 @@ public class GameCTF extends MapActivity {
 	private GameCTFOverlays mapOverlayMarkers;
 	
 	// Game Mechanics
+	private int isMovingFlag;
 	private GameData myGameData;
 	private GameMenu myMenu;
 	private GameInfoBar myInfoBar;
@@ -99,6 +110,9 @@ public class GameCTF extends MapActivity {
 		
 		// Move back to the game selection panel
 		setContentView(R.layout.game);
+		
+		// No, we aren't moving the flag right now :)
+		isMovingFlag = MOVING_FLAG_NONE;
 		
 		// Create the menu [must be created after setContentView() is run]
 		myMenu = new GameMenu(this);
@@ -169,7 +183,7 @@ public class GameCTF extends MapActivity {
 				Log.i(TAG, "LEAVE GAME => " + data);
 				 */
 			}
-		});
+		}).start();
 			  
 		// Call last
 		super.onDestroy();
@@ -273,6 +287,52 @@ public class GameCTF extends MapActivity {
 			icon.setBounds(-redW / 2, -redH, redH / 2, 0);
 	  	}
 
+	}
+	
+	/**
+	 * Moves the flag based on the isMovingFlag value. (If allowed!)
+	 * @param location
+	 */
+	public void moveFlag(final GeoPoint loc) {
+		
+		// If a user doesn't have permissions, don't let them move the flag :)
+		if(!myGameData.getCreator().equals(CurrentUser.getUID())) {
+			return;
+		}
+		
+		// Lets call for a flag move, we don't really care about the response
+		new Thread(new Runnable() {
+			public void run() {
+				
+				String team = "";
+				if(isMovingFlag == MOVING_FLAG_RED) {
+					team = "red";
+				} else if(isMovingFlag == MOVING_FLAG_BLUE) {
+					team = "blue";
+				}
+				
+				isMovingFlag = MOVING_FLAG_NONE;
+				
+				if(!team.equals("")) {
+			        List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
+		            params.add(new BasicNameValuePair("latitude", "" + (loc.getLatitudeE6() / 1E6)));
+		            params.add(new BasicNameValuePair("longitude", "" + (loc.getLongitudeE6() / 1E6)));
+		            params.add(new BasicNameValuePair("user_id", CurrentUser.getUID()));
+		            params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
+		            params.add(new BasicNameValuePair("team", team));
+		            try {
+						HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/flag/");
+						req.setEntity(new UrlEncodedFormEntity(params));
+						String data = Connections.sendRequest(req);
+						Log.i(TAG, "FLAG MOVE: " + data);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				}
+
+			}
+		}).start();
+		
 	}
 	
 	/**
@@ -473,6 +533,22 @@ public class GameCTF extends MapActivity {
 	 */
 	public GameData getGameData() {
 		return myGameData;
+	}
+	
+	/**
+	 * Change if the user is currently moving a flag
+	 * @param moving
+	 */
+	public void setMovingFlag(int moving) {
+		isMovingFlag = moving;
+	}
+	
+	/**
+	 * Is the user is currently moving a flag.
+	 * @return
+	 */
+	public int isMovingFlag() {
+		return isMovingFlag;
 	}
 
 }

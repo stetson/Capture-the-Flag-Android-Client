@@ -31,9 +31,13 @@ public class GameData {
 	private boolean hasError;
 	private String myErrorMessage;
 	
+	private String myCreator;
+	
 	public void parseJSONObject(JSONObject game) {
 		
 		myBounds = new Boundaries();
+		
+		myCreator = game.optString("creator", "");
 		
 		myScoreRed = game.optInt("red_score", 0);
 		myScoreBlue = game.optInt("blue_score", 0);
@@ -140,7 +144,9 @@ public class GameData {
 	public Boundaries getBounds() {
 		return myBounds;
 	}
-	
+	public String getCreator() {
+		return myCreator;
+	}
 	public Player getPlayer(int index) {
 		return myPlayer.get(index);
 	}

@@ -31,6 +31,13 @@ public class GameMenu {
 	}
 	
 	/**
+	 * Sets the default game menu.
+	 */
+	public void setDefaultMenu() {
+		this.setMenu(GameMenu.MENU_DEFAULT, null, null);
+	}
+	
+	/**
 	 * Sets which menu to be displayed. If no menu is visible, one will be come visible.
 	 * To set default game menu, set 'info' and 'point' to null.
 	 * @param type of menu to be displayed
@@ -185,22 +192,26 @@ public class GameMenu {
 				// Alternate menu options
 				case R.id.menu_option_who:
 					menuWho();
+					setDefaultMenu();
 					break;
 					
 				case R.id.menu_option_what:
 					menuWhat();
+					setDefaultMenu();
 					break;
 					
 				case R.id.menu_option_move:
 					menuMoveFlag();
+					setDefaultMenu();
 					break;
 					
 				case R.id.menu_option_waypoints:
 					menuWaypoints();
+					setDefaultMenu();
 					break;
 					
 				case R.id.menu_option_back:
-					setMenu(GameMenu.MENU_DEFAULT, null, null);
+					setDefaultMenu();
 					break;
 					
 			}
@@ -240,7 +251,11 @@ public class GameMenu {
 	 * Requests to move the selected flags position.
 	 */
 	private void menuMoveFlag() {
-		sendToast(".. wants to move flag ..");
+		if(alternateInfo.equals("Red Flag")) {
+			myGame.setMovingFlag(GameCTF.MOVING_FLAG_RED);
+		} else if(alternateInfo.equals("Blue Flag")) {
+			myGame.setMovingFlag(GameCTF.MOVING_FLAG_BLUE);
+		}
 	}
 	
 	/**

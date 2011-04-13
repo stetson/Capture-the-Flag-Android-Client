@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import stetson.CTF.GameCTF;
 
 import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
 
+import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
+import com.google.android.maps.Projection;
 
 public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 
@@ -76,6 +80,30 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 		return true;
 	}
 	
+	/**
+	 * Overridden to allow for the moving of flags on ACTION_UP.
+	 */
+	public boolean onTouchEvent(MotionEvent event, MapView map) {
+		
+		
+		switch(event.getAction()) {
+		
+			case MotionEvent.ACTION_UP:
+				
+				if(gameCTF.isMovingFlag() != GameCTF.MOVING_FLAG_NONE) {
+					Projection projection = map.getProjection(); 
+					GeoPoint location = projection.fromPixels((int) event.getX(), (int) event.getY());
+					gameCTF.moveFlag(location);
+				}
+				
+				break;
+		
+		}
+		
+		return super.onTouchEvent(event, map);
+		
+	}
+
 	/**
 	 * 
 	 * @param index of an overlay item
