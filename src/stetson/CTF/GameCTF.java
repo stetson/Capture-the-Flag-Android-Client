@@ -157,24 +157,19 @@ public class GameCTF extends MapActivity {
 			cycle.cancel(true);
 			cycle = null;
 		}
-		
+				
+		// Remove the user from the game on the back end
+		// We're using an anonymous thread here because we don't care about the response
+		// This is not a strictly required event
+		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
+		HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
+		String data = Connections.sendRequest(req);
+
 		// Remove the user from the game on the front end
 		CurrentUser.setGameId("");
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
 		
-		// Remove the user from the game on the back end
-		// We're using an anonymous thread here because we don't care about the response
-		// This is not a strictly required event
-		new Thread(new Runnable() {
-			public void run() {
-				String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-				HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
-				String data = Connections.sendRequest(req);
-				Log.i(TAG, "LEAVE GAME => " + data);
-			}
-		}).start();
-			  
 		// Call last
 		super.onDestroy();
 	}

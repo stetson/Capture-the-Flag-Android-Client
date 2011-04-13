@@ -171,48 +171,48 @@ public class GameMenu {
 				// Default menu options
 				case R.id.menu_self:
 					myGame.centerMapView(GameCTF.CENTER_SELF);
-					break;
+					return;
 					
 				case R.id.menu_red_flag:
 					myGame.centerMapView(GameCTF.CENTER_RED);
-					break;
+					return;
 					
 				case R.id.menu_blue_flag:
 					myGame.centerMapView(GameCTF.CENTER_BLUE);
-					break;
+					return;
 					
 				case R.id.menu_scores:
 					myGame.getGameScores().showScores();
-					break;
+					return;
 					
 				case R.id.menu_quit:
 					myGame.finish();
-					break;
+					return;
 				
 				// Alternate menu options
 				case R.id.menu_option_who:
 					menuWho();
 					setDefaultMenu();
-					break;
+					return;
 					
 				case R.id.menu_option_what:
 					menuWhat();
 					setDefaultMenu();
-					break;
+					return;
 					
 				case R.id.menu_option_move:
 					menuMoveFlag();
 					setDefaultMenu();
-					break;
+					return;
 					
 				case R.id.menu_option_waypoints:
 					menuWaypoints();
 					setDefaultMenu();
-					break;
+					return;
 					
 				case R.id.menu_option_back:
 					setDefaultMenu();
-					break;
+					return;
 					
 			}
 			
