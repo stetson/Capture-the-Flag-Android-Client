@@ -13,7 +13,7 @@ import com.google.android.maps.MapView;
 import com.google.android.maps.OverlayItem;
 import com.google.android.maps.Projection;
 
-public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
+public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 
 	// Constants: Used in the TITLE attribute of OverlayItems to identify menu control
 	public static final String OVERLAY_PLAYER = "player";
@@ -29,7 +29,7 @@ public class GameCTFOverlays extends ItemizedOverlay<OverlayItem> {
 	 * @param defaultMarker
 	 * @param context
 	 */
-	public GameCTFOverlays(Drawable defaultMarker, GameCTF game) {
+	public ItemizedOverlays(Drawable defaultMarker, GameCTF game) {
 		  super(defaultMarker);
 		  gameCTF = game;
 	}

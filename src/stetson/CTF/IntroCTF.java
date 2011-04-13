@@ -39,7 +39,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class Title extends Activity {
+public class IntroCTF extends Activity {
 
 	// Data members
 
@@ -76,7 +76,7 @@ public class Title extends Activity {
 		// start music
 		mp.setLooping(true);
 		mp.start();
-		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_INTRO);	
+		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_INTRO);	
 		
 	}
 	
@@ -303,7 +303,7 @@ public class Title extends Activity {
 	 */
 	 private class loadingDialog extends AsyncTask<Void,Void, Void> {
 		 ProgressDialog progressDialog;
-		 Context mContext = Title.this;
+		 Context mContext = IntroCTF.this;
 
 		 protected void onPreExecute()
 		 {

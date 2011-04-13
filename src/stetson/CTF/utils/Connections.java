@@ -15,7 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import stetson.CTF.StetsonCTF;
+import stetson.CTF.JoinCTF;
 
 import android.util.Log;
 
@@ -82,7 +82,7 @@ public class Connections {
 		if(game.equals("")) {
 			
 			CurrentUser.setGameId(CurrentUser.getName());
-			HttpPost hp = new HttpPost(StetsonCTF.SERVER_URL + "/game/");
+			HttpPost hp = new HttpPost(JoinCTF.SERVER_URL + "/game/");
 			hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.CREATE_PARAMS));
 			String data = Connections.sendRequest(hp);
 			Log.i(TAG, "RESPONSE: " +data);
@@ -102,7 +102,7 @@ public class Connections {
 		}
 		// If a game was created, then it was a success at this point! Now we must join the game.
 		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-		HttpPost hp = new HttpPost(StetsonCTF.SERVER_URL + "/game/" + gameUrl);
+		HttpPost hp = new HttpPost(JoinCTF.SERVER_URL + "/game/" + gameUrl);
 		hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.JOIN_PARAMS));
 		String data = Connections.sendRequest(hp);
 		
@@ -129,7 +129,7 @@ public class Connections {
 		
 		ArrayList<String> gamesList = new ArrayList<String>();
 		// Sweet, we have a location, lets grab a list of games
-		HttpGet req = new HttpGet(StetsonCTF.SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
+		HttpGet req = new HttpGet(JoinCTF.SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
 		String data = Connections.sendRequest(req);
 		try {
 			JSONObject games = new JSONObject(data);
@@ -157,7 +157,7 @@ public class Connections {
 	 */
 	public static JSONObject getGameData()
 	{
-		HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/location/");
+		HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/location/");
 		req.setEntity(CurrentUser.buildHttpParams(CurrentUser.UPDATE_PARAMS));
 		String data = Connections.sendRequest(req);
 		try {

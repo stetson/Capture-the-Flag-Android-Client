@@ -3,7 +3,7 @@ package stetson.CTF.Game;
 import java.util.ArrayList;
 
 import stetson.CTF.R;
-import stetson.CTF.Title;
+import stetson.CTF.IntroCTF;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.util.Log;
@@ -71,7 +71,7 @@ public class GameScores {
 					// do facebook stuff
 					new Thread(new Runnable() {
 					    public void run() {
-					    	Title.postToWall(shareMessage);
+					    	IntroCTF.postToWall(shareMessage);
 					        }
 					  }).start();
 					break;

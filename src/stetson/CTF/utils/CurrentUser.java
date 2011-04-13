@@ -12,7 +12,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 
-import stetson.CTF.StetsonCTF;
+import stetson.CTF.JoinCTF;
 
 import android.location.Location;
 import android.location.LocationListener;
@@ -229,14 +229,14 @@ public class CurrentUser {
 		// Minimum distance to move a gps update
 		int distThreshold = 0;
 		switch(frequency) {
-			case StetsonCTF.GPS_UPDATE_FREQUENCY_GAME:
-				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_GAME;
+			case JoinCTF.GPS_UPDATE_FREQUENCY_GAME:
+				distThreshold = JoinCTF.GPS_UPDATE_DISTANCE_GAME;
 				break;
-			case StetsonCTF.GPS_UPDATE_FREQUENCY_INTRO:
-				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_INTRO;
+			case JoinCTF.GPS_UPDATE_FREQUENCY_INTRO:
+				distThreshold = JoinCTF.GPS_UPDATE_DISTANCE_INTRO;
 				break;
-			case StetsonCTF.GPS_UPDATE_FREQUENCY_BACKGROUND:
-				distThreshold = StetsonCTF.GPS_UPDATE_DISTANCE_BACKGROUND;
+			case JoinCTF.GPS_UPDATE_FREQUENCY_BACKGROUND:
+				distThreshold = JoinCTF.GPS_UPDATE_DISTANCE_BACKGROUND;
 				break;
 		}
 		

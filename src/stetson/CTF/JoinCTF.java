@@ -25,7 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 //import android.media.MediaPlayer;
 
-public class StetsonCTF extends Activity {
+public class JoinCTF extends Activity {
 	
 	// Constants: To be used across entire application
 	public static final String TAG = "StetsonCTF";
@@ -58,11 +58,11 @@ public class StetsonCTF extends Activity {
 		super.onCreate(savedInstanceState);
 		new Thread(new Runnable() {
 		    public void run() {
-		    	if(StetsonCTF.firstStart)
+		    	if(JoinCTF.firstStart)
 				{
-					Intent titleScreen = new Intent(getBaseContext(), Title.class);
+					Intent titleScreen = new Intent(getBaseContext(), IntroCTF.class);
 					startActivity(titleScreen);
-					StetsonCTF.firstStart = false;
+					JoinCTF.firstStart = false;
 				}
 		    }
 		  }).start();
@@ -173,7 +173,7 @@ public class StetsonCTF extends Activity {
     private class TaskGenerateGamesList extends AsyncTask<Void, String, ArrayList<String>> {
 		
     	protected static final long GPS_CHECK_PAUSE = 500;
-		private Context mContext = StetsonCTF.this;
+		private Context mContext = JoinCTF.this;
 		private TextView[] text;
 		private Button[] button;
 		private TableRow row;
@@ -289,7 +289,7 @@ public class StetsonCTF extends Activity {
 	private class TaskJoinGame extends AsyncTask<String, Void, String> {
 		
 		private final static String GOOD_RESPONSE = "OK";
-		private Context mContext = StetsonCTF.this;
+		private Context mContext = JoinCTF.this;
 		private ProgressDialog dialog;
 		
 		/**

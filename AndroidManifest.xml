@@ -20,7 +20,7 @@
     	<uses-library android:name="com.google.android.maps"  />
     	
     	<!-- Main Activity (Game Selection/Creation) -->
-        <activity android:name=".StetsonCTF"
+        <activity android:name="JoinCTF"
                   android:label="@string/app_name"
                   android:theme="@android:style/Theme.NoTitleBar"
                   android:windowSoftInputMode="stateVisible|adjustResize"
@@ -40,7 +40,7 @@
                   android:screenOrientation="portrait">
         </activity>
         <!-- Loading/Title Screen -->
-        <activity android:name="Title"
+        <activity android:name="IntroCTF"
         		  android:label="@string/app_name"
         		  android:theme="@android:style/Theme.NoTitleBar"
         		  android:screenOrientation="portrait">

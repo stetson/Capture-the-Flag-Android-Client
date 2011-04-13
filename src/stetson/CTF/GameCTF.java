@@ -15,7 +15,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
-import stetson.CTF.Game.GameCTFOverlays;
+import stetson.CTF.Game.ItemizedOverlays;
 import stetson.CTF.Game.GameData;
 import stetson.CTF.Game.GameInfoBar;
 import stetson.CTF.Game.GameMenu;
@@ -74,7 +74,7 @@ public class GameCTF extends MapActivity {
 	private MapView mapView;
 	private boolean hasCenteredOrigin = false;
 	private List<Overlay> mapOverlay;
-	private GameCTFOverlays mapOverlayMarkers;
+	private ItemizedOverlays mapOverlayMarkers;
 	
 	// Game Mechanics
 	private int isMovingFlag;
@@ -128,7 +128,7 @@ public class GameCTF extends MapActivity {
 		myScores = new GameScores(this);
 		
 		// Make sure gps is running at the right speed
-		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), StetsonCTF.GPS_UPDATE_FREQUENCY_GAME);
+		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_GAME);
 		
  		// Turns on built-in zoom controls and satellite view
 		mapView = (MapView) findViewById(R.id.mapView);
@@ -141,7 +141,7 @@ public class GameCTF extends MapActivity {
 				
 	    // Setup overlay stuff
 		mapOverlay = mapView.getOverlays();
-        mapOverlayMarkers = new GameCTFOverlays(drawable.get(R.drawable.star), this);
+        mapOverlayMarkers = new ItemizedOverlays(drawable.get(R.drawable.star), this);
         
         // Start game processing
         myGameData = new GameData();
@@ -164,7 +164,7 @@ public class GameCTF extends MapActivity {
 		// We're using an anonymous thread here because we don't care about the response
 		// This is not a strictly required event
 		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-		HttpDelete req = new HttpDelete(StetsonCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
+		HttpDelete req = new HttpDelete(JoinCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
 		Connections.sendRequest(req);
 
 		// Remove the user from the game on the front end
@@ -309,7 +309,7 @@ public class GameCTF extends MapActivity {
 		            params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
 		            params.add(new BasicNameValuePair("team", team));
 		            try {
-						HttpPost req = new HttpPost(StetsonCTF.SERVER_URL + "/flag/");
+						HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/flag/");
 						req.setEntity(new UrlEncodedFormEntity(params));
 						String data = Connections.sendRequest(req);
 						Log.i(TAG, "FLAG MOVE: " + data);
@@ -442,7 +442,7 @@ public class GameCTF extends MapActivity {
 		protected void addPlayerMarker(Player player) {
 			
 			GeoPoint playerPoint = new GeoPoint(player.getLatitude(), player.getLongitude());
-			OverlayItem playerItem = new OverlayItem(playerPoint, GameCTFOverlays.OVERLAY_PLAYER, player.getUID());
+			OverlayItem playerItem = new OverlayItem(playerPoint, ItemizedOverlays.OVERLAY_PLAYER, player.getUID());
 			
 			// If we have menu focus on this person, show a reticle
 			if(myMenu.getMenuFocus().equals(player.getUID())) {
@@ -502,7 +502,7 @@ public class GameCTF extends MapActivity {
 			}
 			
 			// Add flag
-			OverlayItem flag = new OverlayItem(location, GameCTFOverlays.OVERLAY_FLAG, title);
+			OverlayItem flag = new OverlayItem(location, ItemizedOverlays.OVERLAY_FLAG, title);
 			flag.setMarker(drawable.get(iconId));
 			mapOverlayMarkers.addOverlay(flag);
 			
@@ -513,7 +513,7 @@ public class GameCTF extends MapActivity {
 		 * @param location
 		 */
 		protected void addSelectionReticle(GeoPoint location) {
-			OverlayItem reticleItem = new OverlayItem(location, GameCTFOverlays.OVERLAY_OTHER, "");
+			OverlayItem reticleItem = new OverlayItem(location, ItemizedOverlays.OVERLAY_OTHER, "");
 			reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
 			mapOverlayMarkers.addOverlay(reticleItem);
 		}
