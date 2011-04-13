@@ -35,11 +35,9 @@ android:background="#d5d5d5"
 		>
 		</Button>
 		<TextView
-		style="@style/Font"
 		android:id="@+id/loading"
 		android:layout_centerInParent="true"
 		android:paddingTop="200px"
-		
-		 />
+		/>
 		
 </RelativeLayout>
