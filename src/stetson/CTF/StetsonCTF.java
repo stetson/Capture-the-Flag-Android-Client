@@ -196,7 +196,6 @@ public class StetsonCTF extends Activity {
 		
     	protected static final long GPS_CHECK_PAUSE = 500;
 		private Context mContext = StetsonCTF.this;
-		private int i;
 		private TextView[] text;
 		private Button[] button;
 		private TableRow row;
@@ -208,7 +207,6 @@ public class StetsonCTF extends Activity {
 		 */
 		protected void onPreExecute() {
 			
-			i = 0;
 			table = (TableLayout) findViewById(R.id.tableLayout);
 			row = new TableRow(mContext);
 			row.removeAllViews();

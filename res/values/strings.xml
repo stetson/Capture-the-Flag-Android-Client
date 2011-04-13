@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<!--  Application Strings -->
+	<!-- Application Strings -->
     <string name="hello">Hello World, StetsonCTF!</string>
     <string name="app_name">StetsonCTF</string>
     
-    <!--  Intro Layout Strings -->
+    <!-- Title Screen Strings -->
+	<string name="guest_button">Guest</string>
+	<string name="facebook_button">Facebook</string>
+	<string name="refresh">Refresh List of Games</string>
+	
+    <!-- Intro Layout Strings -->
     <string name="create_game">Create Game</string>
     <string name="join_game">Join</string>
     <string name="loading_games">Loading Games...</string>
@@ -17,7 +22,7 @@
     <string name="failed_to_create">Failed to create game! It probably already exists.</string>
     <string name="failed_to_join">Failed to join game! It probably doesn\'t exist.</string>
     
-    <!--  Game Layout Strings -->
+    <!-- Game Layout Strings -->
     <string name="menu_self">Self</string>
     <string name="menu_red_flag">Red Flag</string>
     <string name="menu_blue_flag">Blue Flag</string>
@@ -38,8 +43,8 @@
 	
 	<!-- Colors -->
 	<color name="menu_text">#111111</color>
-	<string name="guest_button">Guest</string>
-	<string name="facebook_button">Facebook</string>
-	<string name="refresh">Refresh List of Games</string>
+	<color name="red_background">#3FFF0000</color>
+	<color name="blue_background">#3F0000FF</color>
+
 	
 </resources>
