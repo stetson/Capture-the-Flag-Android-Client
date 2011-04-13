@@ -2,6 +2,7 @@ package stetson.CTF.Game;
 
 import com.google.android.maps.GeoPoint;
 
+import stetson.CTF.CurrentUser;
 import stetson.CTF.GameCTF;
 import stetson.CTF.R;
 import android.view.Gravity;
@@ -75,13 +76,39 @@ public class GameMenu {
 		// And make sure we get the info string
 		alternateInfo = info;
 		
+		// Get our game data
+		GameData data = myGame.getGameData();
+		
+		// Number of blank menu options to display
+		int blanks = 3;
+		
 		// Add elements to the new alternate menu based on the type
 		if(type == MENU_FLAG){
+			
+			// What?
 			altMenu.addView(createMenuOption(R.string.menu_what, R.id.menu_option_what, R.drawable.center_self));
-			altMenu.addView(createMenuOption(R.string.menu_move, R.id.menu_option_move, R.drawable.center_self));
+			
+			// If the user created the game, show them the option to move the flag
+			if(data.getCreator().equals(CurrentUser.getUID())) {
+				altMenu.addView(createMenuOption(R.string.menu_move, R.id.menu_option_move, R.drawable.center_self));
+				blanks--;
+			}
+			
+			
 		} else if (type == MENU_PLAYER) {
+			
+			// Grab the players data
+			Player player = data.getPlayerByUID(alternateInfo);
+			Player selfPlayer = data.getPlayerByUID(CurrentUser.getUID());
+			
+			// Who?
 			altMenu.addView(createMenuOption(R.string.menu_who, R.id.menu_option_who, R.drawable.center_self));
-			altMenu.addView(createMenuOption(R.string.menu_waypoints, R.id.menu_option_waypoints, R.drawable.center_self));
+			
+			// Way points for team members only
+			if(player != null && selfPlayer != null && player.getTeam().equals(selfPlayer.getTeam())) {
+				altMenu.addView(createMenuOption(R.string.menu_waypoints, R.id.menu_option_waypoints, R.drawable.center_self));
+				blanks--;
+			}
 		}
 		
 		// Fill the blank spots

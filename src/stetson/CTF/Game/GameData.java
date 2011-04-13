@@ -140,6 +140,23 @@ public class GameData {
 		
 	}
 	
+	/**
+	 * Attempts to find the player with the given UID.
+	 * Returns null if the player is not found.
+	 * @param uid
+	 * @return
+	 */
+	public Player getPlayerByUID(String uid) {
+		Player player;
+		for(int i = 0; i < myActualPlayers; i++) {
+			player = this.getPlayer(i);
+			if(uid.equals(player.getUID())) {
+				return player;
+			}
+		}
+		return null;
+	}
+	
 	/* Accessors */
 	public Boundaries getBounds() {
 		return myBounds;
