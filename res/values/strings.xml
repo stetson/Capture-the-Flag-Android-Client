@@ -38,5 +38,7 @@
 	
 	<!-- Colors -->
 	<color name="menu_text">#111111</color>
+	<string name="guest_button">Guest</string>
+	<string name="facebook_button">Facebook</string>
 	
 </resources>

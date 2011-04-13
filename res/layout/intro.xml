@@ -30,11 +30,11 @@ android:focusableInTouchMode="true"
 	<TextView
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="fill_parent"
-	    	android:text="TEST"/>
+	    	android:text=""/>
 		<Button 
 	    	android:id="@+id/join"
 	    	android:text="Join"
-	    	
+	    	android:visibility="invisible"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="fill_parent" 
 	    	
