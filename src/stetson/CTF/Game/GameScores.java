@@ -2,7 +2,6 @@ package stetson.CTF.Game;
 
 import java.util.ArrayList;
 
-import stetson.CTF.CurrentUser;
 import stetson.CTF.R;
 import stetson.CTF.Title;
 import android.app.AlertDialog;
@@ -13,6 +12,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import stetson.CTF.GameCTF;
+import stetson.CTF.utils.CurrentUser;
 
 public class GameScores {
 	

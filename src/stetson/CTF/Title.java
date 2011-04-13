@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import stetson.CTF.utils.CurrentUser;
+
 
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;

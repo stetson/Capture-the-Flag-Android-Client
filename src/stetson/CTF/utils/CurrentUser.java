@@ -2,7 +2,7 @@
  * CurrentUser.java
  * Used for storage of name, uid and location information of the current user.
  */
-package stetson.CTF;
+package stetson.CTF.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -11,6 +11,8 @@ import java.util.List;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
+
+import stetson.CTF.StetsonCTF;
 
 import android.location.Location;
 import android.location.LocationListener;

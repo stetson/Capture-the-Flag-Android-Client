@@ -21,6 +21,8 @@ import stetson.CTF.Game.GameInfoBar;
 import stetson.CTF.Game.GameMenu;
 import stetson.CTF.Game.GameScores;
 import stetson.CTF.Game.Player;
+import stetson.CTF.utils.Connections;
+import stetson.CTF.utils.CurrentUser;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

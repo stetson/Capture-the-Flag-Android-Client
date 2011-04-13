@@ -2,6 +2,9 @@ package stetson.CTF;
 
 import java.util.ArrayList;
 
+import stetson.CTF.utils.Connections;
+import stetson.CTF.utils.CurrentUser;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;

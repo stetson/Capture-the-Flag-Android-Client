@@ -1,4 +1,4 @@
-package stetson.CTF;
+package stetson.CTF.utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +14,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import stetson.CTF.StetsonCTF;
 
 import android.util.Log;
 

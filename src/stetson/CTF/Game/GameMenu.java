@@ -2,9 +2,9 @@ package stetson.CTF.Game;
 
 import com.google.android.maps.GeoPoint;
 
-import stetson.CTF.CurrentUser;
 import stetson.CTF.GameCTF;
 import stetson.CTF.R;
+import stetson.CTF.utils.CurrentUser;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
