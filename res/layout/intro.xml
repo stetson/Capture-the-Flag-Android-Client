@@ -1,65 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-android:id="@+id/main_frame"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
-android:orientation="vertical"
-xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_weight="2"
 android:focusable="true" 
 android:focusableInTouchMode="true"
+android:background="#d5d5d5"
 >
+	
 		<ImageView
-		android:id="@+id/imageView1"
-		android:src="@drawable/load_screen3"
-		android:scaleType="fitXY"
+		android:id="@+id/loading_image"
+		android:background="@drawable/load_screen3"
 		android:layout_width="fill_parent"
 		android:layout_height="fill_parent"
+		android:scaleType="fitXY"
 		/>
-		<Button
-		android:id="@+id/refresh_button"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/refresh"
-		android:layout_below="@+id/main_frame"
-		android:layout_marginTop="10px"
-		/>
-		<Button
-		android:id="@+id/newgame_button"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/create_game"
-		android:layout_below="@+id/refresh_button"
-		/>
-	  	<ScrollView
-		android:id="@+id/games_frame"
-		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_weight="1"
-		android:gravity="bottom"
-		android:padding="5px"
-		android:layout_below="@+id/newgame_button"
-		>
-		<TableLayout 
-		android:id="@+id/tableLayout"
-		android:layout_width="fill_parent" 
-		android:layout_height="fill_parent" 
-		xmlns:android="http://schemas.android.com/apk/res/android"
-		android:stretchColumns="0">
-	
-		<TableRow>
 		<TextView
 		android:id="@+id/games"
 	    style="@style/coolFont"
-	    android:text=""
+	    android:text="a;sdkjfa;skfj;askjf;as"
+	    android:layout_above="@+id/ctfwords"
+	    android:layout_centerHorizontal="true"
 	    />
-		<Button 
-	    android:id="@+id/join"
-	    android:text="@string/join_game"
-	    android:visibility="invisible"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent" 
-	    />
-		</TableRow>
-		</TableLayout>
-		</ScrollView>	
+		<ImageView
+		android:id="@+id/ctfwords"
+		android:src="@drawable/ctfwords"
+		android:layout_width="wrap_content"
+		android:layout_above="@+id/guest"
+		android:layout_height="50px"
+		android:scaleType="fitXY"
+		/>
+		<Button
+		android:id="@+id/guest"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/guest_button"
+		android:layout_alignParentLeft="true"
+		android:layout_alignParentBottom="true" 
+		>
+		</Button><Button
+		android:id="@+id/facebook"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/facebook_button"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true"
+		>
+		</Button>
+		
 </RelativeLayout>

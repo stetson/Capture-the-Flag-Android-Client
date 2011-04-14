@@ -67,7 +67,7 @@ public class JoinCTF extends Activity {
 		    }
 		  }).start();
 		// Move back to the game selection panel
-		setContentView(R.layout.intro);
+		setContentView(R.layout.join);
 		// Build listeners
 		buildListeners();
 		

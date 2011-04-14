@@ -54,7 +54,7 @@ public class IntroCTF extends Activity {
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
+		setContentView(R.layout.intro);
 		
 		// load image
 		image = (ImageView) findViewById(R.id.loading_image);
