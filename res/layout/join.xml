@@ -1,65 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:id="@+id/main_frame"
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
 android:orientation="vertical"
-xmlns:android="http://schemas.android.com/apk/res/android"
 android:focusable="true" 
 android:focusableInTouchMode="true"
+android:background="@drawable/load_screen3"
 >
-		<ImageView
-		android:id="@+id/imageView1"
-		android:src="@drawable/load_screen3"
-		android:scaleType="fitXY"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		/>
-		<Button
-		android:id="@+id/refresh_button"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:text="@string/refresh"
-		android:layout_below="@+id/main_frame"
-		android:layout_marginTop="10px"
-		/>
+
+	<TextView
+	android:id="@+id/join_games_error"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_alignParentTop="true"
+	android:gravity="center"
+	android:padding="5px"
+	android:background="#8F000000"
+	android:textColor="#FFFFFF"
+	android:layout_marginTop="5px"
+	android:layout_marginLeft="5px"
+	android:layout_marginRight="5px"
+	/>
+	
+	<ListView
+	android:id="@+id/join_games_list"
+	android:layout_height="fill_parent"
+	android:layout_width="fill_parent"
+	android:layout_above="@+id/join_button_bar"
+	android:layout_below="@+id/join_games_error"
+	android:background="#8F000000"
+	android:cacheColorHint="#00000000"
+	android:padding="5px"
+	android:layout_margin="5px"
+	></ListView>
+
+	<LinearLayout
+	android:id="@+id/join_button_bar"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_alignParentBottom="true"
+	android:orientation="horizontal"
+	>
+	
 		<Button
 		android:id="@+id/newgame_button"
-		android:layout_width="fill_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_weight="0.5"
 		android:text="@string/create_game"
-		android:layout_below="@+id/refresh_button"
 		/>
-	  	<ScrollView
-		android:id="@+id/games_frame"
+		
+		<Button
+		android:id="@+id/refresh_button"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_width="fill_parent"
-		android:layout_weight="1"
-		android:gravity="bottom"
-		android:padding="5px"
-		android:layout_below="@+id/newgame_button"
-		>
-		<TableLayout 
-		android:id="@+id/tableLayout"
-		android:layout_width="fill_parent" 
-		android:layout_height="fill_parent" 
-		xmlns:android="http://schemas.android.com/apk/res/android"
-		android:stretchColumns="0">
+		android:layout_weight="0.5"
+		android:text="@string/refresh"
+		/>
+		
+	</LinearLayout>
 	
-		<TableRow>
-		<TextView
-		android:id="@+id/games"
-	    style="@style/coolFont"
-	    android:text=""
-	    />
-		<Button 
-	    android:id="@+id/join"
-	    android:text="@string/join_game"
-	    android:visibility="invisible"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent" 
-	    />
-		</TableRow>
-		</TableLayout>
-		</ScrollView>	
 </RelativeLayout>

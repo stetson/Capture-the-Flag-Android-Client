@@ -9,11 +9,12 @@
     <string name="game_title">Capture the Flag</string>
 	<string name="guest_button">Guest</string>
 	<string name="facebook_button">Facebook</string>
-	<string name="refresh">Refresh List of Games</string>
 	<string name="title_welcome">Welcome! Please sign in...</string>
 	
     <!-- Intro Layout Strings -->
-    <string name="create_game">Create Game</string>
+    <string name="join_message">Click a game to join, or create your own!</string>
+    <string name="create_game">Create a Game</string>
+	<string name="refresh">Refresh List</string>
     <string name="join_game">Join</string>
     <string name="loading_games">Loading Games...</string>
     <string name="loading_location">Acquiring Location...</string>
@@ -23,6 +24,9 @@
     <string name="no_game_selected">You must pick a game first!</string>
     <string name="failed_to_create">Failed to create game! It probably already exists.</string>
     <string name="failed_to_join">Failed to join game! It probably doesn\'t exist.</string>
+    <string name="join_list_players">Players:&#160;</string>
+    <string name="join_list_distance">Distance:&#160;</string>
+    <string name="join_list_distance_units">&#160;m</string>
     
     <!-- Game Layout Strings -->
     <string name="menu_self">Self</string>
@@ -38,9 +42,9 @@
     <string name="menu_back">Back</string>
     
     
-    <string name="game_info_red">Red: </string>
-    <string name="game_info_blue">Blue: </string>
-    <string name="game_info_accuracy">Accuracy: </string>
+    <string name="game_info_red">Red:&#160;</string>
+    <string name="game_info_blue">Blue:&#160;</string>
+    <string name="game_info_accuracy">Accuracy:&#160;</string>
 	<string name="game_info_loading">Loading...</string>
 	
 	<!-- Colors -->

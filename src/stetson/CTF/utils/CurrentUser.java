@@ -182,7 +182,9 @@ public class CurrentUser {
 		String params = "";
 		params += "latitude=" + CurrentUser.latitude;
 		params += "&longitude=" + CurrentUser.longitude;
-		params += "&accuracy=" + CurrentUser.accuracy;	
+		params += "&accuracy=" + CurrentUser.accuracy;
+		params += "&user_id=" + CurrentUser.uid;	
+		params += "&name=" + CurrentUser.name;	
 		return params;
 	}
 	

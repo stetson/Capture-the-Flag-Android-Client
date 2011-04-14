@@ -2,6 +2,8 @@ package stetson.CTF;
 
 import java.util.ArrayList;
 
+import stetson.CTF.Join.GameItem;
+import stetson.CTF.Join.GamesList;
 import stetson.CTF.utils.Connections;
 import stetson.CTF.utils.CurrentUser;
 
@@ -9,21 +11,14 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
-//import android.media.MediaPlayer;
 
 public class JoinCTF extends Activity {
 	
@@ -40,11 +35,10 @@ public class JoinCTF extends Activity {
 	public static final int GPS_UPDATE_DISTANCE_GAME = 0;
 	public static final int GPS_UPDATE_DISTANCE_INTRO = 1;
 	public static final int GPS_UPDATE_DISTANCE_BACKGROUND = 10;
-	public static boolean firstStart = true;
-	//Sound file
-	//public MediaPlayer mp = MediaPlayer.create(getBaseContext(), R.raw.absorb1);
 	
 	// Data Members
+	public static boolean firstStart = true;
+	private GamesList myGamesList;
 
 	/**
 	 * Called when the activity is first created.
@@ -56,6 +50,7 @@ public class JoinCTF extends Activity {
 		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
+		
 		new Thread(new Runnable() {
 		    public void run() {
 		    	if(JoinCTF.firstStart)
@@ -66,8 +61,16 @@ public class JoinCTF extends Activity {
 				}
 		    }
 		  }).start();
+		
 		// Move back to the game selection panel
 		setContentView(R.layout.join);
+		
+		// Startup list view
+		myGamesList = new GamesList(this);
+	    
+		// Grab a list of games on start up
+		buildGamesList();
+		
 		// Build listeners
 		buildListeners();
 		
@@ -84,8 +87,6 @@ public class JoinCTF extends Activity {
 		
 		// Start GPS
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), GPS_UPDATE_FREQUENCY_INTRO);
-		//mp.start();
-	
 	}
 	
 	/**
@@ -97,10 +98,12 @@ public class JoinCTF extends Activity {
 		
 		// Stop GPS
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
-		//mp.stop();
-		
-		
+
 	}
+	
+	/**
+	 * The activity has ended, stop all GPS updates.
+	 */
 	public void onDestroy() {
 
 		super.onDestroy();
@@ -109,8 +112,6 @@ public class JoinCTF extends Activity {
 		CurrentUser.stopLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE));
 		firstStart = true;
 		CurrentUser.setName("");
-		//mp.stop();
-		//mp.release();
 		
 	}
 	
@@ -137,7 +138,6 @@ public class JoinCTF extends Activity {
 		final Button refreshButton = (Button) findViewById(R.id.refresh_button);
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
-
 				buildGamesList();
 			}
 		});
@@ -170,27 +170,42 @@ public class JoinCTF extends Activity {
      * The AsyncTask used for generating a new list of games.
      * (Generics: Params, Progress, Result)
      */
-    private class TaskGenerateGamesList extends AsyncTask<Void, String, ArrayList<String>> {
+    private class TaskGenerateGamesList extends AsyncTask<Void, String, ArrayList<GameItem>> {
 		
     	protected static final long GPS_CHECK_PAUSE = 500;
-		private Context mContext = JoinCTF.this;
-		private TextView[] text;
-		private Button[] button;
-		private TableRow row;
-		private TableLayout table;
 		
 		/**
 		 * Run before execution on the UI thread.
 		 * Remove all children from group view and post a loading message.
 		 */
 		protected void onPreExecute() {
+			myGamesList.clearList();
+			myGamesList.updateList();
+		}
+	     
+		/**
+		 * Run after execution on the UI thread.
+		 * Clears the gameGroup view and adds a list of games to it.
+		 */
+		protected void onPostExecute(final ArrayList<GameItem> response) {
 			
-			table = (TableLayout) findViewById(R.id.tableLayout);
-			row = new TableRow(mContext);
-			row.removeAllViews();
-			table.removeAllViews();
+			myGamesList.setErrorText("");
 			
-			
+			// If there is a problem, or no games, display an error
+			if(response == null) {
+				myGamesList.setErrorText(getString(R.string.no_games_error));
+			} else if(response.isEmpty()) {
+				myGamesList.setErrorText(getString(R.string.no_games_error));
+				
+			// If there are games, add them to the list :)
+			} else {
+				
+				for(int i = 0; i < response.size(); i++) {
+					myGamesList.addGame(response.get(i));
+				}
+				myGamesList.updateList();
+				
+			}
 		}
 		
 		/**
@@ -198,78 +213,16 @@ public class JoinCTF extends Activity {
 		 * Clears the gamesGroup view and adds a message with the progress text.
 		 */
 	     protected void onProgressUpdate(String... progress) {
-	    	 table.removeAllViews();
-	    	 row.removeAllViews();
-	    	 TextView text = new TextView(mContext);
-	    	 text.setText(progress[0]);
-	    	 row.addView(text);
-	    	 table.removeAllViews();
-	    	 row.removeAllViews();
+	    	 myGamesList.setErrorText(progress[0]);
 	     }
 	     
 		/**
-		 * Run after execution on the UI thread.
-		 * Clears the gameGroup view and adds a list of games to it.
-		 */
-		protected void onPostExecute(final ArrayList<String> response) {
-			
-			row.removeAllViews();
-			table.removeAllViews();
-			// Something bad happened, unknown error :o
-			if(response == null) {
-		    	 TextView text = new TextView(mContext);
-		    	 text.setText(R.string.no_games_error);
-		    	 text.setTextSize(20);
-		    	 text.setTypeface(Typeface.MONOSPACE);
-		    	 text.setTypeface(Typeface.DEFAULT_BOLD);
-		    	 text.setTextColor(Color.BLACK);
-		    	 row.addView(text);
-		    	 table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		    	 
-		    // We have no games :(
-			} else if(response.isEmpty()) {
-		    	 TextView text = new TextView(mContext);
-		    	 text.setText(R.string.no_games);
-		    	 text.setTextSize(20);
-		    	 text.setTextColor(Color.BLACK);
-		    	 text.setTypeface(Typeface.MONOSPACE);
-		    	 text.setTypeface(Typeface.DEFAULT_BOLD);
-		    	 row.addView(text);
-		    	 table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-		    	 
-		    // We have some games! Add them to the list :)
-			} else {
-				table.removeAllViews();
-				text = new TextView[response.size()];
-				button = new Button[response.size()];
-				for(int i = 0; i < response.size(); i++) {
-					Log.i(TAG, "Adding game to view (" + response.get(i) + ")");
-					row = new TableRow(mContext);
-					text[i] = new TextView(mContext);
-					text[i].setTextSize(20);
-					text[i].setTextColor(Color.BLACK);
-					text[i].setTypeface(Typeface.MONOSPACE);
-					text[i].setTypeface(Typeface.DEFAULT_BOLD);
-					String gameName = response.get(i); 
-					text[i].setText(gameName);
-					button[i]=  new Button(mContext);
-					button[i].setText("Join");
-					button[i].setTag(gameName);
-					button[i].setOnClickListener(new listener());
-					row.addView(text[i]);
-					row.addView(button[i]);
-					table.addView(row,new TableLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-				}
-			}
-		}
-		
-		/**
 		 * Run as the work on another thread.
 		 */
-		protected ArrayList<String> doInBackground(Void... params) {
+		protected ArrayList<GameItem> doInBackground(Void... params) {
 			
-			publishProgress(mContext.getString(R.string.loading_location));
-			// We might still be waiting for a location...
+			this.publishProgress(JoinCTF.this.getString(R.string.loading_location));
+			
 			while(!CurrentUser.hasLocation()) {
 				try {
 					Thread.sleep(GPS_CHECK_PAUSE);
@@ -277,7 +230,9 @@ public class JoinCTF extends Activity {
 					Log.e(TAG, "Can't sleep :(", e);
 				}
 			}
-			publishProgress(mContext.getString(R.string.loading_games));
+			
+			this.publishProgress(JoinCTF.this.getString(R.string.loading_games));
+			
 			return Connections.getGames();
 		}
     }
@@ -323,19 +278,12 @@ public class JoinCTF extends Activity {
 	}
 	
 	/**
-	 * Custom button listener class
-	 * Triggers join game for the button pushed.
+	 * Public join game call to be used from GamesList.java ONLY!
+	 * @param gameName
 	 */
-	private class listener implements OnClickListener
-	{
-
-		public void onClick(View v) {
-			// TODO Auto-generated method stub
-			String myGameName = (String) v.getTag();
-			CurrentUser.setGameId(myGameName);
-			joinGame(CurrentUser.getName(), myGameName);
-		}
-		
+	public void joinGame(String gameName) {
+		CurrentUser.setGameId(gameName);
+		joinGame(CurrentUser.getName(), gameName);
 	}
 	
 }

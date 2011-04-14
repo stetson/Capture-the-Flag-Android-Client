@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" 
+android:layout_height="wrap_content"
+android:layout_width="fill_parent"
+android:padding="5px"
+>
+
+	<TextView
+	android:id="@+id/join_game_row_name"
+	android:layout_height="wrap_content"
+	android:layout_width="fill_parent"
+	android:layout_alignParentTop="true"
+	android:layout_marginBottom="5px"
+	android:text="Some game name!"
+	android:textAppearance="@style/join_game_name"
+	/>
+	
+	<TextView
+	android:id="@+id/join_game_row_players"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:layout_below="@+id/join_game_row_name"
+	android:layout_alignParentLeft="true"
+	android:textAppearance="@style/join_game_info"
+	/>
+	
+	<TextView
+	android:id="@+id/join_game_row_distance"
+	android:layout_height="wrap_content"
+	android:layout_width="wrap_content"
+	android:layout_below="@+id/join_game_row_name"
+	android:layout_alignParentRight="true"
+	android:layout_marginRight="5px"
+	android:textAppearance="@style/join_game_info"
+	/>
+	
+</RelativeLayout>

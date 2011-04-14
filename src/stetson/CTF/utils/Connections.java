@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import com.google.android.maps.GeoPoint;
 
 import stetson.CTF.JoinCTF;
+import stetson.CTF.Join.GameItem;
 
 import android.util.Log;
 
@@ -132,9 +133,9 @@ public class Connections {
 	 * 
 	 * @return ArrayList<String> games
 	 */
-	public static ArrayList<String> getGames() {
+	public static ArrayList<GameItem> getGames() {
 		
-		ArrayList<String> gamesList = new ArrayList<String>();
+		ArrayList<GameItem> gamesList = new ArrayList<GameItem>();
 		// Sweet, we have a location, lets grab a list of games
 		HttpGet req = new HttpGet(JoinCTF.SERVER_URL + "/game/?" + CurrentUser.buildQueryParams());
 		String data = Connections.sendRequest(req);
@@ -144,7 +145,8 @@ public class Connections {
 				// Add all the games to a list
 				JSONArray list = games.getJSONArray("games");
 				for(int n = 0; n < list.length(); n++) {
-					gamesList.add(list.getString(n));
+					GameItem item = new GameItem(list.optJSONObject(n));
+					gamesList.add(item);
 				}
 				// Ok, that's all, return the games list
 				return gamesList;
