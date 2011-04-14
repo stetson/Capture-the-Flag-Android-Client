@@ -29,15 +29,11 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 public class IntroCTF extends Activity {
 
@@ -48,7 +44,6 @@ public class IntroCTF extends Activity {
 	private static final String APP_ID = "215859728429846";
 	private static final String[] PERMS = new String[] {"publish_stream" };
 	private static Facebook facebook;
-	private ImageView image;
 	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
@@ -56,15 +51,13 @@ public class IntroCTF extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intro);
 		
-		// load image
-		image = (ImageView) findViewById(R.id.loading_image);
 		// Set music
 		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
-		// set loading message
-		setLoadingMessage("Please enter your name\nor login through Facebook", true);
+		
 		// facebook calls
 		facebook= new Facebook(APP_ID);
 		mAsyncRunner = new AsyncFacebookRunner(facebook);
+		
 		// start button and image listeners
 		buildListeners();
 		
@@ -99,12 +92,8 @@ public class IntroCTF extends Activity {
 	 */
 	public void buildListeners()
 	{		
-		image.setOnTouchListener(new OnTouchListener() {
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				return false;
-			}
-		});
-		final Button guestButton = (Button) findViewById(R.id.guest);
+		
+		final Button guestButton = (Button) findViewById(R.id.intro_guest_button);
 		guestButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				// Perform action on click
@@ -134,7 +123,7 @@ public class IntroCTF extends Activity {
 				alertDialog.show();
 			}
 		});
-		final Button facebookButton = (Button) findViewById(R.id.facebook);
+		final Button facebookButton = (Button) findViewById(R.id.intro_facebook_button);
 		facebookButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				// Initialize facebook on click
@@ -182,21 +171,6 @@ public class IntroCTF extends Activity {
 			alert.show();
 		}
 	}
-	/**
-	 * Method sets the loading message text
-	 * 
-	 * @param msg
-	 * @param visible
-	 */
-	public void setLoadingMessage(String msg, boolean visible)
-	{
-		TextView loading = (TextView) findViewById(R.id.games);
-		if(visible)
-		{
-			loading.setVisibility(TextView.VISIBLE);
-		}
-		loading.setText(msg);
-	}	
 	
 	/**
 	 * Allows messages to be posted to the Current User's wall

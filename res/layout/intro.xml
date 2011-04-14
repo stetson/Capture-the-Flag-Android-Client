@@ -6,47 +6,64 @@ android:layout_height="fill_parent"
 android:layout_weight="2"
 android:focusable="true" 
 android:focusableInTouchMode="true"
-android:background="#d5d5d5"
+android:background="@drawable/load_screen3"
 >
 	
-		<ImageView
-		android:id="@+id/loading_image"
-		android:background="@drawable/load_screen3"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent"
-		android:scaleType="fitXY"
-		/>
-		<TextView
-		android:id="@+id/games"
-	    style="@style/coolFont"
-	    android:text="a;sdkjfa;skfj;askjf;as"
-	    android:layout_above="@+id/ctfwords"
-	    android:layout_centerHorizontal="true"
-	    />
-		<ImageView
-		android:id="@+id/ctfwords"
-		android:src="@drawable/ctfwords"
-		android:layout_width="wrap_content"
-		android:layout_above="@+id/guest"
-		android:layout_height="50px"
-		android:scaleType="fitXY"
-		/>
+	<TextView
+	android:id="@+id/intro_loading_text"
+	android:layout_above="@+id/intro_title_text"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:gravity="center"
+	android:text="@string/title_welcome"
+	android:textAppearance="@style/intro_loading_style"
+	/>
+
+	<TextView
+	android:id="@+id/intro_title_text"
+	android:layout_width="fill_parent"
+	android:layout_above="@+id/intro_button_bar"
+	android:layout_height="50px"
+	android:gravity="center"
+	android:text="@string/game_title"
+	android:textColor="@color/intro_text_foreground"
+	android:background="@color/intro_text_background"
+	android:textAppearance="@style/intro_title_style"
+	android:layout_marginTop="5px"
+	android:layout_marginBottom="5px"
+	/>
+	
+	<LinearLayout
+	android:id="@+id/intro_button_bar"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_alignParentBottom="true"
+	android:orientation="horizontal"
+	>
+	
 		<Button
-		android:id="@+id/guest"
+		android:id="@+id/intro_guest_button"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="@string/guest_button"
-		android:layout_alignParentLeft="true"
-		android:layout_alignParentBottom="true" 
-		>
-		</Button><Button
-		android:id="@+id/facebook"
+		android:layout_weight="0.4"
+		/>
+		
+		<TextView
+		android:id="@+id/intro_guest_button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_weight="0.2"
+		/>
+		
+		<Button
+		android:id="@+id/intro_facebook_button"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:text="@string/facebook_button"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentBottom="true"
-		>
-		</Button>
-		
+		android:layout_weight="0.4"
+		/>
+	
+	</LinearLayout>
+	
 </RelativeLayout>

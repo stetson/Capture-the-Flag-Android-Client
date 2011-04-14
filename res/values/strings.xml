@@ -6,9 +6,11 @@
     <string name="app_name">StetsonCTF</string>
     
     <!-- Title Screen Strings -->
+    <string name="game_title">Capture the Flag</string>
 	<string name="guest_button">Guest</string>
 	<string name="facebook_button">Facebook</string>
 	<string name="refresh">Refresh List of Games</string>
+	<string name="title_welcome">Welcome! Please sign in...</string>
 	
     <!-- Intro Layout Strings -->
     <string name="create_game">Create Game</string>
@@ -45,6 +47,9 @@
 	<color name="menu_text">#111111</color>
 	<color name="red_background">#3FFF0000</color>
 	<color name="blue_background">#3F0000FF</color>
+	<color name="intro_text_background">#8F000000</color>
+	<color name="intro_text_foreground">#FFFFFFFF</color>
+	
 
 	
 </resources>
