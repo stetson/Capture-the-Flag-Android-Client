@@ -24,6 +24,7 @@ import stetson.CTF.Game.Player;
 import stetson.CTF.utils.Connections;
 import stetson.CTF.utils.CurrentUser;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -168,6 +169,7 @@ public class GameCTF extends MapActivity {
 		Connections.sendRequest(req);
 
 		// Remove the user from the game on the front end
+		CurrentUser.setName("");
 		CurrentUser.setGameId("");
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
@@ -288,38 +290,23 @@ public class GameCTF extends MapActivity {
 			return;
 		}
 		
-		// Lets call for a flag move, we don't really care about the response
-		new Thread(new Runnable() {
-			public void run() {
-				
-				String team = "";
-				if(isMovingFlag == MOVING_FLAG_RED) {
-					team = "red";
-				} else if(isMovingFlag == MOVING_FLAG_BLUE) {
-					team = "blue";
-				}
-				
-				isMovingFlag = MOVING_FLAG_NONE;
-				
-				if(!team.equals("")) {
-			        List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
-		            params.add(new BasicNameValuePair("latitude", "" + (loc.getLatitudeE6() / 1E6)));
-		            params.add(new BasicNameValuePair("longitude", "" + (loc.getLongitudeE6() / 1E6)));
-		            params.add(new BasicNameValuePair("user_id", CurrentUser.getUID()));
-		            params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
-		            params.add(new BasicNameValuePair("team", team));
-		            try {
-						HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/flag/");
-						req.setEntity(new UrlEncodedFormEntity(params));
-						String data = Connections.sendRequest(req);
-						Log.i(TAG, "FLAG MOVE: " + data);
-					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace();
-					}
-				}
-
-			}
-		}).start();
+		String team = "";
+		if(isMovingFlag == MOVING_FLAG_RED) {
+			team = "red";
+		} else if(isMovingFlag == MOVING_FLAG_BLUE) {
+			team = "blue";
+		}
+		
+		isMovingFlag = MOVING_FLAG_NONE;
+		
+		
+		if(!team.equals(""))
+		{
+			Object[] obj = new Object[2];
+			obj[0]=loc;
+			obj[1]=team;
+			new MoveFlag().execute(obj);
+		}
 		
 	}
 	
@@ -517,8 +504,31 @@ public class GameCTF extends MapActivity {
 			reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
 			mapOverlayMarkers.addOverlay(reticleItem);
 		}
-	
 	}
+	
+	
+	
+	 private class MoveFlag extends AsyncTask<Object[],Void, Void> {
+		 Context mContext = GameCTF.this;
+
+		 protected void onPreExecute()
+		 {
+			 
+	     }
+		 protected void onPostExecute(Void result)
+	     {
+	         
+	     }
+		 protected Void doInBackground(Object[]... params)
+		 {
+			 Object[] obj = params[0];
+			 GeoPoint loc = (GeoPoint) obj[0];
+			 String team = (String) obj[1];
+			 Connections.moveFlag(loc, team);
+			 return null;
+		 }
+	 }
+	
 	
 	/**
 	 * Returns a reference to the game's menu

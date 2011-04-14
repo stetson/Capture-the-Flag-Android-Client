@@ -114,15 +114,15 @@ public class GameScores {
 		}
 		
 		// Compose facebook string
-		myShareMessage = "<pre>Can\tI\tPost\nThis?</p>StetsonCTF!\n" + 
+		myShareMessage = "StetsonCTF!\n" + 
 			CurrentUser.getName() + " has posted the Scores of the game.\n" +
-			"Name:\tTags:\tCaptures:\tTeam:\n";
+			"Name:            Tags:  Captures:  Team:\n";
 		
 		// Add lines
 		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
 		for(int i =0; i < actualCount; i++) {
 			ScoreTable current = scoreTable.get(i);
-			myShareMessage = myShareMessage + current.name + "\t\t"+ current.tags + "\t\t\t"+  current.caps+ "\t\t"+ current.team+ "\n";
+			myShareMessage = myShareMessage + current.name + "       "+ current.tags + "        "+  current.caps+ "        "+ current.team+ "\n";
 			board.addView(createLine(i + 1, current.name, current.tags, current.caps, current.team));
 		}
 		

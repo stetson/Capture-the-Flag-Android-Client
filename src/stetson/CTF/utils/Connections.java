@@ -1,19 +1,26 @@
 package stetson.CTF.utils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.google.android.maps.GeoPoint;
 
 import stetson.CTF.JoinCTF;
 
@@ -169,7 +176,25 @@ public class Connections {
 		return null;
 		
 	}
-		
+	
+	public static void moveFlag(GeoPoint loc, String team)
+	{
+		List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
+		params.add(new BasicNameValuePair("latitude", "" + (loc.getLatitudeE6() / 1E6)));
+		params.add(new BasicNameValuePair("longitude", "" + (loc.getLongitudeE6() / 1E6)));
+		params.add(new BasicNameValuePair("user_id", CurrentUser.getUID()));
+		params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
+		params.add(new BasicNameValuePair("team", team));
+		try {
+			HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/flag/");
+			req.setEntity(new UrlEncodedFormEntity(params));
+			String data = Connections.sendRequest(req);
+			Log.i(TAG, "FLAG MOVE: " + data);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
 	 /**
      * Sets the user's name and generates a new UID.
      * @param name

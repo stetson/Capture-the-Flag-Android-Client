@@ -315,7 +315,7 @@ public class IntroCTF extends Activity {
 	     }
 		 protected void onPostExecute(Void result)
 	     {
-	         progressDialog.hide();
+	         progressDialog.dismiss();
 	         finish();
 	     }
 		 protected Void doInBackground(Void... params)
