@@ -1,18 +1,11 @@
 package stetson.CTF;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import stetson.CTF.Game.ItemizedOverlays;
@@ -24,7 +17,6 @@ import stetson.CTF.Game.Player;
 import stetson.CTF.utils.Connections;
 import stetson.CTF.utils.CurrentUser;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
@@ -160,21 +152,20 @@ public class GameCTF extends MapActivity {
 			cycle.cancel(true);
 			cycle = null;
 		}
+		
+		// Leave the game (server side)
+		Object[] obj = new Object[2];
+		obj[0] = CurrentUser.getGameId();
+		obj[1] = CurrentUser.getUID();
+		new LeaveGame().execute(obj);
 				
-		// Remove the user from the game on the back end
-		// We're using an anonymous thread here because we don't care about the response
-		// This is not a strictly required event
-		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-		HttpDelete req = new HttpDelete(JoinCTF.SERVER_URL + "/game/" + gameUrl + "/" + CurrentUser.getUID());
-		Connections.sendRequest(req);
-
-		// Remove the user from the game on the front end
+		// Leave the game (client side)
 		CurrentUser.setName("");
 		CurrentUser.setGameId("");
 		CurrentUser.setLocation(-1, -1);
 		CurrentUser.setAccuracy(-1);
 		
-		// Call last
+		// Call the super
 		super.onDestroy();
 	}
 	
@@ -299,15 +290,13 @@ public class GameCTF extends MapActivity {
 		
 		isMovingFlag = MOVING_FLAG_NONE;
 		
-		
-		if(!team.equals(""))
-		{
+		if(!team.equals("")) {
 			Object[] obj = new Object[2];
 			obj[0]=loc;
 			obj[1]=team;
 			new MoveFlag().execute(obj);
 		}
-		
+	
 	}
 	
 	/**
@@ -506,21 +495,15 @@ public class GameCTF extends MapActivity {
 		}
 	}
 	
-	
-	
-	 private class MoveFlag extends AsyncTask<Object[],Void, Void> {
-		 Context mContext = GameCTF.this;
 
-		 protected void onPreExecute()
-		 {
-			 
-	     }
-		 protected void onPostExecute(Void result)
-	     {
-	         
-	     }
-		 protected Void doInBackground(Object[]... params)
-		 {
+	/**
+	 * Private class for the MoveFlag server call.
+	 * Runs on a worker thread as to not interrupt the UI thread.
+	 * The call requires the current user to be the creator of the game in order to function.
+	 * This task does not handle a server response.
+	 */
+	 private class MoveFlag extends AsyncTask<Object[],Void, Void> {		 
+		 protected Void doInBackground(Object[]... params) {
 			 Object[] obj = params[0];
 			 GeoPoint loc = (GeoPoint) obj[0];
 			 String team = (String) obj[1];
@@ -528,7 +511,21 @@ public class GameCTF extends MapActivity {
 			 return null;
 		 }
 	 }
-	
+	 
+	 /**
+	  * Private calls for the LeaveGame server call.
+	  * Runs on a worker thread as to not interrupt the UI thread.
+	  * This task does not handle a server response.
+	  */
+	 private class LeaveGame extends AsyncTask<Object[],Void, Void> {		 
+		 protected Void doInBackground(Object[]... params) {
+			 Object[] obj = params[0];
+			 String game = (String) obj[0];
+			 String uid = (String) obj[1];
+			 Connections.leaveGame(game, uid);
+			 return null;
+		 }
+	 }
 	
 	/**
 	 * Returns a reference to the game's menu

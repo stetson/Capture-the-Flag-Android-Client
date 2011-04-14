@@ -12,6 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -67,6 +68,7 @@ public class Connections {
     	}  
     	return str;
 	}
+	
 	/**
 	 * Main method to create a game if the game parameter is ""
 	 * Main method to join a game if the game parameter is the gameName
@@ -75,8 +77,7 @@ public class Connections {
 	 * @param usrGame
 	 * @return
 	 */
-	public static String joinOrCreate(String usrName, String usrGame)
-	{
+	public static String joinOrCreate(String usrName, String usrGame) {
 		// More friendly parameters :)
 		String name = usrName;
 		String game = usrGame;
@@ -125,14 +126,13 @@ public class Connections {
 
 	    return GOOD_RESPONSE;
 	}
+	
 	/**
 	 * Method returns ArrayList<String> of the list of games available
 	 * 
 	 * @return ArrayList<String> games
 	 */
-	
-	public static ArrayList<String> getGames()
-	{
+	public static ArrayList<String> getGames() {
 		
 		ArrayList<String> gamesList = new ArrayList<String>();
 		// Sweet, we have a location, lets grab a list of games
@@ -157,13 +157,13 @@ public class Connections {
 		}
 		return null;
 	}
+	
 	/**
 	 * Methods returns all gameData
 	 * 
 	 * @return JSONObject gameData
 	 */
-	public static JSONObject getGameData()
-	{
+	public static JSONObject getGameData() {
 		HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/location/");
 		req.setEntity(CurrentUser.buildHttpParams(CurrentUser.UPDATE_PARAMS));
 		String data = Connections.sendRequest(req);
@@ -177,8 +177,13 @@ public class Connections {
 		
 	}
 	
-	public static void moveFlag(GeoPoint loc, String team)
-	{
+	/**
+	 * Sends server request to move a flag.
+	 * Requires that the user is the creator of the game.
+	 * @param loc
+	 * @param team
+	 */
+	public static void moveFlag(GeoPoint loc, String team) {
 		List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
 		params.add(new BasicNameValuePair("latitude", "" + (loc.getLatitudeE6() / 1E6)));
 		params.add(new BasicNameValuePair("longitude", "" + (loc.getLongitudeE6() / 1E6)));
@@ -195,6 +200,18 @@ public class Connections {
 		}
 	}
 
+	/**
+	 * Request to leave the game that the user is in.
+	 * This call does not handle the server's response!
+	 * @param game name
+	 * @param user uid
+	 */
+	public static void leaveGame(String gameName, String uid) {
+		String gameUrl = gameName.replaceAll(" ", "%20");
+		HttpDelete req = new HttpDelete(JoinCTF.SERVER_URL + "/game/" + gameUrl + "/" + uid);
+		Connections.sendRequest(req);
+	}
+	
 	 /**
      * Sets the user's name and generates a new UID.
      * @param name
