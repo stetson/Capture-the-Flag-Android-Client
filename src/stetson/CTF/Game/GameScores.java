@@ -6,7 +6,6 @@ import stetson.CTF.R;
 import stetson.CTF.IntroCTF;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
@@ -18,11 +17,9 @@ public class GameScores {
 	
 	// Constants: To be used across entire application
 	public static final String TAG = "GameScores";
-	private String shareMessage = "StetsonCTF!!\n" + CurrentUser.getName() + " has posted the Scores of the game.\nName:\t" +
-	"Tags:\tCaptures:\tTeam:\n";
 	private static final int LIST_COUNT = 10;
-	
-	
+	private String myShareMessage;
+
 	private GameCTF myGame;
 	
 	public GameScores(GameCTF game) {
@@ -71,7 +68,7 @@ public class GameScores {
 					// do facebook stuff
 					new Thread(new Runnable() {
 					    public void run() {
-					    	IntroCTF.postToWall(shareMessage);
+					    	IntroCTF.postToWall(myShareMessage);
 					        }
 					  }).start();
 					break;
@@ -91,28 +88,41 @@ public class GameScores {
 		
 		// Sort the ScoreTables, get the top LIST_COUNT players
 		for(int i = 0; i < game.getPlayerCount(); i++) {
+			
 			player = game.getPlayer(i);
 			ScoreTable score = new ScoreTable(player.getName(), player.getTags(), player.getCaptures(), player.getTeam());
 			if(scoreTable.size() == 0) {
-				Log.i(TAG, "no other scores... adding first");
 				scoreTable.add(score);
 			} else {
+				
+				// Is this score bigger than anything on the list?
+				// If it is, put this in front of the smaller one.
 				for(int r = 0; r < scoreTable.size(); r++) {
 					ScoreTable current = scoreTable.get(r);
 					if(score.compare(current) >= 0) {
-						Log.i(TAG, "replacing #" +r + " score!");
 						scoreTable.add(r, score);
 						break;
 					}
 				}
+				
+				// No? Is the list full yet? If it isn't full, add it!
+				if(scoreTable.size() < LIST_COUNT) {
+					scoreTable.add(score);
+				}
+				
 			}
 		}
+		
+		// Compose facebook string
+		myShareMessage = "<pre>Can\tI\tPost\nThis?</p>StetsonCTF!\n" + 
+			CurrentUser.getName() + " has posted the Scores of the game.\n" +
+			"Name:\tTags:\tCaptures:\tTeam:\n";
 		
 		// Add lines
 		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
 		for(int i =0; i < actualCount; i++) {
 			ScoreTable current = scoreTable.get(i);
-			shareMessage = shareMessage + current.name + "\t\t"+ current.tags + "\t\t\t"+  current.caps+ "\t\t"+ current.team+ "\n";
+			myShareMessage = myShareMessage + current.name + "\t\t"+ current.tags + "\t\t\t"+  current.caps+ "\t\t"+ current.team+ "\n";
 			board.addView(createLine(i + 1, current.name, current.tags, current.caps, current.team));
 		}
 		
@@ -233,10 +243,10 @@ public class GameScores {
 
 		/**
 		 * Compares SELF to OTHER
-		 * if SELF > -> 1
-		 * if SELF < -> -1
-		 * if SELF = -> 0
-		 * @param other
+		 * Greater than 	-> 1
+		 * Less than		-> -1
+		 * Equal to			-> 0
+		 * @param the other ScoreTable
 		 * @return
 		 */
 		public int compare(ScoreTable other) {
