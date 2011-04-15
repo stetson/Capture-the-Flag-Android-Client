@@ -3,13 +3,9 @@ package stetson.CTF;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import stetson.CTF.utils.CurrentUser;
-
-
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
@@ -17,7 +13,6 @@ import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -92,10 +87,6 @@ public class IntroCTF extends Activity {
 		//		mp.release();
 		
 	}
-	// Disable User from exiting
-	public void onBackPressed()
-	{	
-	}
 
 	/**
 	 * Build button and image listeners
@@ -157,14 +148,18 @@ public class IntroCTF extends Activity {
 			public void onCancel() {}
 		});
 	}
-	
+	/**
+	 * Method checks to see if UserID is stored. If it isn't call generate user id.
+	 * If it is set UserID to it.
+	 * 
+	 */
 	public void setUID()
 	{
 		settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String uid = settings.getString("UID", "0");
 		if(uid.equals("0") || uid.equals(""))
 		{
-			CurrentUser.setUID(CurrentUser.genUID());
+			CurrentUser.genUID();
 		}
 		else
 		{
@@ -179,22 +174,7 @@ public class IntroCTF extends Activity {
 	 */
 	public void gpsLock()
 	{
-		if(!CurrentUser.getName().equals(""))
-		{
 			new loadingDialog().execute();
-		}
-		else
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Please login.");
-			builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		                
-		           }
-		       });
-			AlertDialog alert = builder.create();
-			alert.show();
-		}
 	}
 	
 	/**
@@ -236,6 +216,7 @@ public class IntroCTF extends Activity {
 
 		facebook.authorizeCallback(requestCode, resultCode, data);
 		mAsyncRunner.request("me", new IDRequestListener());
+		gpsLock();
 	}
 	/**
 	 * Facebook
@@ -258,7 +239,6 @@ public class IntroCTF extends Activity {
 				runOnUiThread(new Runnable() {
 					public void run() {
 					CurrentUser.setName(name);
-					gpsLock();
 				}
 			});	
 						
@@ -286,10 +266,10 @@ public class IntroCTF extends Activity {
 		public void onComplete(Bundle values) {
 			// Process onComplete
 			// Dispatch on its own thread
-			runOnUiThread(new Runnable() {
-				public void run() {
-				}
-			});
+//			runOnUiThread(new Runnable() {
+//				public void run() {
+//				}
+//			});
 		}
 		public void onFacebookError(FacebookError error) {}
 		public void onError(DialogError error) {}
@@ -300,7 +280,7 @@ public class IntroCTF extends Activity {
 	 * Loading dialog for GPS signal
 	 *
 	 */
-	 private class loadingDialog extends AsyncTask<Void,Void, Void> {
+	 private class loadingDialog extends AsyncTask<Void,String, Void> {
 		 ProgressDialog progressDialog;
 		 Context mContext = IntroCTF.this;
 
@@ -308,7 +288,7 @@ public class IntroCTF extends Activity {
 		 {
 			 progressDialog = new ProgressDialog(mContext);
 			 progressDialog.setTitle("Hello " + CurrentUser.getName());
-			 progressDialog.setMessage("Acquiring GPS signal please wait...");
+			 progressDialog.setMessage(IntroCTF.this.getString(R.string.please_wait));
 			 progressDialog.setIndeterminate(true);
 			 progressDialog.show();
 	     }
@@ -318,9 +298,31 @@ public class IntroCTF extends Activity {
 	         setResult(RESULT_OK);
 	         finish();
 	     }
+		 /**
+			 * Runs every time publicProgress() is called.
+			 * Clears the gamesGroup view and adds a message with the progress text.
+			 */
+		 protected void onProgressUpdate(String... progress) {
+			 progressDialog.setMessage(IntroCTF.this.getString(R.string.please_wait) + progress[0]);
+			 if(progress[1]!= null)
+			 {
+				 progressDialog.setTitle(progress[1]);
+				 progress[1] = null;
+			 }
+		 }
 		 protected Void doInBackground(Void... params)
 		 {
 
+			 this.publishProgress(IntroCTF.this.getString(R.string.wait_for_name),null);
+			 while(CurrentUser.getName().equals("")) {
+				 try {
+					 Thread.sleep(800);
+				 } catch (InterruptedException e) {
+					 Log.e(TAG, "Can't sleep :(", e);
+				 }
+			 }
+			 
+			 this.publishProgress(IntroCTF.this.getString(R.string.wait_for_signal),"Hello " + CurrentUser.getName());
 			 while(!CurrentUser.hasLocation()) {
 				 try {
 					 Thread.sleep(800);

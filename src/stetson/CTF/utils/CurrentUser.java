@@ -4,16 +4,7 @@
  */
 package stetson.CTF.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
-
 import stetson.CTF.JoinCTF;
-
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -104,7 +95,7 @@ public class CurrentUser {
 		params += "&longitude=" + CurrentUser.longitude;
 		params += "&accuracy=" + CurrentUser.accuracy;
 		params += "&user_id=" + CurrentUser.uid;	
-		params += "&name=" + CurrentUser.name;	
+		params += "&name=" + CurrentUser.name.replace(" ", "%20");	
 		return params;
 	}
 	

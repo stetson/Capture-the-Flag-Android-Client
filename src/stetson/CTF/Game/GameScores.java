@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import stetson.CTF.GameCTF;
 import stetson.CTF.utils.CurrentUser;
 
@@ -68,7 +69,12 @@ public class GameScores {
 					// do facebook stuff
 					new Thread(new Runnable() {
 					    public void run() {
-					    	IntroCTF.postToWall(myShareMessage);
+					    	
+					    	if(!IntroCTF.postToWall(myShareMessage))
+					    	{
+					    		Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.facebook_login_error, 10);
+					    		toast.show();	
+					    	}
 					        }
 					  }).start();
 					break;
@@ -115,19 +121,16 @@ public class GameScores {
 		
 		// Compose facebook string
 		myShareMessage = "StetsonCTF!\n" + 
-			CurrentUser.getName() + " has posted the Scores of the game.\n" +
+			CurrentUser.getName() + " has     posted the \tScores of the game.\n" +
 			"Name:            Tags:  Captures:  Team:\n";
 		
 		// Add lines
 		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
 		for(int i =0; i < actualCount; i++) {
 			ScoreTable current = scoreTable.get(i);
-			myShareMessage = myShareMessage + current.name + "       "+ current.tags + "        "+  current.caps+ "        "+ current.team+ "\n";
+			myShareMessage = myShareMessage + current.name + "\u0009\u0009"+ current.tags + "\u0009"+  current.caps+ "\u0020\u00a0\u00a0"+ current.team+ "\n";
 			board.addView(createLine(i + 1, current.name, current.tags, current.caps, current.team));
 		}
-		
-		
-		
 	}
 	
 	/**

@@ -205,7 +205,7 @@ public class JoinCTF extends Activity {
 			if(response == null) {
 				myGamesList.setErrorText(getString(R.string.no_games_error));
 			} else if(response.isEmpty()) {
-				myGamesList.setErrorText(getString(R.string.no_games_error));
+				myGamesList.setErrorText(getString(R.string.no_games));
 				
 			// If there are games, add them to the list :)
 			} else {
@@ -214,7 +214,6 @@ public class JoinCTF extends Activity {
 					myGamesList.addGame(response.get(i));
 				}
 				myGamesList.updateList();
-				
 			}
 		}
 		
@@ -271,7 +270,7 @@ public class JoinCTF extends Activity {
 		 */
 		protected void onPostExecute(final String response) {
 			dialog.hide();
-			if(response.equals(GOOD_RESPONSE)) {
+			if(response.equals(GOOD_RESPONSE) && GameCTF.hasStarted == false) {
 			    Intent i = new Intent(mContext, GameCTF.class);
 			    startActivity(i);
 			} else {
