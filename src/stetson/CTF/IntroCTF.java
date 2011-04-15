@@ -24,6 +24,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -34,25 +35,31 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class IntroCTF extends Activity {
 
 	// Data members
 
 	private static AsyncFacebookRunner mAsyncRunner;
+	public static final String PREFS_NAME = "CTFuid";
 	private static final String TAG = "FACEBOOK CONNECT";
 	private static final String APP_ID = "215859728429846";
 	private static final String[] PERMS = new String[] {"publish_stream" };
 	private static Facebook facebook;
-	private MediaPlayer mp;
+	private SharedPreferences settings;
+//	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intro);
 		
+		// set or get the Users id
+		setUID();
 		// Set music
-		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
+		// not used in intro
+//		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
 		
 		// facebook calls
 		facebook= new Facebook(APP_ID);
@@ -67,18 +74,22 @@ public class IntroCTF extends Activity {
 	{
 		super.onResume();
 		// start music
-		mp.setLooping(true);
-		mp.start();
+//		mp.setLooping(true);
+//		mp.start();
 		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_INTRO);	
 		
 	}
-	
 	public void onDestroy()
 	{
 		super.onDestroy();
+		SharedPreferences.Editor editor = settings.edit();
+		// save UID temporarily
+		editor.putString("UID", CurrentUser.getUID());
+		// Commit the edits!
+		editor.commit();
 		// stop music and call GC
-		mp.stop();
-		mp.release();
+		//		mp.stop();
+		//		mp.release();
 		
 	}
 	// Disable User from exiting
@@ -145,6 +156,20 @@ public class IntroCTF extends Activity {
 			public void onError(DialogError e) {}
 			public void onCancel() {}
 		});
+	}
+	
+	public void setUID()
+	{
+		settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		String uid = settings.getString("UID", "0");
+		if(uid.equals("0") || uid.equals(""))
+		{
+			CurrentUser.setUID(CurrentUser.genUID());
+		}
+		else
+		{
+			CurrentUser.setUID(uid);
+		}
 	}
 	/**
 	 * Method forces user to login and wait for GPS signal
@@ -290,6 +315,7 @@ public class IntroCTF extends Activity {
 		 protected void onPostExecute(Void result)
 	     {
 	         progressDialog.dismiss();
+	         setResult(RESULT_OK);
 	         finish();
 	     }
 		 protected Void doInBackground(Void... params)
