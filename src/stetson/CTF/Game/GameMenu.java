@@ -115,11 +115,15 @@ public class GameMenu {
 		}
 		
 		// Fill the blank spots
-		altMenu.addView(createMenuOption(-1, -1, -1));
-		altMenu.addView(createMenuOption(-1, -1, -1));
+		for(int i = 0; i < blanks; i++) {
+			altMenu.addView(createMenuOption(-1, -1, R.drawable.menu_blank));
+		}
 		
 		// Back Button
 		altMenu.addView(createMenuOption(R.string.menu_back, R.id.menu_option_back, R.drawable.exit));
+		
+		// Update map markers
+		myGame.updateMapMarkers();
 
 	}
 	

@@ -34,24 +34,31 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 		  gameCTF = game;
 	}
 	
-	/**
-	 * Adds an overlay item to the array of overlays.
-	 * @param overlay
-	 */
-	public void addOverlay(OverlayItem overlay) {
+	public void addOverlay(OverlayItem overlay, boolean forceBottom) {
 		
 		// Is there an empty overlay right now?
-		for(int i = 0; i < mOverlays.size(); i++) {
-			if(mOverlays.get(i).getMarker(OverlayItem.ITEM_STATE_FOCUSED_MASK) == null) {
-				mOverlays.set(i, overlay);
-				this.populate();
-				return;
+		if(!forceBottom) {
+			for(int i = 0; i < mOverlays.size(); i++) {
+				if(mOverlays.get(i).getMarker(OverlayItem.ITEM_STATE_FOCUSED_MASK) == null) {
+					mOverlays.set(i, overlay);
+					this.populate();
+					return;
+				}
 			}
 		}
 		
 		// If not, add it to the end
 	    mOverlays.add(overlay);
 	    populate();
+	}
+	
+	/**
+	 * Adds an overlay item to the array of overlays.
+	 * Tries to fill unused overlay positions.
+	 * @param overlay
+	 */
+	public void addOverlay(OverlayItem overlay) {
+		this.addOverlay(overlay, false);
 	}
 
 	/**

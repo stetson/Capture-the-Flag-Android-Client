@@ -308,6 +308,15 @@ public class GameCTF extends MapActivity {
 	}	
 	
 	/**
+	 * If the thread isn't already busy updating, go ahead and update the map markers now.
+	 */
+	public void updateMapMarkers() {
+		if(cycle.getStatus() == AsyncTask.Status.FINISHED){ 
+			cycle.updateGame();
+		}
+	}
+	
+	/**
 	 * Game processor. Runs the GameProcess task every GAME_UPDATE_DELAY (ms).
 	 */
 	private final Runnable gameProcess = new Runnable() {
@@ -321,7 +330,6 @@ public class GameCTF extends MapActivity {
 			
 			// Call for another execution later
 			gameHandler.postDelayed(this, GAME_UPDATE_DELAY);
-	
 	   }
 	};
 	
@@ -329,6 +337,7 @@ public class GameCTF extends MapActivity {
      * The AsyncTask used for processing game updates.
      * (Generics: Params, Progress, Result)
      */
+	
 	public class TaskGameProcess extends AsyncTask<Void, Void, JSONObject> {
 		
 		/**
@@ -355,8 +364,12 @@ public class GameCTF extends MapActivity {
 				return;
 			}
 			
-			// No errors, parsing was a success!
-			Log.i(TAG, "GameProcess()...");
+			// Call for a game update
+			updateGame();
+			
+		}
+		
+		public void updateGame() {
 			
 			// Is this the first map data we have gotten?
 			this.firstCenter();
@@ -386,9 +399,9 @@ public class GameCTF extends MapActivity {
 		    
 		    // Let the make know we're done!
 		    mapView.invalidate();
-			
+		    
 		}
-	
+		
 		/**
 		 * If the map hasn't been centered around the origin and smart-zoomed
 		 * this function will take care of that.
@@ -491,7 +504,7 @@ public class GameCTF extends MapActivity {
 		protected void addSelectionReticle(GeoPoint location) {
 			OverlayItem reticleItem = new OverlayItem(location, ItemizedOverlays.OVERLAY_OTHER, "");
 			reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
-			mapOverlayMarkers.addOverlay(reticleItem);
+			mapOverlayMarkers.addOverlay(reticleItem, true);
 		}
 	}
 	
@@ -502,7 +515,7 @@ public class GameCTF extends MapActivity {
 	 * The call requires the current user to be the creator of the game in order to function.
 	 * This task does not handle a server response.
 	 */
-	 private class MoveFlag extends AsyncTask<Object[],Void, Void> {		 
+	 private class MoveFlag extends AsyncTask<Object[],Void, Void> {
 		 protected Void doInBackground(Object[]... params) {
 			 Object[] obj = params[0];
 			 GeoPoint loc = (GeoPoint) obj[0];
