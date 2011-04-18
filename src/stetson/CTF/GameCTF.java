@@ -377,7 +377,8 @@ public class GameCTF extends MapActivity {
 			// Remove all overlay items
 			mapOverlay.clear();
 			mapOverlayMarkers.clear();
-						
+			mapView.invalidate();
+
 			// Update game info bar
 			myInfoBar.update(myGameData.getRedScore(), myGameData.getBlueScore(), CurrentUser.getAccuracy());
 			
@@ -504,7 +505,7 @@ public class GameCTF extends MapActivity {
 		protected void addSelectionReticle(GeoPoint location) {
 			OverlayItem reticleItem = new OverlayItem(location, ItemizedOverlays.OVERLAY_OTHER, "");
 			reticleItem.setMarker(drawable.get(R.drawable.selection_reticle));
-			mapOverlayMarkers.addOverlay(reticleItem, true);
+			mapOverlayMarkers.addOverlay(reticleItem);
 		}
 	}
 	

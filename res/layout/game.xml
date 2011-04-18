@@ -12,7 +12,10 @@
 		android:gravity="bottom"
 		android:weightSum="1.0"
 		android:orientation="horizontal"
-		android:padding="3px"
+		android:paddingLeft="5px"
+		android:paddingRight="5px"
+		android:paddingTop="3px"
+		android:paddingBottom="3px"
 		android:background="@drawable/menu_bg"
  		>
  		

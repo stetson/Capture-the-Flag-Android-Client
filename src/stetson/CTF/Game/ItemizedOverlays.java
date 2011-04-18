@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import stetson.CTF.GameCTF;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
@@ -34,14 +35,14 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 		  gameCTF = game;
 	}
 	
-	public void addOverlay(OverlayItem overlay, boolean forceBottom) {
+	public void addOverlay(OverlayItem overlay, boolean allowReuse) {
 		
 		// Is there an empty overlay right now?
-		if(!forceBottom) {
+		if(allowReuse) {
 			for(int i = 0; i < mOverlays.size(); i++) {
 				if(mOverlays.get(i).getMarker(OverlayItem.ITEM_STATE_FOCUSED_MASK) == null) {
 					mOverlays.set(i, overlay);
-					this.populate();
+					populate();
 					return;
 				}
 			}
@@ -49,6 +50,9 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 		
 		// If not, add it to the end
 	    mOverlays.add(overlay);
+	    
+	    Log.i("MARKER", "Marker added at index=" + mOverlays.indexOf(overlay) + " text=" + overlay.getTitle());
+	    
 	    populate();
 	}
 	
@@ -58,7 +62,7 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 	 * @param overlay
 	 */
 	public void addOverlay(OverlayItem overlay) {
-		this.addOverlay(overlay, false);
+		this.addOverlay(overlay, true);
 	}
 
 	/**
