@@ -70,6 +70,7 @@ public class GameCTF extends MapActivity {
 	private ItemizedOverlays mapOverlayMarkers;
 	
 	// Game Mechanics
+	private boolean isStopped = false;
 	private int isMovingFlag;
 	private GameData myGameData;
 	private GameMenu myMenu;
@@ -92,7 +93,8 @@ public class GameCTF extends MapActivity {
 		
 		// Restore a saved instance of the application
 		super.onCreate(savedInstanceState);
-				
+		isStopped = false;
+		
 		// Make sure the user is actually in a game
 		if(CurrentUser.getGameId().equals("")) {
 			this.finish();
@@ -148,6 +150,7 @@ public class GameCTF extends MapActivity {
 	public void onDestroy() {
 		
 		// Stop any running cycle that may exist
+		isStopped = true;
 		if(cycle != null) {
 			cycle.cancel(true);
 			cycle = null;
@@ -323,7 +326,7 @@ public class GameCTF extends MapActivity {
 	    public void run() {
 			// Run the task only if the previous one is null or finished
 			// AsyncTasks are designed to run only ONCE per lifetime
-			if(cycle == null || cycle.getStatus() == AsyncTask.Status.FINISHED) {
+			if(cycle == null || cycle.getStatus() == AsyncTask.Status.FINISHED && !isStopped) {
 	    		cycle = new TaskGameProcess();
 	    		cycle.execute();
 			}
@@ -346,6 +349,9 @@ public class GameCTF extends MapActivity {
 		 */
 		protected JSONObject doInBackground(Void... params) {
 			Log.i(TAG, "Grabbing game data...");
+			if(isStopped) {
+				return null;
+			}
 			return Connections.getGameData();
 		}
 		

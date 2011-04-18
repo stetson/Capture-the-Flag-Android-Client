@@ -70,7 +70,6 @@ public class GameData {
 		
 		// We don't have any players?!
 		if(!game.has("players")) {
-			Log.i("TAG", "Game has no players...");
 			return;
 		}
 

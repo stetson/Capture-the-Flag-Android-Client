@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import stetson.CTF.GameCTF;
 
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.google.android.maps.GeoPoint;
@@ -50,9 +49,6 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 		
 		// If not, add it to the end
 	    mOverlays.add(overlay);
-	    
-	    Log.i("MARKER", "Marker added at index=" + mOverlays.indexOf(overlay) + " text=" + overlay.getTitle());
-	    
 	    populate();
 	}
 	
