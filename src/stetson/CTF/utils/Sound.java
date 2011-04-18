@@ -14,12 +14,12 @@ public class Sound {
 	}
 	
 	public void playInObserver() {
-		mp = MediaPlayer.create(myContext, R.raw.se9);
+		mp = MediaPlayer.create(myContext, R.raw.observermoderobo);
 		mp.start();
 	}
 	
 	public void playOutObserver() {
-		mp = MediaPlayer.create(myContext, R.raw.se8);
+		mp = MediaPlayer.create(myContext, R.raw.actionrobo);
 		mp.start();
 	}
 	
