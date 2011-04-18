@@ -5,6 +5,7 @@ import com.google.android.maps.GeoPoint;
 import stetson.CTF.GameCTF;
 import stetson.CTF.R;
 import stetson.CTF.utils.CurrentUser;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -49,6 +50,8 @@ public class GameMenu {
 	 * @param point to highlight on the map
 	 */
 	public void setMenu(int type, String info, GeoPoint point) {
+		
+		Log.i("MENU", "Menu Display: " + type + ", Info: " + info);
 		
 		LinearLayout gameMenu = (LinearLayout) myGame.findViewById(R.id.gameMenu);
 		LinearLayout altMenu = (LinearLayout) myGame.findViewById(R.id.altMenu);

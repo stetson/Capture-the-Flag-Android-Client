@@ -61,6 +61,10 @@ public class ItemizedOverlays extends ItemizedOverlay<OverlayItem> {
 	 */
 	protected boolean onTap(int index) {
 		
+		if(index > (mOverlays.size() - 1)) {
+			return true;
+		}
+		
 		OverlayItem item = mOverlays.get(index);
 
 		String id = item.getTitle();
