@@ -393,8 +393,12 @@ public class GameCTF extends MapActivity {
 			myInfoBar.update(myGameData.getRedScore(), myGameData.getBlueScore(), CurrentUser.getAccuracy());
 			
 			// Add flags
-			addFlagMarker(myGameData.getRedFlag(), "Red Flag", R.drawable.red_flag);
-			addFlagMarker(myGameData.getBlueFlag(), "Blue Flag", R.drawable.blue_flag);
+			if(!myGameData.isRedFlagTaken()) {
+				addFlagMarker(myGameData.getRedFlag(), "Red Flag", R.drawable.red_flag);
+			}
+			if(!myGameData.isBlueFlagTaken()) {
+				addFlagMarker(myGameData.getBlueFlag(), "Blue Flag", R.drawable.blue_flag);
+			}
 					
 			// Add players
 			Player player;
