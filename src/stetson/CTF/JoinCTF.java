@@ -195,7 +195,7 @@ public class JoinCTF extends Activity {
 			if(response == null) {
 				myGamesList.setErrorText(getString(R.string.no_games_error));
 			} else if(response.isEmpty()) {
-				myGamesList.setErrorText(getString(R.string.no_games_error));
+				myGamesList.setErrorText(getString(R.string.no_games));
 				
 			// If there are games, add them to the list :)
 			} else {
