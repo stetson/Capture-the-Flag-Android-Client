@@ -53,6 +53,10 @@
 	<color name="blue_background">#3F0000FF</color>
 	<color name="intro_text_background">#8F000000</color>
 	<color name="intro_text_foreground">#FFFFFFFF</color>
+	<string name="facebook_login_error">You must login through facebook to use this feature.</string>
+	<string name="please_wait">Please wait...</string>
+	<string name="wait_for_signal">Acquiring GPS signal</string>
+	<string name="wait_for_name">Retrieving username</string>
 	
 
 	

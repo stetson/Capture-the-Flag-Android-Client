@@ -3,8 +3,6 @@ package stetson.CTF.utils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -32,6 +30,12 @@ public class Connections {
 	
 	public final static String TAG = "Connections";
 	private final static String GOOD_RESPONSE = "OK";
+	public static final int CUSTOM_PARAMS = -1;
+	public static final int CREATE_PARAMS = 0;
+	public static final int JOIN_PARAMS = 1;
+	public static final int UPDATE_PARAMS = 2;
+	public static final int LEAVE_PARAMS = 3;
+	
 	/**
 	 * Makes an HTTP request and returns a response as a string.
 	 * @param request
@@ -56,6 +60,95 @@ public class Connections {
 	}
 	
 	/**
+	 * Generates HttpParams automatically for the current user.
+	 * Type:	CREATE_PARAMS 	= lat, long, name, gameId
+	 * 			JOIN_PARAMS		= lat, long, accuracy, uid, name
+	 * 			UPDATE_PARAMS 	= lat, long, accuracy, uid, name, game
+	 *          CUSTOM_PARAMS   = uses ArrayList passed to create FormEntity
+	 * @param type
+	 * @return
+	 */
+	public static UrlEncodedFormEntity buildHttpParams(int type, ArrayList<NameValuePair> customList) {
+
+        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>(4);  
+        
+        boolean location = false;
+        boolean user_id = false;
+        boolean game_id = false;
+        boolean name = false;
+        boolean custom = false;
+        
+        // Determine what is needed for each protocol
+        switch(type) {
+        
+			case CREATE_PARAMS:
+	    		location = true;
+	    		user_id = true;
+	    		name = true;
+	    		game_id = true;
+	    		break;
+	    		
+    		case JOIN_PARAMS:
+	    		location = true;
+	    		user_id = true;
+	    		name = true;
+	    		break;
+    		
+        	case UPDATE_PARAMS:
+        		location = true;
+        		user_id = true;
+        		name = true;
+        		game_id = true;
+        		break;
+        		
+	        case LEAVE_PARAMS:
+	        	user_id = true;
+	        	break;
+	        case CUSTOM_PARAMS:
+	        	custom = true;
+	        	break;
+        }
+        
+        if(custom)
+        {
+        	params = customList;
+        	
+        }
+        
+        // Location Information
+        if(location) {
+            params.add(new BasicNameValuePair("latitude", Double.toString(CurrentUser.getLatitude())));
+            params.add(new BasicNameValuePair("longitude", Double.toString(CurrentUser.getLongitude())));
+            params.add(new BasicNameValuePair("accuracy",  Float.toString(CurrentUser.getAccuracy())));
+        }
+        
+        // User UID
+        if(user_id) {
+        	params.add(new BasicNameValuePair("user_id", CurrentUser.getUID()));
+        }
+        
+        // Game ID
+        if(game_id) {
+        	params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
+        }
+        
+        // Username
+        if(name) {
+        	params.add(new BasicNameValuePair("name", CurrentUser.getName()));
+        }
+
+        
+        try {
+        	return new UrlEncodedFormEntity(params);
+		} catch (UnsupportedEncodingException e) {
+			Log.e(TAG, "Error adding params to request!", e);
+		}
+		
+		return null;
+	}
+
+	
+	/**
 	 * Draws a string from an HttpResponse object.
 	 * @param rp
 	 * @return
@@ -78,22 +171,17 @@ public class Connections {
 	 * @param usrGame
 	 * @return
 	 */
-	public static String joinOrCreate(String usrName, String usrGame) {
+	public static String joinOrCreate(String usrName) {
 		// More friendly parameters :)
 		String name = usrName;
-		String game = usrGame;
+		String game = CurrentUser.getGameId();
 		Log.i(TAG, "(WORKER) joinGame(" + name + ", " + game + ")");
-		
-		// Build a UID
-		updateUser(name);
 		
 		// If a game name wasn't given, then we need to make a game.
 		if(game.equals("")) {
 			
 			CurrentUser.setGameId(CurrentUser.getName());
-			HttpPost hp = new HttpPost(JoinCTF.SERVER_URL + "/game/");
-			hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.CREATE_PARAMS));
-			String data = Connections.sendRequest(hp);
+			String data = callPost("/game/", buildHttpParams(CREATE_PARAMS,null));
 			Log.i(TAG, "RESPONSE: " +data);
 			
 			try {
@@ -110,10 +198,7 @@ public class Connections {
 			}
 		}
 		// If a game was created, then it was a success at this point! Now we must join the game.
-		String gameUrl = CurrentUser.getGameId().replaceAll(" ", "%20");
-		HttpPost hp = new HttpPost(JoinCTF.SERVER_URL + "/game/" + gameUrl);
-		hp.setEntity(CurrentUser.buildHttpParams(CurrentUser.JOIN_PARAMS));
-		String data = Connections.sendRequest(hp);
+		String data = callPost("/game/" + CurrentUser.getGameId().replaceAll(" ", "%20"),buildHttpParams(JOIN_PARAMS,null));
 		
 		try {
 			JSONObject jsonGame = new JSONObject(data);
@@ -166,9 +251,7 @@ public class Connections {
 	 * @return JSONObject gameData
 	 */
 	public static JSONObject getGameData() {
-		HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/location/");
-		req.setEntity(CurrentUser.buildHttpParams(CurrentUser.UPDATE_PARAMS));
-		String data = Connections.sendRequest(req);
+		String data = callPost("/location/", buildHttpParams(UPDATE_PARAMS,null));
 		try {
 			JSONObject jObject = new JSONObject(data);
 			return jObject;
@@ -186,20 +269,32 @@ public class Connections {
 	 * @param team
 	 */
 	public static void moveFlag(GeoPoint loc, String team) {
-		List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
+		ArrayList<NameValuePair> params = new ArrayList<NameValuePair>(4);  
 		params.add(new BasicNameValuePair("latitude", "" + (loc.getLatitudeE6() / 1E6)));
 		params.add(new BasicNameValuePair("longitude", "" + (loc.getLongitudeE6() / 1E6)));
 		params.add(new BasicNameValuePair("user_id", CurrentUser.getUID()));
 		params.add(new BasicNameValuePair("game_id", CurrentUser.getGameId()));
 		params.add(new BasicNameValuePair("team", team));
-		try {
-			HttpPost req = new HttpPost(JoinCTF.SERVER_URL + "/flag/");
-			req.setEntity(new UrlEncodedFormEntity(params));
-			String data = Connections.sendRequest(req);
-			Log.i(TAG, "FLAG MOVE: " + data);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		String data = callPost("/flag/",buildHttpParams(CUSTOM_PARAMS, params));
+	    Log.i(TAG, "FLAG MOVE: " + data);
+	    
+	}
+	/**
+	 * Method that calls HttpPost with the servers url
+	 * Uses given url and form entity to make post.
+	 * 
+	 * @param postURL
+	 * @param params
+	 * @return
+	 */
+	public static String callPost(String postURL,UrlEncodedFormEntity params)
+	{
+		// url to post data to
+		String url = postURL;
+		HttpPost req = new HttpPost(JoinCTF.SERVER_URL + url);
+		req.setEntity(params);
+		String data = Connections.sendRequest(req);
+		return data;
 	}
 
 	/**
@@ -214,20 +309,6 @@ public class Connections {
 		Connections.sendRequest(req);
 	}
 	
-	 /**
-     * Sets the user's name and generates a new UID.
-     * @param name
-     */
-    protected static void updateUser(String name) {
-    	// New name
-    	CurrentUser.setName(name);
-    	
-		// Generate a new uid
-		String uid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
-		while(uid.contains("x")) 
-		uid = uid.replaceFirst("x", Long.toHexString(Math.round(Math.random() * 16.0)));
-		uid = uid.toUpperCase();
-		CurrentUser.setUID(uid);
-    }
+	
     
 }

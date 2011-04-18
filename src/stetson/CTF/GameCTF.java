@@ -53,7 +53,7 @@ public class GameCTF extends MapActivity {
 	public static final int CENTER_SELF = 1;
 	public static final int CENTER_RED = 2;
 	public static final int CENTER_BLUE = -3;
-		
+	public static boolean hasStarted = false;	
 	// Constant: What is the minimum accuracy (in meters) we should expect ?
 	public static final int MIN_ACCURACY = 40;	
 		
@@ -121,7 +121,7 @@ public class GameCTF extends MapActivity {
 		
 		// Create the class for game scores
 		myScores = new GameScores(this);
-		
+		hasStarted = true;
 		// Make sure gps is running at the right speed
 		CurrentUser.userLocation((LocationManager) this.getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_GAME);
 		
@@ -149,6 +149,9 @@ public class GameCTF extends MapActivity {
 	 */
 	public void onDestroy() {
 		
+		// Call the super
+		super.onDestroy();
+		
 		// Stop any running cycle that may exist
 		isStopped = true;
 		if(cycle != null) {
@@ -163,13 +166,8 @@ public class GameCTF extends MapActivity {
 		new LeaveGame().execute(obj);
 				
 		// Leave the game (client side)
-		CurrentUser.setName("");
 		CurrentUser.setGameId("");
-		CurrentUser.setLocation(-1, -1);
-		CurrentUser.setAccuracy(-1);
-		
-		// Call the super
-		super.onDestroy();
+		hasStarted = false;
 	}
 	
 	/**
@@ -360,10 +358,16 @@ public class GameCTF extends MapActivity {
 		 * Processes the game object retrieved from the worker thread.
 		 * If game is NULL then the game will be stopped and the activity terminated.
 		 */
-		protected void onPostExecute(final JSONObject gameObject) {		
+		protected void onPostExecute(final JSONObject gameObject) {	
 			
+			if(gameObject == null)
+			{
+				return;
+			}
+			else
+			{
 			myGameData.parseJSONObject(gameObject);
-			
+			}
 			// Handle Errors
 			if(myGameData.hasError()) {
 				Log.e(TAG, "Error: " + myGameData.getErrorMessage());

@@ -4,16 +4,7 @@
  */
 package stetson.CTF.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.message.BasicNameValuePair;
-
 import stetson.CTF.JoinCTF;
-
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,10 +14,7 @@ import android.util.Log;
 public class CurrentUser {
 	
 	public static final String TAG = "CurrentUser";
-	public static final int CREATE_PARAMS = 0;
-	public static final int JOIN_PARAMS = 1;
-	public static final int UPDATE_PARAMS = 2;
-	public static final int LEAVE_PARAMS = 3;
+	
 	
 	// User Info
 	private static String name = "";
@@ -95,84 +83,7 @@ public class CurrentUser {
 		return true;
 	}
 	
-	/**
-	 * Generates HttpParams automatically for the current user.
-	 * Type:	CREATE_PARAMS 	= lat, long, name, gameId
-	 * 			JOIN_PARAMS		= lat, long, accuracy, uid, name
-	 * 			UPDATE_PARAMS 	= lat, long, accuracy, uid, name, game
-	 * @param hbr
-	 * @param type
-	 * @return
-	 */
-	public static UrlEncodedFormEntity buildHttpParams(int type) {
-
-        List<NameValuePair> params = new ArrayList<NameValuePair>(2);  
-        
-        boolean location = false;
-        boolean user_id = false;
-        boolean game_id = false;
-        boolean name = false;
-        
-        // Determine what is needed for each protocol
-        switch(type) {
-        
-			case CREATE_PARAMS:
-	    		location = true;
-	    		user_id = true;
-	    		name = true;
-	    		game_id = true;
-	    		break;
-	    		
-    		case JOIN_PARAMS:
-	    		location = true;
-	    		user_id = true;
-	    		name = true;
-	    		break;
-    		
-        	case UPDATE_PARAMS:
-        		location = true;
-        		user_id = true;
-        		name = true;
-        		game_id = true;
-        		break;
-        		
-	        case LEAVE_PARAMS:
-	        	user_id = true;
-	        	break;
-        }
-        
-        // Location Information
-        if(location) {
-            params.add(new BasicNameValuePair("latitude", Double.toString(CurrentUser.latitude)));
-            params.add(new BasicNameValuePair("longitude", Double.toString(CurrentUser.longitude)));
-            params.add(new BasicNameValuePair("accuracy",  Float.toString(CurrentUser.accuracy)));
-        }
-        
-        // User UID
-        if(user_id) {
-        	params.add(new BasicNameValuePair("user_id", CurrentUser.uid));
-        }
-        
-        // Game ID
-        if(game_id) {
-        	params.add(new BasicNameValuePair("game_id", CurrentUser.gameId));
-        }
-        
-        // Username
-        if(name) {
-        	params.add(new BasicNameValuePair("name", CurrentUser.name));
-        }
-
-        
-        try {
-        	return new UrlEncodedFormEntity(params);
-		} catch (UnsupportedEncodingException e) {
-			Log.e(TAG, "Error adding params to request!", e);
-		}
-		
-		return null;
-	}
-
+	
 	/**
 	 * Generates HttpParams automatically for quering the server for a list of games.
 	 * @param hbr
@@ -184,7 +95,7 @@ public class CurrentUser {
 		params += "&longitude=" + CurrentUser.longitude;
 		params += "&accuracy=" + CurrentUser.accuracy;
 		params += "&user_id=" + CurrentUser.uid;	
-		params += "&name=" + CurrentUser.name;	
+		params += "&name=" + CurrentUser.name.replace(" ", "%20");	
 		return params;
 	}
 	
@@ -248,5 +159,17 @@ public class CurrentUser {
 		
 	}
 	
-	
+	 /**
+     * generates a new UID.
+     * @param name
+     */
+    public static String genUID() {
+		// Generate a new uid
+		String uid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
+		while(uid.contains("x")) 
+		uid = uid.replaceFirst("x", Long.toHexString(Math.round(Math.random() * 16.0)));
+		uid = uid.toUpperCase();
+		setUID(uid);
+		return uid;
+    }
 }

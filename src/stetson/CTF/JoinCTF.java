@@ -55,8 +55,8 @@ public class JoinCTF extends Activity {
 		    public void run() {
 		    	if(JoinCTF.firstStart)
 				{
-					Intent titleScreen = new Intent(getBaseContext(), IntroCTF.class);
-					startActivity(titleScreen);
+		    		Intent titleScreen = new Intent(getBaseContext(), IntroCTF.class);
+					startActivityForResult(titleScreen,RESULT_CANCELED);
 					JoinCTF.firstStart = false;
 				}
 		    }
@@ -77,7 +77,16 @@ public class JoinCTF extends Activity {
 		Log.i(TAG, "Activity ready!");
 		
 	}
-	
+	/**
+	 * This method receives callback from IntroCTF to indicate that the user has hit the back button
+	 * 
+	 */
+	protected void onActivityResult(int requestCode, int resultCode,
+            Intent data) {
+        if (resultCode == RESULT_CANCELED) {
+           finish();
+        }
+    }
 	/**
 	 * Start GPS and rebuild games list.
 	 */
@@ -161,7 +170,8 @@ public class JoinCTF extends Activity {
 	 */
     protected void joinGame(String name, String game) {
     	Log.i(TAG, "(UI) joinGame(" + name + ", " + game + ")");
-    	new TaskJoinGame().execute(name, game);
+    	CurrentUser.setGameId(game);
+    	new TaskJoinGame().execute(name);
     }
     
    
@@ -204,7 +214,6 @@ public class JoinCTF extends Activity {
 					myGamesList.addGame(response.get(i));
 				}
 				myGamesList.updateList();
-				
 			}
 		}
 		
@@ -261,7 +270,7 @@ public class JoinCTF extends Activity {
 		 */
 		protected void onPostExecute(final String response) {
 			dialog.hide();
-			if(response.equals(GOOD_RESPONSE)) {
+			if(response.equals(GOOD_RESPONSE) && GameCTF.hasStarted == false) {
 			    Intent i = new Intent(mContext, GameCTF.class);
 			    startActivity(i);
 			} else {
@@ -273,7 +282,7 @@ public class JoinCTF extends Activity {
 		 * Run as the work on another thread.
 		 */
 		protected String doInBackground(final String... params) {
-			return Connections.joinOrCreate(params[0], params[1]);
+			return Connections.joinOrCreate(params[0]);
 		}
 	}
 	

@@ -3,13 +3,9 @@ package stetson.CTF;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import stetson.CTF.utils.CurrentUser;
-
-
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
@@ -17,13 +13,13 @@ import com.facebook.android.FacebookError;
 import com.facebook.android.Util;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.Facebook.DialogListener;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
@@ -34,25 +30,31 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class IntroCTF extends Activity {
 
 	// Data members
 
 	private static AsyncFacebookRunner mAsyncRunner;
+	public static final String PREFS_NAME = "CTFuid";
 	private static final String TAG = "FACEBOOK CONNECT";
 	private static final String APP_ID = "215859728429846";
 	private static final String[] PERMS = new String[] {"publish_stream" };
 	private static Facebook facebook;
-	private MediaPlayer mp;
+	private SharedPreferences settings;
+//	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.intro);
 		
+		// set or get the Users id
+		setUID();
 		// Set music
-		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
+		// not used in intro
+//		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
 		
 		// facebook calls
 		facebook= new Facebook(APP_ID);
@@ -67,23 +69,23 @@ public class IntroCTF extends Activity {
 	{
 		super.onResume();
 		// start music
-		mp.setLooping(true);
-		mp.start();
+//		mp.setLooping(true);
+//		mp.start();
 		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_INTRO);	
 		
 	}
-	
 	public void onDestroy()
 	{
 		super.onDestroy();
+		SharedPreferences.Editor editor = settings.edit();
+		// save UID temporarily
+		editor.putString("UID", CurrentUser.getUID());
+		// Commit the edits!
+		editor.commit();
 		// stop music and call GC
-		mp.stop();
-		mp.release();
+		//		mp.stop();
+		//		mp.release();
 		
-	}
-	// Disable User from exiting
-	public void onBackPressed()
-	{	
 	}
 
 	/**
@@ -147,6 +149,24 @@ public class IntroCTF extends Activity {
 		});
 	}
 	/**
+	 * Method checks to see if UserID is stored. If it isn't call generate user id.
+	 * If it is set UserID to it.
+	 * 
+	 */
+	public void setUID()
+	{
+		settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+		String uid = settings.getString("UID", "0");
+		if(uid.equals("0") || uid.equals(""))
+		{
+			CurrentUser.genUID();
+		}
+		else
+		{
+			CurrentUser.setUID(uid);
+		}
+	}
+	/**
 	 * Method forces user to login and wait for GPS signal
 	 * 
 	 * 
@@ -154,22 +174,7 @@ public class IntroCTF extends Activity {
 	 */
 	public void gpsLock()
 	{
-		if(!CurrentUser.getName().equals(""))
-		{
 			new loadingDialog().execute();
-		}
-		else
-		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage("Please login.");
-			builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-		           public void onClick(DialogInterface dialog, int id) {
-		                
-		           }
-		       });
-			AlertDialog alert = builder.create();
-			alert.show();
-		}
 	}
 	
 	/**
@@ -211,6 +216,7 @@ public class IntroCTF extends Activity {
 
 		facebook.authorizeCallback(requestCode, resultCode, data);
 		mAsyncRunner.request("me", new IDRequestListener());
+		gpsLock();
 	}
 	/**
 	 * Facebook
@@ -233,7 +239,6 @@ public class IntroCTF extends Activity {
 				runOnUiThread(new Runnable() {
 					public void run() {
 					CurrentUser.setName(name);
-					gpsLock();
 				}
 			});	
 						
@@ -261,10 +266,10 @@ public class IntroCTF extends Activity {
 		public void onComplete(Bundle values) {
 			// Process onComplete
 			// Dispatch on its own thread
-			runOnUiThread(new Runnable() {
-				public void run() {
-				}
-			});
+//			runOnUiThread(new Runnable() {
+//				public void run() {
+//				}
+//			});
 		}
 		public void onFacebookError(FacebookError error) {}
 		public void onError(DialogError error) {}
@@ -275,7 +280,7 @@ public class IntroCTF extends Activity {
 	 * Loading dialog for GPS signal
 	 *
 	 */
-	 private class loadingDialog extends AsyncTask<Void,Void, Void> {
+	 private class loadingDialog extends AsyncTask<Void,String, Void> {
 		 ProgressDialog progressDialog;
 		 Context mContext = IntroCTF.this;
 
@@ -283,18 +288,41 @@ public class IntroCTF extends Activity {
 		 {
 			 progressDialog = new ProgressDialog(mContext);
 			 progressDialog.setTitle("Hello " + CurrentUser.getName());
-			 progressDialog.setMessage("Acquiring GPS signal please wait...");
+			 progressDialog.setMessage(IntroCTF.this.getString(R.string.please_wait));
 			 progressDialog.setIndeterminate(true);
 			 progressDialog.show();
 	     }
 		 protected void onPostExecute(Void result)
 	     {
 	         progressDialog.dismiss();
+	         setResult(RESULT_OK);
 	         finish();
 	     }
+		 /**
+			 * Runs every time publicProgress() is called.
+			 * Clears the gamesGroup view and adds a message with the progress text.
+			 */
+		 protected void onProgressUpdate(String... progress) {
+			 progressDialog.setMessage(IntroCTF.this.getString(R.string.please_wait) + progress[0]);
+			 if(progress[1]!= null)
+			 {
+				 progressDialog.setTitle(progress[1]);
+				 progress[1] = null;
+			 }
+		 }
 		 protected Void doInBackground(Void... params)
 		 {
 
+			 this.publishProgress(IntroCTF.this.getString(R.string.wait_for_name),null);
+			 while(CurrentUser.getName().equals("")) {
+				 try {
+					 Thread.sleep(800);
+				 } catch (InterruptedException e) {
+					 Log.e(TAG, "Can't sleep :(", e);
+				 }
+			 }
+			 
+			 this.publishProgress(IntroCTF.this.getString(R.string.wait_for_signal),"Hello " + CurrentUser.getName());
 			 while(!CurrentUser.hasLocation()) {
 				 try {
 					 Thread.sleep(800);
