@@ -16,7 +16,6 @@
 
 package com.facebook.android;
 
-import stetson.CTF.R;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;

@@ -41,6 +41,7 @@ public class IntroCTF extends Activity {
 	private static final String[] PERMS = new String[] {"publish_stream" };
 	private static Facebook facebook;
 	private SharedPreferences settings;
+	private boolean firstClick = true;
 //	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
@@ -103,7 +104,11 @@ public class IntroCTF extends Activity {
 				input.setText(R.string.guest_button);
 				input.setOnClickListener(new OnClickListener(){
 					public void onClick(View arg0) {
-						input.setText("");
+						if(firstClick)
+						{
+							input.setText("");
+							firstClick = false;
+						}
 					}
 				});
 				alertDialog.setView(input);

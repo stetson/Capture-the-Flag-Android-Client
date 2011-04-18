@@ -198,7 +198,7 @@ public class JoinCTF extends Activity {
 		 * Clears the gameGroup view and adds a list of games to it.
 		 */
 		protected void onPostExecute(final ArrayList<GameItem> response) {
-			
+			myGamesList.clearList();
 			myGamesList.setErrorText("");
 			
 			// If there is a problem, or no games, display an error

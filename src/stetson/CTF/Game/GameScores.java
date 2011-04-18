@@ -75,6 +75,11 @@ public class GameScores {
 					    		Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.facebook_login_error, 10);
 					    		toast.show();	
 					    	}
+					    	else
+					    	{
+					    		Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.postsuccess , 10);
+					    		toast.show();	
+					    	}
 					        }
 					  }).start();
 					break;

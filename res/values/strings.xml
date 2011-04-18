@@ -57,7 +57,6 @@
 	<string name="please_wait">Please wait...</string>
 	<string name="wait_for_signal">Acquiring GPS signal</string>
 	<string name="wait_for_name">Retrieving username</string>
-	
-
+	<string name="postsuccess">You\'ve successfully posted the score board to your wall.</string>
 	
 </resources>

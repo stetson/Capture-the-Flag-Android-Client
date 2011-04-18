@@ -219,6 +219,10 @@ public class GameMenu {
 					return;
 					
 				case R.id.menu_scores:
+					if(myGame.getGameData().getPlayerCount() < 1)
+					{
+						return;
+					}
 					myGame.getGameScores().showScores();
 					return;
 					
