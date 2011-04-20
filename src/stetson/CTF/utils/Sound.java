@@ -33,8 +33,13 @@ public class Sound {
 		mp.start();
 	}
 	
-	public void playWin() {
-		mp = MediaPlayer.create(myContext, R.raw.winnerrobo);
+	public void playRedWin() {
+		mp = MediaPlayer.create(myContext, R.raw.redteamwinsrobo);
+		mp.start();
+	}
+	
+	public void playBlueWin() {
+		mp = MediaPlayer.create(myContext, R.raw.blueteamwinsrobo);
 		mp.start();
 	}
 	
