@@ -23,6 +23,7 @@ public class CurrentUser {
 	private static double longitude = -1;
 	private static float accuracy = -1;
 	private static boolean isObserver = false;
+	private static boolean isFacebookUser = false;
 	
 	// Game Info
 	private static String gameId = "";
@@ -75,7 +76,13 @@ public class CurrentUser {
 	public static boolean getIsObserver() {
 		return isObserver;
 	}
-	
+    public static void setFacebookUser(boolean facebook) {
+    	isFacebookUser = facebook;
+    }
+    
+    public static boolean isFacebookuser() {
+    	return isFacebookUser;
+    }
 	public static boolean hasLocation() {
 		if(CurrentUser.accuracy == -1 || CurrentUser.latitude == -1 || CurrentUser.longitude == -1) {
 			return false;
@@ -172,4 +179,5 @@ public class CurrentUser {
 		setUID(uid);
 		return uid;
     }
+    
 }

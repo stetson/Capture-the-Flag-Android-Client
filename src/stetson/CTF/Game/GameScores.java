@@ -51,7 +51,11 @@ public class GameScores {
 		alertDialog.setTitle("Score Board");
 		alertDialog.setCancelable(true);
 		alertDialog.setButton("Close", onButtonClick);
-		alertDialog.setButton2("Share", onButtonClick);
+		
+		if(CurrentUser.isFacebookuser()) {
+			alertDialog.setButton2("Share", onButtonClick);
+		}
+		
 		alertDialog.show();
 
 	}
@@ -68,6 +72,12 @@ public class GameScores {
 					break;
 					
 				case DialogInterface.BUTTON2:
+					
+					// non-facebook users shouldn't be able to get here :P
+					if(!CurrentUser.isFacebookuser()) {
+						break;
+					}
+					
 					new Thread(new Runnable() {
 						public void run() {
 							if(!IntroCTF.postToWall(myShareMessage)) {
