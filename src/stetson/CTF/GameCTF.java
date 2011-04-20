@@ -16,6 +16,7 @@ import stetson.CTF.Game.GameScores;
 import stetson.CTF.Game.Player;
 import stetson.CTF.utils.Connections;
 import stetson.CTF.utils.CurrentUser;
+import stetson.CTF.utils.Sound;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -77,6 +78,7 @@ public class GameCTF extends MapActivity {
 	private GameInfoBar myInfoBar;
 	private GameScores myScores;
 	private TaskGameProcess cycle;
+	private Sound sound;
 	private Handler gameHandler = new Handler();
 	
 	/*----------------------------------*
@@ -118,6 +120,7 @@ public class GameCTF extends MapActivity {
 		// Create the game info bar (top of screen)
 		myInfoBar = new GameInfoBar(this);
 		myInfoBar.setLoading();
+		sound = new Sound(this);
 		
 		// Create the class for game scores
 		myScores = new GameScores(this);
