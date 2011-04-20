@@ -33,7 +33,6 @@ import android.widget.EditText;
 public class IntroCTF extends Activity {
 
 	// Data members
-
 	private static AsyncFacebookRunner mAsyncRunner;
 	public static final String PREFS_NAME = "CTFuid";
 	private static final String TAG = "FACEBOOK CONNECT";
@@ -42,7 +41,6 @@ public class IntroCTF extends Activity {
 	private static Facebook facebook;
 	private SharedPreferences settings;
 	private boolean firstClick = true;
-//	private MediaPlayer mp;
 
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,9 +49,6 @@ public class IntroCTF extends Activity {
 		
 		// set or get the Users id
 		setUID();
-		// Set music
-		// not used in intro
-//		mp = MediaPlayer.create(getBaseContext(), R.raw.town4);
 		
 		// facebook calls
 		facebook= new Facebook(APP_ID);
@@ -64,26 +59,19 @@ public class IntroCTF extends Activity {
 		
 	}
 	
-	public void onResume()
-	{
+	public void onResume() {
 		super.onResume();
-		// start music
-//		mp.setLooping(true);
-//		mp.start();
 		CurrentUser.userLocation((LocationManager) getSystemService(Context.LOCATION_SERVICE), JoinCTF.GPS_UPDATE_FREQUENCY_INTRO);	
 		
 	}
-	public void onDestroy()
-	{
+	
+	public void onDestroy() {
 		super.onDestroy();
 		SharedPreferences.Editor editor = settings.edit();
 		// save UID temporarily
 		editor.putString("UID", CurrentUser.getUID());
 		// Commit the edits!
 		editor.commit();
-		// stop music and call GC
-		//		mp.stop();
-		//		mp.release();
 		
 	}
 
@@ -91,8 +79,7 @@ public class IntroCTF extends Activity {
 	 * Build button and image listeners
 	 * 
 	 */
-	public void buildListeners()
-	{		
+	public void buildListeners() {		
 		
 		final Button guestButton = (Button) findViewById(R.id.intro_guest_button);
 		guestButton.setOnClickListener(new View.OnClickListener() {
@@ -138,11 +125,8 @@ public class IntroCTF extends Activity {
 	}
 	/**
 	 * authorize facebook, login...
-	 * 
-	 * 
 	 */
-	public void intFacebook()
-	{
+	public void intFacebook() {
 
 		facebook.authorize(this,PERMS, new LoginDialogListener() {
 			public void onComplete(Bundle values) {             }
@@ -156,8 +140,7 @@ public class IntroCTF extends Activity {
 	 * If it is set UserID to it.
 	 * 
 	 */
-	public void setUID()
-	{
+	public void setUID() {
 		settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
 		String uid = settings.getString("UID", "0");
 		if(uid.equals("0") || uid.equals(""))
@@ -175,8 +158,7 @@ public class IntroCTF extends Activity {
 	 * 
 	 * 
 	 */
-	public void gpsLock()
-	{
+	public void gpsLock() {
 			new loadingDialog().execute();
 	}
 	
@@ -184,15 +166,12 @@ public class IntroCTF extends Activity {
 	 * Allows messages to be posted to the Current User's wall
 	 * @param String msg - message to be posted
 	 */
-	public static boolean postToWall(String msg)
-	{
-		if(facebook.isSessionValid())
-		{
+	public static boolean postToWall(String msg) {
+		if(facebook.isSessionValid()) {
 			Bundle parameters = new Bundle();
 			parameters.putString("message",msg);
 			try {
 				facebook.request("me/feed", parameters,"POST");
-					
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (MalformedURLException e) {
@@ -200,12 +179,8 @@ public class IntroCTF extends Activity {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			//      Other way to implement wall posts
-			//		mAsyncRunner.request("me/feed", params, "POST", new TestRequestListener());
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -216,14 +191,12 @@ public class IntroCTF extends Activity {
 	 */
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-
 		facebook.authorizeCallback(requestCode, resultCode, data);
 		mAsyncRunner.request("me", new IDRequestListener());
 		gpsLock();
 	}
 	/**
 	 * Facebook
-	 * 
 	 * Listener for name request, sets CurrentUser name
 	 * 
 	 */
@@ -241,9 +214,10 @@ public class IntroCTF extends Activity {
 				// thread that created a view hierarchy can touch its views."
 				runOnUiThread(new Runnable() {
 					public void run() {
-					CurrentUser.setName(name);
-				}
-			});	
+						CurrentUser.setName(name);
+						CurrentUser.setFacebookUser(true);
+					}
+				});	
 						
 			} catch (JSONException e) {
 				Log.w(TAG, "JSON Error in response");
