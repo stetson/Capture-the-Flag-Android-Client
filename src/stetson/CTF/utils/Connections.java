@@ -2,6 +2,7 @@ package stetson.CTF.utils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -14,6 +15,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -139,7 +141,7 @@ public class Connections {
 
         
         try {
-        	return new UrlEncodedFormEntity(params);
+        	return new UrlEncodedFormEntity(params,HTTP.UTF_8);
 		} catch (UnsupportedEncodingException e) {
 			Log.e(TAG, "Error adding params to request!", e);
 		}
@@ -198,7 +200,7 @@ public class Connections {
 			}
 		}
 		// If a game was created, then it was a success at this point! Now we must join the game.
-		String data = callPost("/game/" + CurrentUser.getGameId().replaceAll(" ", "%20"),buildHttpParams(JOIN_PARAMS,null));
+		String data = callPost("/game/" + encString(CurrentUser.getGameId()) ,buildHttpParams(JOIN_PARAMS,null));
 		
 		try {
 			JSONObject jsonGame = new JSONObject(data);
@@ -304,9 +306,32 @@ public class Connections {
 	 * @param user uid
 	 */
 	public static void leaveGame(String gameName, String uid) {
-		String gameUrl = gameName.replaceAll(" ", "%20");
+		String gameUrl = encString(gameName);
 		HttpDelete req = new HttpDelete(JoinCTF.SERVER_URL + "/game/" + gameUrl + "/" + uid);
 		Connections.sendRequest(req);
+	}
+	
+	public static String encString(String param)
+	{
+		String message="";
+		if(!param.equals(""))
+		{
+		try {
+			message = URLEncoder.encode(param,HTTP.UTF_8);
+			message = message.replaceAll("\\+", "%20");
+		} catch (UnsupportedEncodingException e) {
+			message = "error encoding string";
+			e.printStackTrace();
+		}
+		catch (NullPointerException e)
+		{
+			message = "error encoding string";
+			e.printStackTrace();
+		}
+		}
+		
+		return message;
+		
 	}
 	
 	
