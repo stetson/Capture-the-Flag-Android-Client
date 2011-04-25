@@ -48,6 +48,11 @@ public class Sound {
 		mp.start();
 	}
 	
+	public void playCenterFlag(){
+		mp = MediaPlayer.create(myContext, R.raw.se1);
+		mp.start();
+	}
+	
 	public void stopSound(){
 		mp.stop();
 	}
