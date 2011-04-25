@@ -28,8 +28,13 @@ public class Sound {
 		mp.start();
 	}
 	
-	public void playFlagCaptured() {
-		mp = MediaPlayer.create(myContext, R.raw.flagcapturedrobo);
+	public void playRedFlagCaptured() {
+		mp = MediaPlayer.create(myContext, R.raw.redflagcapturedrobo);
+		mp.start();
+	}
+	
+	public void playBlueFlagCaptured() {
+		mp = MediaPlayer.create(myContext, R.raw.blueflagcapturedrobo);
 		mp.start();
 	}
 	
@@ -43,4 +48,11 @@ public class Sound {
 		mp.start();
 	}
 	
+	public void stopSound(){
+		mp.stop();
+	}
+	
+	public void releaseSound(){
+		mp.release();
+	}
 }

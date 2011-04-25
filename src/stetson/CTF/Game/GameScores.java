@@ -51,7 +51,11 @@ public class GameScores {
 		alertDialog.setTitle("Score Board");
 		alertDialog.setCancelable(true);
 		alertDialog.setButton("Close", onButtonClick);
-		alertDialog.setButton2("Share", onButtonClick);
+		
+		if(CurrentUser.isFacebookuser()) {
+			alertDialog.setButton2("Share", onButtonClick);
+		}
+		
 		alertDialog.show();
 
 	}
@@ -62,26 +66,29 @@ public class GameScores {
 	private DialogInterface.OnClickListener onButtonClick = new DialogInterface.OnClickListener() {
 		public void onClick(DialogInterface dialog, int which) {
 			switch(which) {
+			
 				case DialogInterface.BUTTON1:
 					dialog.dismiss();
 					break;
+					
 				case DialogInterface.BUTTON2:
-					// do facebook stuff
+					
+					// non-facebook users shouldn't be able to get here :P
+					if(!CurrentUser.isFacebookuser()) {
+						break;
+					}
+					
 					new Thread(new Runnable() {
-					    public void run() {
-					    	
-					    	if(!IntroCTF.postToWall(myShareMessage))
-					    	{
-					    		Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.facebook_login_error, 10);
-					    		toast.show();	
-					    	}
-					    	else
-					    	{
-					    		Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.postsuccess , 10);
-					    		toast.show();	
-					    	}
-					        }
-					  }).start();
+						public void run() {
+							if(!IntroCTF.postToWall(myShareMessage)) {
+								Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.facebook_login_error, 10);
+								toast.show();	
+							} else {
+								Toast toast = Toast.makeText(myGame.getBaseContext(), R.string.postsuccess , 10);
+								toast.show();	
+							}
+						}
+					}).start();
 					break;
 			}
 		}
@@ -89,53 +96,37 @@ public class GameScores {
 	
 	/**
 	 * Builds the score board lines.
+	 * Composes the facebook message (it is not sent!).
 	 * @param board
 	 */
 	private void buildScoreBoard(LinearLayout board) {
 		
 		Player player;
 		GameData game = myGame.getGameData();
-		ArrayList<ScoreTable> scoreTable = new ArrayList<ScoreTable>();
+		ArrayList<ScoreItem> scoreTable = new ArrayList<ScoreItem>();
 		
-		// Sort the ScoreTables, get the top LIST_COUNT players
+		// The player order that we received from the server was pre-sorted for us :)
 		for(int i = 0; i < game.getPlayerCount(); i++) {
-			
 			player = game.getPlayer(i);
-			ScoreTable score = new ScoreTable(player.getName(), player.getTags(), player.getCaptures(), player.getTeam());
-			if(scoreTable.size() == 0) {
-				scoreTable.add(score);
-			} else {
-				
-				// Is this score bigger than anything on the list?
-				// If it is, put this in front of the smaller one.
-				for(int r = 0; r < scoreTable.size(); r++) {
-					ScoreTable current = scoreTable.get(r);
-					if(score.compare(current) >= 0) {
-						scoreTable.add(r, score);
-						break;
-					}
-				}
-				
-				// No? Is the list full yet? If it isn't full, add it!
-				if(scoreTable.size() < LIST_COUNT) {
-					scoreTable.add(score);
-				}
-				
-			}
+			ScoreItem score = new ScoreItem(player.getName(), player.getTags(), player.getCaptures(), player.getTeam());
+			scoreTable.add(score);
 		}
 		
-		// Compose facebook string
+		// How many scores do we actually have/want? Anywhere from 1 to LIST_COUNT
+		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
+		
+		// Start composing our facebook message...
 		myShareMessage = "StetsonCTF!\n" + 
 			CurrentUser.getName() + " has     posted the \tScores of the game.\n" +
 			"Name:            Tags:  Captures:  Team:\n";
 		
-		// Add lines
-		int actualCount = scoreTable.size() >= LIST_COUNT ? LIST_COUNT : scoreTable.size();
+		// Add them all to the view
 		for(int i =0; i < actualCount; i++) {
-			ScoreTable current = scoreTable.get(i);
-			myShareMessage = myShareMessage + current.name + "\u0009\u0009"+ current.tags + "\u0009"+  current.caps+ "\u0020\u00a0\u00a0"+ current.team+ "\n";
+			ScoreItem current = scoreTable.get(i);
 			board.addView(createLine(i + 1, current.name, current.tags, current.caps, current.team));
-		}
+			myShareMessage += current.name + "\u0009\u0009"+ current.tags + "\u0009"+  current.caps+ "\u0020\u00a0\u00a0"+ current.team+ "\n";
+		}		
+		
 	}
 	
 	/**
@@ -235,44 +226,19 @@ public class GameScores {
 	/**
 	 * Private class to be used for sorting score information.
 	 */
-	private class ScoreTable {
+	private class ScoreItem {
 		
 		public String name;
 		public String team;
 		public int tags;
 		public int caps;
 		
-		public ScoreTable(String n, int t, int c, String tm) {
+		public ScoreItem(String n, int t, int c, String tm) {
 			name = n;
 			tags = t;
 			caps = c;
 			team = tm;
 		}
-
-		/**
-		 * Compares SELF to OTHER
-		 * Greater than 	-> 1
-		 * Less than		-> -1
-		 * Equal to			-> 0
-		 * @param the other ScoreTable
-		 * @return
-		 */
-		public int compare(ScoreTable other) {
-			if(other.caps < this.caps) {
-				return 1;
-			}
-			if(other.caps > this.caps) {
-				return -1;
-			}
-			if(other.tags < this.tags) {
-				return 1;
-			}
-			if(other.tags > this.tags) {
-				return -1;
-			}
-			return 0;
-		}
-		
 	}
 	
 }
