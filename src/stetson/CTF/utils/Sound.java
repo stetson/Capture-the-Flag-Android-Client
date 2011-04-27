@@ -8,14 +8,23 @@ public class Sound {
 	//sounds
 	private MediaPlayer mp;
 	private Context myContext;
+	private long observerModeLast;
+	private static final int TIME_BETWEEN_SOUNDS = 5000;
+	private boolean playedObserver = false;
 	
 	public Sound(Context context){
+		observerModeLast = -1;
 		myContext = context;	
 	}
 	
 	public void playInObserver() {
-		mp = MediaPlayer.create(myContext, R.raw.observermoderobo);
-		mp.start();
+		if(observerModeLast == -1 || (System.currentTimeMillis() - observerModeLast) > TIME_BETWEEN_SOUNDS && !playedObserver && CurrentUser.getIsObserver())
+		{
+			observerModeLast = System.currentTimeMillis();
+			mp = MediaPlayer.create(myContext, R.raw.observermoderobo);
+			mp.start();
+			playedObserver = true;
+		}
 	}
 	
 	public void playOutObserver() {

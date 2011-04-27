@@ -39,7 +39,7 @@ public class GameMenu {
 	 * Sets the default game menu.
 	 */
 	public void setDefaultMenu() {
-		this.setMenu(GameMenu.MENU_DEFAULT, null, null);
+		this.setMenu(GameMenu.MENU_DEFAULT, "", null);
 	}
 	
 	/**
@@ -93,7 +93,7 @@ public class GameMenu {
 			
 			// If the user created the game, show them the option to move the flag
 			if(data.getCreator().equals(CurrentUser.getUID())) {
-				altMenu.addView(createMenuOption(R.string.menu_move, R.id.menu_option_move, R.drawable.center_self));
+				altMenu.addView(createMenuOption(R.string.menu_move, R.id.menu_option_move, R.drawable.move));
 				blanks--;
 			}
 			
@@ -105,11 +105,11 @@ public class GameMenu {
 			Player selfPlayer = data.getPlayerByUID(CurrentUser.getUID());
 			
 			// Who?
-			altMenu.addView(createMenuOption(R.string.menu_who, R.id.menu_option_who, R.drawable.center_self));
+			altMenu.addView(createMenuOption(R.string.menu_who, R.id.menu_option_who, R.drawable.who));
 			
 			// Way points for team members only
 			if(player != null && selfPlayer != null && player.getTeam().equals(selfPlayer.getTeam())) {
-				altMenu.addView(createMenuOption(R.string.menu_waypoints, R.id.menu_option_waypoints, R.drawable.center_self));
+				altMenu.addView(createMenuOption(R.string.menu_waypoints, R.id.menu_option_waypoints, R.drawable.waypoint));
 				blanks--;
 			}
 		}
